@@ -21,8 +21,13 @@ public:
 public slots:
     void message_from_login(QString);
 
+signals:
+    void test_signal();
+
 private slots:
     void on_showDB_button_clicked();
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::Databases *ui;

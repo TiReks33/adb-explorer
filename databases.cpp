@@ -19,6 +19,10 @@ Databases::Databases(QWidget *parent) :
                                 | Qt::WindowMaximizeButtonHint
                                 | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
+
+    //SIGNALS
+
+
 }
 
 Databases::Databases(QSqlDatabase info, QWidget *parent) :
@@ -50,7 +54,33 @@ void Databases::message_from_login(QString message)
 
 void Databases::on_showDB_button_clicked()
 {
-    QSqlQueryModel * modal=new QSqlQueryModel();
+    loginWindow connection;
+    QSqlQueryModel* modal = new QSqlQueryModel();
 
-    //conn.connOpen();
+    connection.connection_open(db_connection_);
+
+
+
+
+
+
+
+
+    QSqlQuery qry(db_connection_);
+
+    qry.prepare("SHOW DATABASES;"); //MY_SQL_QUERY
+
+    qry.exec();
+    modal->setQuery(qry);
+
+    ui->tableView->setModel(modal);
+
+    //connection.connection_close(db_connection_);
+
+    qDebug() << (modal->rowCount());
+}
+
+void Databases::on_pushButton_2_clicked()
+{
+    emit test_signal();
 }
