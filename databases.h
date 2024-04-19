@@ -21,6 +21,8 @@ public:
 public slots:
     void message_from_login(QString);
 
+    void receive_auth(QString,QString,QString);
+
 signals:
     void test_signal();
 
@@ -33,6 +35,10 @@ private:
     Ui::Databases *ui;
     //QStatusBar* status_bar_;
     QSqlDatabase db_connection_;
+    QString db_server_;
+    QString db_login_;
+    QString db_passw_;
+    QString db_host_;
 };
 
 #endif // DATABASES_H

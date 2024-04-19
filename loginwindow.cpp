@@ -14,6 +14,7 @@ loginWindow::loginWindow(QWidget *parent)
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
+    ui->Host_Form->setText("localhost");
 
 //db_connection_=QSqlDatabase::addDatabase("QMYSQL");
     //db_connection_.setHostName("xxx.xxx.xxx.xxx");//<-remote IP
@@ -43,13 +44,23 @@ void loginWindow::closeEvent(QCloseEvent *event)
     //event->accept();
 }
 
-bool loginWindow::connection_open()
+bool loginWindow::connection_open(QString login,QString password,QString hostname)
 {
     //if(db.isValid()){
 
-        db_connection_=QSqlDatabase::addDatabase(db_server_);
-        db_connection_.setUserName(login_);
-        db_connection_.setPassword(passw_);
+
+//        db_connection_=QSqlDatabase::addDatabase(db_server_);
+    QSqlDatabase db_connection_=QSqlDatabase::addDatabase(db_server_);
+        //login_="root";
+        login_=login;
+        //login_=ui->Login_Form->text();
+        db_connection_.setUserName(get_login());
+        //passw_="18715";
+        passw_=password;
+        //passw_=ui->Password_Form->text();
+        db_connection_.setPassword(get_passw());
+
+        //db_connection_.setHostName("localhost");//<-remote IP
 
         if(!db_connection_.open()){
             qDebug() << ("(x)Error connection to database.");
@@ -69,8 +80,18 @@ void loginWindow::test_slot()
     emit message_to_database(ui->Password_Form->text());
 }
 
+void loginWindow::receive_login_(QString&login_ref)
+{
+    login_ref=ui->Login_Form->text();
+}
 
-void loginWindow::on_pushButton_clicked()
+void loginWindow::receive_passw_(QString&passw_ref)
+{
+    passw_ref=ui->Password_Form->text();
+}
+
+
+/*void loginWindow::on_pushButton_clicked()
 {
 //          db_connection_=QSqlDatabase::addDatabase("QMYSQL");
           db_connection_=QSqlDatabase::addDatabase(db_name_);
@@ -94,6 +115,36 @@ void loginWindow::on_pushButton_clicked()
             db_window_->show();
             emit message_to_database("Database succesfull connected.");
             this->hide();
+            //emit message_to_database(QString::number(db_connection_.isValid()));
+        }
+
+}*/
+
+
+void loginWindow::on_pushButton_clicked()
+{
+    login_=this->ui->Login_Form->text();
+    passw_=this->ui->Password_Form->text();
+
+        if(!this->connection_open(login_,passw_,host_))
+            ui->statusbar->showMessage("(x)Error connection to database.");
+        else{
+            //ui->statusbar->showMessage("Database succesfull connected.");
+
+            db_window_ = new Databases(/*db_connection_*/);
+            connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
+            connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
+            connect(this,SIGNAL(send_auth(QString,QString,QString)),db_window_,SLOT(receive_auth(QString,QString,QString)));
+            db_window_->show();
+            emit message_to_database("Database succesfull connected.");
+            emit send_auth(login_,passw_,host_);
+            //this->hide();
+            this->ui->Login_Form->setReadOnly(true);
+            this->ui->Password_Form->setReadOnly(true);
+            this->ui->pushButton->setEnabled(false);
+            this->ui->checkBox->setChecked(true);
+            this->ui->checkBox->setEnabled(false);
+            this->ui->Host_Form->setEnabled(false);
             //emit message_to_database(QString::number(db_connection_.isValid()));
         }
 

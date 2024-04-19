@@ -24,7 +24,7 @@ public:
 
     void connection_close(){ db_connection_.close(); }
 
-    bool connection_open();
+    bool connection_open(QString,QString,QString="localhost");
 
 
 
@@ -35,14 +35,23 @@ public:
     QString get_db_name(){return db_name_;}
     QString get_host(){return host_;};
     QString get_login(){return login_;}
-    QString geT_passw(){return passw_;}
+    QString get_passw(){return passw_;}
+    QSqlDatabase get_cur_connection_(){return db_connection_;}
 
 public slots:
 
     void test_slot();
 
+    void receive_login_(QString&);
+    void receive_passw_(QString&);
+
 signals:
     void message_to_database(QString);
+
+    void request_login_(QString&);
+    void request_passw_(QString&);
+
+    void send_auth(QString,QString,QString="localhost");
 
 private slots:
     void on_pushButton_clicked();
@@ -58,8 +67,8 @@ private:
     QString db_server_;
     QString db_name_;
     QString host_;
-    QString login_;
-    QString passw_;
+    QString login_; // NOMINAL MEMBER
+    QString passw_; // NOMINAL MEMBER
 
 };
 #endif // LOGINWINDOW_H
