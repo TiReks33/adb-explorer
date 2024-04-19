@@ -22,7 +22,7 @@ public:
     // close-event override for save/db closing connection-purpose after app closing
     void closeEvent(QCloseEvent *event);
 
-    void connection_close(){ db_connection_.close(); }
+    void connection_close(){ /*db_connection_.close();*/ QSqlDatabase::database().close(); }
 
     bool connection_open(QString,QString,QString="localhost");
 
@@ -36,7 +36,7 @@ public:
     QString get_host(){return host_;};
     QString get_login(){return login_;}
     QString get_passw(){return passw_;}
-    QSqlDatabase get_cur_connection_(){return db_connection_;}
+    //QSqlDatabase get_cur_connection_(){return db_connection_;}
 
 public slots:
 
@@ -62,7 +62,7 @@ private slots:
 
 private:
     Ui::loginWindow *ui;
-    QSqlDatabase db_connection_;
+    //QSqlDatabase db_connection_;
     Databases* db_window_;
     QString db_server_;
     QString db_name_;

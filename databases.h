@@ -15,8 +15,11 @@ class Databases : public QDialog
 
 public:
     explicit Databases(QWidget *parent = nullptr);
-             Databases(QSqlDatabase, QWidget *parent = nullptr);
+//             Databases(QSqlDatabase, QWidget *parent = nullptr);
     ~Databases();
+
+
+             void close_DB();
 
 public slots:
     void message_from_login(QString);
@@ -34,7 +37,7 @@ private slots:
 private:
     Ui::Databases *ui;
     //QStatusBar* status_bar_;
-    QSqlDatabase db_connection_;
+    //QSqlDatabase db_connection_;
     QString db_server_;
     QString db_login_;
     QString db_passw_;

@@ -26,25 +26,36 @@ Databases::Databases(QWidget *parent) :
 
 }
 
-Databases::Databases(QSqlDatabase info, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::Databases)
-  , db_connection_(info)
-{
-    ui->setupUi(this);
+//Databases::Databases(QSqlDatabase info, QWidget *parent) :
+//    QDialog(parent),
+//    ui(new Ui::Databases)
+//  //, db_connection_(info)
+//{
+//    ui->setupUi(this);
 
-    ui->statusLine->setReadOnly(true);
+//    ui->statusLine->setReadOnly(true);
 
-    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
-                                | Qt::WindowMinimizeButtonHint
-                                | Qt::WindowMaximizeButtonHint
-                                | Qt::WindowCloseButtonHint;
-    this->setWindowFlags(flags);
-}
+//    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
+//                                | Qt::WindowMinimizeButtonHint
+//                                | Qt::WindowMaximizeButtonHint
+//                                | Qt::WindowCloseButtonHint;
+//    this->setWindowFlags(flags);
+//}
 
 Databases::~Databases()
 {
+    close_DB();
     delete ui;
+}
+
+void Databases::close_DB()
+{
+    {
+        QSqlDatabase db = QSqlDatabase::database();
+        db.close();
+    }
+    QSqlDatabase::removeDatabase( QSqlDatabase::defaultConnection );
+    return;
 }
 
 void Databases::message_from_login(QString message)
@@ -63,7 +74,7 @@ void Databases::receive_auth(QString login, QString passw, QString host)
 void Databases::on_showDB_button_clicked()
 {
     //loginWindow connection;
-
+    close_DB();
 
     //connection.connection_open(db_login_,db_passw_,db_host_);
 
@@ -107,6 +118,15 @@ void Databases::on_showDB_button_clicked()
     //connection.connection_close();
 
             //db_connection_.close();
+
+//    {
+//        QSqlDatabase db = QSqlDatabase::database();
+//        db.close();
+//    }
+//    QSqlDatabase::removeDatabase( QSqlDatabase::defaultConnection );
+//    return;
+
+
 
     //qDebug() << (modal->rowCount());
 

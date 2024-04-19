@@ -6,7 +6,7 @@
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::loginWindow)
-    //, db_window_(new Databases)
+    , db_window_(new Databases)
     , db_server_("QMYSQL")
 {
     ui->setupUi(this);
@@ -30,6 +30,12 @@ loginWindow::loginWindow(QWidget *parent)
 
 
 //ui->statusbar->showMessage(QString::number(db_connection_.isValid()));
+
+
+    //db_window_ = new Databases(/*db_connection_*/);
+    connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
+    connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
+    connect(this,SIGNAL(send_auth(QString,QString,QString)),db_window_,SLOT(receive_auth(QString,QString,QString)));
 }
 
 loginWindow::~loginWindow()
@@ -42,6 +48,16 @@ void loginWindow::closeEvent(QCloseEvent *event)
 {
     //if(db_connection_.isOpen())db_connection_.close();
     //event->accept();
+
+
+//            QSqlDatabase db = QSqlDatabase::database();
+//            if(db.isOpen())
+//        {    db.close();
+
+//        QSqlDatabase::removeDatabase( QSqlDatabase::defaultConnection );
+//        }
+            //return;
+        event->accept();
 }
 
 bool loginWindow::connection_open(QString login,QString password,QString hostname)
@@ -131,10 +147,10 @@ void loginWindow::on_pushButton_clicked()
         else{
             //ui->statusbar->showMessage("Database succesfull connected.");
 
-            db_window_ = new Databases(/*db_connection_*/);
-            connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
-            connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
-            connect(this,SIGNAL(send_auth(QString,QString,QString)),db_window_,SLOT(receive_auth(QString,QString,QString)));
+//            db_window_ = new Databases(/*db_connection_*/);
+//            connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
+//            connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
+//            connect(this,SIGNAL(send_auth(QString,QString,QString)),db_window_,SLOT(receive_auth(QString,QString,QString)));
             db_window_->show();
             emit message_to_database("Database succesfull connected.");
             emit send_auth(login_,passw_,host_);
@@ -163,6 +179,8 @@ void loginWindow::on_checkBox_stateChanged(int arg1)
 
 void loginWindow::on_login_testButton_clicked()
 {
-    emit message_to_database("test from login");
+    //emit message_to_database("test from login");
+    QSqlDatabase qs=QSqlDatabase::addDatabase("QMYSQL");
+    qDebug() << qs.isValid();
 }
 
