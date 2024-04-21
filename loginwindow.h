@@ -10,25 +10,26 @@
 
 #include "databases.h"
 #include "tables.h"
+#include "auth.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class loginWindow; }
 QT_END_NAMESPACE
 
-struct auth{
-    auth() :
-        db_server_("QMYSQL")
-      , host_("localhost")
-    {}
-private:
-    QString db_server_; //default
-    QString host_;
+//struct auth{
+//    auth() :
+//        db_server_("QMYSQL")
+//      , host_("localhost")
+//    {}
+////private:
+//    QString db_server_; //default
+//    QString host_;
 
-    QString login_; //db_window
-    QString passw_;
+//    QString login_; //db_window
+//    QString passw_;
 
-    QString db_name_; //tables_window
-};
+//    QString db_name_; //tables_window
+//};
 
 class loginWindow : public QMainWindow
 {
@@ -43,7 +44,7 @@ public:
 
     void connection_close(){ /*db_connection_.close();*/ QSqlDatabase::database().close(); }
 
-    bool connection_open(QString,QString,QString="localhost");
+    bool connection_open(auth&);
 
 
 
@@ -51,10 +52,10 @@ public:
 
 
 
-    QString get_db_name(){return db_name_;}
-    QString get_host(){return host_;};
-    QString get_login(){return login_;}
-    QString get_passw(){return passw_;}
+    QString get_db_name(){return auth_.db_name_;}
+    QString get_host(){return auth_.host_;};
+    QString get_login(){return auth_.login_;}
+    QString get_passw(){return auth_.passw_;}
     //QSqlDatabase get_cur_connection_(){return db_connection_;}
 
 public slots:
@@ -70,7 +71,7 @@ signals:
     void request_login_(QString&);
     void request_passw_(QString&);
 
-    void send_auth(QString,QString,QString="localhost");
+    void send_auth(auth&);
 
 private slots:
     void on_pushButton_clicked();
@@ -83,11 +84,12 @@ private:
     Ui::loginWindow *ui;
     //QSqlDatabase db_connection_;
     Databases* db_window_;
-    QString db_server_;
-    QString db_name_;
-    QString host_;
-    QString login_; // NOMINAL MEMBER
-    QString passw_; // NOMINAL MEMBER
+
+//    QString db_server_;
+//    QString db_name_;
+//    QString host_;
+//    QString login_; // NOMINAL MEMBER
+//    QString passw_; // NOMINAL MEMBER
 
     auth auth_;
 

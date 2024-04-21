@@ -1,10 +1,11 @@
 #include <tables.h>
 #include "ui_tables.h"
 
-Tables::Tables(QWidget *parent) :
+Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Tables)
-  , db_server_("QMYSQL")
+//  , db_server_("QMYSQL")
+  , auth_(auth__)
 {
     ui->setupUi(this);
 

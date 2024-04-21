@@ -15,6 +15,7 @@ SOURCES += \
     tables.cpp
 
 HEADERS += \
+    auth.h \
     databases.h \
     loginwindow.h \
     tables.h

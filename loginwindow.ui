@@ -57,7 +57,7 @@
          <property name="geometry">
           <rect>
            <x>120</x>
-           <y>130</y>
+           <y>140</y>
            <width>84</width>
            <height>34</height>
           </rect>
@@ -72,79 +72,6 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox">
-         <property name="geometry">
-          <rect>
-           <x>230</x>
-           <y>80</y>
-           <width>73</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Unhide</string>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-        </widget>
-        <widget class="QWidget" name="layoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>23</x>
-           <y>30</y>
-           <width>204</width>
-           <height>94</height>
-          </rect>
-         </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Password</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Hostname</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" rowspan="2">
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <widget class="QLineEdit" name="Login_Form">
-              <property name="text">
-               <string>root</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="Password_Form">
-              <property name="text">
-               <string>18715</string>
-              </property>
-              <property name="echoMode">
-               <enum>QLineEdit::Password</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Login</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="Host_Form"/>
-          </item>
-         </layout>
-        </widget>
         <widget class="QPushButton" name="login_testButton">
          <property name="geometry">
           <rect>
@@ -157,6 +84,77 @@
          <property name="text">
           <string>test</string>
          </property>
+        </widget>
+        <widget class="QWidget" name="horizontalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>311</width>
+           <height>96</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="1" rowspan="2">
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QLineEdit" name="Login_Form">
+                <property name="text">
+                 <string>root</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="Password_Form">
+                <property name="text">
+                 <string>18715</string>
+                </property>
+                <property name="echoMode">
+                 <enum>QLineEdit::Password</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="Host_Form"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Login</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Hostname</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Password</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>Unhide</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
