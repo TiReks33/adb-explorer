@@ -5,11 +5,30 @@
 #include <QtSql>
 #include <QtDebug>
 #include <QFileInfo>
+#include <QScreen>
+#include <QCloseEvent>
+
 #include "databases.h"
+#include "tables.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class loginWindow; }
 QT_END_NAMESPACE
+
+struct auth{
+    auth() :
+        db_server_("QMYSQL")
+      , host_("localhost")
+    {}
+private:
+    QString db_server_; //default
+    QString host_;
+
+    QString login_; //db_window
+    QString passw_;
+
+    QString db_name_; //tables_window
+};
 
 class loginWindow : public QMainWindow
 {
@@ -69,6 +88,10 @@ private:
     QString host_;
     QString login_; // NOMINAL MEMBER
     QString passw_; // NOMINAL MEMBER
+
+    auth auth_;
+
+    //Tables* tables_window_;
 
 };
 #endif // LOGINWINDOW_H

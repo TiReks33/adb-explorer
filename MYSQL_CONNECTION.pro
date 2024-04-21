@@ -11,15 +11,18 @@ CONFIG += c++11
 SOURCES += \
     databases.cpp \
     main.cpp \
-    loginwindow.cpp
+    loginwindow.cpp \
+    tables.cpp
 
 HEADERS += \
     databases.h \
-    loginwindow.h
+    loginwindow.h \
+    tables.h
 
 FORMS += \
     databases.ui \
-    loginwindow.ui
+    loginwindow.ui \
+    tables.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

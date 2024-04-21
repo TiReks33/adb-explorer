@@ -1,7 +1,5 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
-#include <QScreen>
-#include <QCloseEvent>
 
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)

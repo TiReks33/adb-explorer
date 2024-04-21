@@ -4,6 +4,11 @@
 #include <QDialog>
 #include <QStatusBar>
 #include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlQueryModel>
+#include <QDebug>
+//#include <loginwindow.h>
+#include "tables.h"
 
 namespace Ui {
 class Databases;
@@ -34,6 +39,10 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_tableView_activated(const QModelIndex &index);
+
+    void on_tableView_clicked(const QModelIndex &index);
+
 private:
     Ui::Databases *ui;
     //QStatusBar* status_bar_;
@@ -42,6 +51,8 @@ private:
     QString db_login_;
     QString db_passw_;
     QString db_host_;
+    Tables* tables_window_;
+
 };
 
 #endif // DATABASES_H

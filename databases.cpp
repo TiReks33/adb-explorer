@@ -1,7 +1,5 @@
 #include "databases.h"
 #include "ui_databases.h"
-#include <QStatusBar>
-#include <loginwindow.h>
 
 Databases::Databases(QWidget *parent) :
     QDialog(parent),
@@ -128,12 +126,25 @@ void Databases::on_showDB_button_clicked()
 
 
 
-    //qDebug() << (modal->rowCount());
+    qDebug() << "Number of existinf DBs::" <<(modal->rowCount());
 
-    qDebug() << "123";
+    //qDebug() << "123";
 }
 
 void Databases::on_pushButton_2_clicked()
 {
     emit test_signal();
+}
+
+void Databases::on_tableView_activated(const QModelIndex &index)
+{
+    QString val=ui->tableView->model()->data(index).toString();
+    ui->statusLine->setText("Database activated: "+val);
+}
+
+void Databases::on_tableView_clicked(const QModelIndex &index)
+{
+    QString val=ui->tableView->model()->data(index).toString();
+    ui->statusLine->setText("Database clicked: "+val);
+
 }

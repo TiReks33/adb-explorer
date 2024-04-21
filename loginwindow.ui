@@ -115,10 +115,17 @@
           <item row="0" column="1" rowspan="2">
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <widget class="QLineEdit" name="Login_Form"/>
+             <widget class="QLineEdit" name="Login_Form">
+              <property name="text">
+               <string>root</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLineEdit" name="Password_Form">
+              <property name="text">
+               <string>18715</string>
+              </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
