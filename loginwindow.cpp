@@ -8,11 +8,20 @@ loginWindow::loginWindow(QWidget *parent)
     //, db_server_("QMYSQL")
 {
     ui->setupUi(this);
-    this->setFixedSize(QSize(400, 225));
+    this->setFixedSize(QSize(450, 225));
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
     ui->Host_Form->setText("localhost");
+
+    ui->cc_label->setToolTip("<pre style=\"white-space: pre-wrap;\"><img src=':/pic/9rnvobslce_cc.png' height='16' width='16'><b>"
+                        "[Non-Commercial License<br>   Requires Attribution]</b><br>This logo's "
+                        "original image<br>was "
+                        "designed by <b>Wannapik</b.><br>"
+                        "       [URL:]<br>"
+                        "<a>https://www.wannapik.com<br>"
+                        "/vectors/22949</a></pre>");
+    ui->cc_label->setToolTipDuration(60000);
 
 //db_connection_=QSqlDatabase::addDatabase("QMYSQL");
     //db_connection_.setHostName("xxx.xxx.xxx.xxx");//<-remote IP

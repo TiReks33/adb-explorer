@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QScreen>
 #include <QCloseEvent>
+#include <QToolTip>
 
 #include "databases.h"
 #include "tables.h"
