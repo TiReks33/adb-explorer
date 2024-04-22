@@ -12,25 +12,12 @@
 #include "databases.h"
 #include "tables.h"
 #include "auth.h"
+#include "db_connection.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class loginWindow; }
 QT_END_NAMESPACE
 
-//struct auth{
-//    auth() :
-//        db_server_("QMYSQL")
-//      , host_("localhost")
-//    {}
-////private:
-//    QString db_server_; //default
-//    QString host_;
-
-//    QString login_; //db_window
-//    QString passw_;
-
-//    QString db_name_; //tables_window
-//};
 
 class loginWindow : public QMainWindow
 {
@@ -43,21 +30,11 @@ public:
     // close-event override for save/db closing connection-purpose after app closing
     void closeEvent(QCloseEvent *event);
 
-    void connection_close(){ /*db_connection_.close();*/ QSqlDatabase::database().close(); }
-
-    bool connection_open(auth&);
-
-
-
-
-
-
 
     QString get_db_name(){return auth_.db_name_;}
     QString get_host(){return auth_.host_;};
     QString get_login(){return auth_.login_;}
     QString get_passw(){return auth_.passw_;}
-    //QSqlDatabase get_cur_connection_(){return db_connection_;}
 
 public slots:
 
@@ -86,11 +63,6 @@ private:
     //QSqlDatabase db_connection_;
     Databases* db_window_;
 
-//    QString db_server_;
-//    QString db_name_;
-//    QString host_;
-//    QString login_; // NOMINAL MEMBER
-//    QString passw_; // NOMINAL MEMBER
 
     auth auth_;
 

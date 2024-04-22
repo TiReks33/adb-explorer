@@ -10,14 +10,18 @@ CONFIG += c++11
 
 SOURCES += \
     databases.cpp \
+    db_connection.cpp \
     main.cpp \
     loginwindow.cpp \
+    select_cells.cpp \
     tables.cpp
 
 HEADERS += \
     auth.h \
     databases.h \
+    db_connection.h \
     loginwindow.h \
+    select_cells.hpp \
     tables.h
 
 FORMS += \

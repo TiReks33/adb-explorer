@@ -15,6 +15,7 @@ struct auth{
     QString passw_;
 
     QString db_name_; //tables_window
+    QString table_name_;
 };
 
 #endif // AUTH_H

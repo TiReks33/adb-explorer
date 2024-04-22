@@ -7,9 +7,12 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QDebug>
+
 //#include <loginwindow.h>
 #include "tables.h"
 #include "auth.h"
+#include "select_cells.hpp"
+#include "db_connection.h"
 
 namespace Ui {
 class Databases;
@@ -25,30 +28,29 @@ public:
     ~Databases();
 
 
-             void close_DB();
 
 public slots:
     void message_from_login(QString);
 
-//    void receive_auth(auth&);
 
 signals:
     void test_signal();
 
     void select_cells_signal(const QModelIndex &,const QModelIndex &);
 
+    void show_tables_signal();
+
 private slots:
     void on_showDB_button_clicked();
 
-//    void on_pushButton_2_clicked();
 
-    void select_cells(const QModelIndex &);
+//    void select_cells(const QModelIndex &);
 
-    void select_cells(int,int);
+//    void select_cells(int,int);
 
-    void select_cells(const QModelIndex &,const QModelIndex &);
+//    void select_cells(const QModelIndex &,const QModelIndex &);
 
-    void select_cells(int,int,int,int);
+//    void select_cells(int,int,int,int);
 
 
     void on_tableView_activated(const QModelIndex &index);
@@ -61,17 +63,13 @@ private slots:
 
 private:
     Ui::Databases *ui;
-    //QStatusBar* status_bar_;
-    //QSqlDatabase db_connection_;
 
-//    QString db_server_;
-//    QString db_login_;
-//    QString db_passw_;
-//    QString db_host_;
 
     auth& auth_;
 
     Tables* tables_window_;
+
+    QSqlQueryModel model_;
 
     void test();
 
