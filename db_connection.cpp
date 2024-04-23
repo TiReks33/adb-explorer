@@ -1,7 +1,7 @@
 #include "db_connection.h"
 
 
-bool db_connect(auth& auth__)
+bool db_connection::open(auth& auth__)
 {
     if(!QSqlDatabase::database().isOpen()){
     QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth__.db_server_);
@@ -28,11 +28,63 @@ bool db_connect(auth& auth__)
 
 }
 
-void db_close()
+void db_connection::close()
 {
     {
         QSqlDatabase db = QSqlDatabase::database();
         db.close();
     }
-    QSqlDatabase::removeDatabase( /*QSqlDatabase::defaultConnection*/QSqlDatabase::database().connectionName() );
+    QSqlDatabase::removeDatabase( QSqlDatabase::defaultConnection/*QSqlDatabase::database().connectionName()*/ );
+}
+
+bool db_connection::set_query(QString query, QSqlQueryModel&model__, QAbstractItemView* itemView)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+    qry.prepare(query); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    itemView->setModel(&model__);
+
+    return true;
+    }
+    return false;
+}
+
+bool db_connection::set_query(QString query, QSqlQueryModel&model__, QTableView *tableView, QHeaderView::ResizeMode scalemode)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+    qry.prepare(query); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    tableView->setModel(&model__);
+
+    tableView->horizontalHeader()->setSectionResizeMode(scalemode);
+
+    return true;
+    }
+    return false;
+}
+
+bool db_connection::set_query(QString query, QSqlQueryModel &model__, QComboBox *comboBox/*, QHeaderView::ResizeMode scalemode*/)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+    qry.prepare(query); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    comboBox->setModel(&model__);
+
+    //comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+
+    return true;
+    }
+    return false;
 }

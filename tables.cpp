@@ -34,22 +34,19 @@ void Tables::closeEvent(QCloseEvent *event)
 
 void Tables::show_tables()
 {
-    db_connect(auth_);
+    if(QSqlDatabase::database().databaseName().isNull())
+        db_connection::close(); // if database name in connection is not added
+    // ==> close current and open new connect
 
-    //QSqlQueryModel model;
+    db_connection::open(auth_);
 
 
-        QSqlQuery qry = QSqlQuery(QSqlDatabase::database());
-        //QSqlQuery* qry = new QSqlQuery(db_connection_);
+    db_connection::set_query("SHOW TABLES;",model_,ui->tableView,QHeaderView::Stretch);
 
-        qry.prepare("SHOW TABLES;"); //MY_SQL_QUERY
 
-        qry.exec();
-        model_.setQuery(qry);
+    select_cells(0,0, ui->tableView);
 
-        ui->tableView->setModel(&model_);
-
-        ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
 
 
         qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
@@ -60,6 +57,10 @@ void Tables::show_tables()
         //ui->tableView->setCurrentIndex(ui->tableView->model()->index(0,0));
         //ui->tableView->selectionModel()->select(ui->tableView->model()->index(0,0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
+        if(!auth_.table_name_.isNull()){
+            ui->select_from_table_button->setEnabled(true);
+            ui->select_from_table_button->setStyleSheet("background: green; color: white;");
+        }
 }
 
 

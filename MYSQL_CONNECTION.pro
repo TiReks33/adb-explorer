@@ -9,8 +9,10 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    create_db_name.cpp \
     databases.cpp \
     db_connection.cpp \
+    delete_db.cpp \
     main.cpp \
     loginwindow.cpp \
     select_cells.cpp \
@@ -18,14 +20,18 @@ SOURCES += \
 
 HEADERS += \
     auth.h \
+    create_db_name.h \
     databases.h \
     db_connection.h \
+    delete_db.h \
     loginwindow.h \
     select_cells.hpp \
     tables.h
 
 FORMS += \
+    create_db_name.ui \
     databases.ui \
+    delete_db.ui \
     loginwindow.ui \
     tables.ui
 

@@ -31,6 +31,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
   //, db_connection_(info)
   , auth_(auth__)
   , tables_window_(new Tables(auth_))
+  , new_db_window_(new create_db_name)
+  , delete_db_window_(new delete_db)
 {
     ui->setupUi(this);
 
@@ -43,18 +45,28 @@ Databases::Databases(auth& auth__, QWidget *parent) :
     this->setWindowFlags(flags);
 
     //SIGNALs
-    connect(this,SIGNAL(select_cells_signal(const QModelIndex &,const QModelIndex &)),
-            this,SLOT(select_cells(const QModelIndex &,const QModelIndex &)),Qt::QueuedConnection);
+//    connect(this,SIGNAL(select_cells_signal(const QModelIndex &,const QModelIndex &)),
+//            this,SLOT(select_cells(const QModelIndex &,const QModelIndex &)),Qt::QueuedConnection);
     connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
 
     connect(tables_window_,SIGNAL(db_show()),this,SLOT(on_showDB_button_clicked()));
+
+    connect(new_db_window_,SIGNAL(create_db_signal(QString)),this,SLOT(create_db_slot(QString)));
+
+    connect(this,SIGNAL(delete_form_request()),delete_db_window_,SLOT(delete_form_request_slot()));
+
+    connect(delete_db_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
+
+    connect(delete_db_window_,SIGNAL(delete_database(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
 }
 
 Databases::~Databases()
 {
-    db_close();
+    db_connection::close();
     delete ui;
     delete tables_window_;
+    delete new_db_window_;
+    delete delete_db_window_;
 }
 
 
@@ -63,42 +75,74 @@ void Databases::message_from_login(QString message)
 {
     ui->statusLine->clear();
     ui->statusLine->insert(message);
+    on_showDB_button_clicked();
+}
+
+void Databases::create_db_slot(QString query)
+{
+    db_connection::open(auth_);
+
+
+    bool query_success=db_connection::set_query(query,model_,ui->tableView,QHeaderView::Stretch);
+
+    if(query_success){
+
+        db_connection::close();
+        on_showDB_button_clicked();
+        //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
+        select_cells(0,0, ui->tableView);
+
+    } else {
+
+        QMessageBox::warning(this,"Warning","Database is not created. Please check name and try again.");
+
+    }
+
+}
+
+void Databases::delete_form_send_slot(QComboBox *comboBox__)
+{
+    db_connection::open(auth_);
+
+
+    db_connection::set_query("SHOW DATABASES;",model_,comboBox__);
+
+    comboBox__->setCurrentIndex(-1); //for blank cell default
+}
+
+void Databases::delete_database_slot(QComboBox *comboBox__)
+{
+    db_connection::open(auth_);
+
+    bool query_success=db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",model_,comboBox__);
+
+    if(query_success){
+
+        db_connection::close();
+        on_showDB_button_clicked();
+        //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
+        select_cells(0,0, ui->tableView);
+
+    } else {
+
+        QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
+
+    }
+    on_showDB_button_clicked(); // view database after deletion
 }
 
 
 void Databases::on_showDB_button_clicked()
 {
 
-    db_close();
-
-    db_connect(auth_);
+    db_connection::open(auth_);
 
 
-
-
-
-
-
-
-
-
-    //QSqlQueryModel model;
-
-
-    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(auth_.db_server_));
-
-    qry.prepare("SHOW DATABASES;"); //MY_SQL_QUERY
-
-    qry.exec();
-    model_.setQuery(qry);
-
-    ui->tableView->setModel(&model_);
-
-    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    db_connection::set_query("SHOW DATABASES;",model_,ui->tableView,QHeaderView::Stretch);
 
 
     //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
-    select_cells(3,0,0,0, ui->tableView);
+    select_cells(0,0, ui->tableView);
 
     auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
 
@@ -106,7 +150,10 @@ void Databases::on_showDB_button_clicked()
 
     qDebug() << "current auth_.dB_name_ index::" << auth_.db_name_;
 
-    if(!auth_.db_name_.isNull()) ui->showTables_button->setEnabled(true);
+    if(!auth_.db_name_.isNull()){
+        ui->showTables_button->setEnabled(true);
+        ui->showTables_button->setStyleSheet("background: green; color: white;");
+    }
 }
 
 
@@ -148,29 +195,40 @@ void Databases::on_tableView_clicked(const QModelIndex &index)
 
 void Databases::on_pushButton_clicked()
 {
-    QItemSelectionModel *selectionModel = ui->tableView->selectionModel();
 
-    QModelIndex topLeft;
-    QModelIndex bottomRight;
-
-    topLeft = ui->tableView->model()->index(0, 0, QModelIndex());
-    bottomRight = ui->tableView->model()->index(2, 0, QModelIndex());
-
-    QItemSelection selection(topLeft, bottomRight);
-    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
 }
 
 void Databases::test()
 {
-        QItemSelectionModel *selectionModel = ui->tableView->selectionModel();
 
-        QModelIndex topLeft;
-        QModelIndex bottomRight;
 
-        topLeft = ui->tableView->model()->index(0, 0, QModelIndex());
-        bottomRight = ui->tableView->model()->index(2, 0, QModelIndex());
+}
 
-        QItemSelection selection(topLeft, bottomRight);
-             selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
+void Databases::on_create_db_button_clicked()
+{
+    new_db_window_->setModal(true);
+    new_db_window_->show();
+}
 
+void Databases::on_delete_db_button_clicked()
+{
+    delete_db_window_->setModal(true);
+    delete_db_window_->show();
+    emit delete_form_request();
+}
+
+void Databases::on_comboBox_activated(const QString &arg1)
+{
+//    db_connection::open(auth_);
+
+
+//    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
+}
+
+void Databases::on_comboBox_test_button_clicked()
+{
+    db_connection::open(auth_);
+
+
+    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
 }

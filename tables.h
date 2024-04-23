@@ -11,6 +11,7 @@
 
 #include "auth.h"
 #include "db_connection.h"
+#include "select_cells.hpp"
 
 namespace Ui {
 class Tables;

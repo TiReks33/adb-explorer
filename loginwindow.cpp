@@ -66,7 +66,7 @@ void loginWindow::on_pushButton_clicked()
     auth_.passw_=this->ui->Password_Form->text();
     auth_.host_=this->ui->Host_Form->text();
 
-        if(!db_connect(auth_))
+        if(!db_connection::open(auth_))
             ui->statusbar->showMessage("(x)Authorization wrong. Please check your login details.");
         else{
 
@@ -100,10 +100,10 @@ void loginWindow::on_checkBox_stateChanged(int arg1)
 }
 
 
-void loginWindow::on_login_testButton_clicked()
-{
-    //emit message_to_database("test from login");
-    QSqlDatabase qs=QSqlDatabase::addDatabase("QMYSQL");
-    qDebug() << qs.isValid();
-}
+//void loginWindow::on_login_testButton_clicked()
+//{
+//    //emit message_to_database("test from login");
+//    QSqlDatabase qs=QSqlDatabase::addDatabase("QMYSQL");
+//    qDebug() << qs.isValid();
+//}
 

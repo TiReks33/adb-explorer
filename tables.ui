@@ -27,13 +27,23 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="select_from_table_button">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <property name="text">
-        <string>PushButton</string>
+        <string>Show table content</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Custom query</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLineEdit" name="statusLine">

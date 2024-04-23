@@ -56,7 +56,7 @@ private slots:
 
     void on_checkBox_stateChanged(int arg1);
 
-    void on_login_testButton_clicked();
+//    void on_login_testButton_clicked();
 
 private:
     Ui::loginWindow *ui;

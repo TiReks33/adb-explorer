@@ -8,6 +8,5 @@ int main(int argc, char *argv[])
 //    Tables* tables_test = new Tables();
 //    tables_test->show();
     w.show();
-
     return a.exec();
 }

@@ -7,12 +7,16 @@
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QDebug>
+#include <QMessageBox>
+#include <QComboBox>
 
 //#include <loginwindow.h>
 #include "tables.h"
 #include "auth.h"
 #include "select_cells.hpp"
 #include "db_connection.h"
+#include "create_db_name.h"
+#include "delete_db.h"
 
 namespace Ui {
 class Databases;
@@ -32,6 +36,11 @@ public:
 public slots:
     void message_from_login(QString);
 
+    void create_db_slot(QString);
+
+    void delete_form_send_slot(QComboBox*);
+
+    void delete_database_slot(QComboBox*);
 
 signals:
     void test_signal();
@@ -39,6 +48,8 @@ signals:
     void select_cells_signal(const QModelIndex &,const QModelIndex &);
 
     void show_tables_signal();
+
+    void delete_form_request();
 
 private slots:
     void on_showDB_button_clicked();
@@ -61,6 +72,14 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_create_db_button_clicked();
+
+    void on_delete_db_button_clicked();
+
+    void on_comboBox_activated(const QString &arg1);
+
+    void on_comboBox_test_button_clicked();
+
 private:
     Ui::Databases *ui;
 
@@ -72,6 +91,10 @@ private:
     QSqlQueryModel model_;
 
     void test();
+
+    create_db_name* new_db_window_;
+
+    delete_db* delete_db_window_;
 
 };
 
