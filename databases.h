@@ -70,7 +70,7 @@ private slots:
 
     void on_showTables_button_clicked();
 
-    void on_pushButton_clicked();
+//    void on_pushButton_clicked();
 
     void on_create_db_button_clicked();
 
@@ -90,7 +90,7 @@ private:
 
     QSqlQueryModel model_;
 
-    void test();
+//    void test();
 
     create_db_name* new_db_window_;
 

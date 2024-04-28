@@ -39,7 +39,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="Custom_Query_Button">
      <property name="text">
       <string>Custom query</string>
      </property>

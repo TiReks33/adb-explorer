@@ -12,6 +12,7 @@
 #include "auth.h"
 #include "db_connection.h"
 #include "select_cells.hpp"
+#include "custom_query.h"
 
 namespace Ui {
 class Tables;
@@ -33,6 +34,8 @@ public slots:
 
     void show_tables();
 
+    void set_custom_query_slot(QString);
+
 signals:
 
     void db_show();
@@ -41,6 +44,14 @@ private slots:
 
 
     void on_showDB_button_clicked();
+
+    void on_tableView_clicked(const QModelIndex &index);
+
+    void on_select_from_table_button_clicked();
+
+//    void on_pushButton_clicked();
+
+    void on_Custom_Query_Button_clicked();
 
 private:
     Ui::Tables *ui;
@@ -52,6 +63,8 @@ private:
     auth& auth_;
 
     QSqlQueryModel model_;
+
+    Custom_Query* table_query_window_;
 };
 
 #endif // TABLES_H

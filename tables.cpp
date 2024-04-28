@@ -6,6 +6,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     ui(new Ui::Tables)
 //  , db_server_("QMYSQL")
   , auth_(auth__)
+  , table_query_window_(new Custom_Query)
 {
     ui->setupUi(this);
 
@@ -18,6 +19,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     this->setWindowFlags(flags);
 
     //SIGNALS
+    connect(table_query_window_,SIGNAL(set_custom_query(QString)),this,SLOT(set_custom_query_slot(QString)));
 
 }
 
@@ -34,7 +36,7 @@ void Tables::closeEvent(QCloseEvent *event)
 
 void Tables::show_tables()
 {
-    if(QSqlDatabase::database().databaseName().isNull())
+    //if(QSqlDatabase::database().databaseName().isNull())
         db_connection::close(); // if database name in connection is not added
     // ==> close current and open new connect
 
@@ -63,8 +65,49 @@ void Tables::show_tables()
         }
 }
 
+void Tables::set_custom_query_slot(QString query__)
+{
+    //qDebug()<<"test";
+    db_connection::open(auth_);
+
+
+    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
+
+}
+
 
 void Tables::on_showDB_button_clicked()
 {
     show_tables();
+}
+
+void Tables::on_tableView_clicked(const QModelIndex &index)
+{
+    ////SETUP CURRENT INDEX POSITION (first 'a' index)
+    ui->tableView->setCurrentIndex(index);
+
+    auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+
+    qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.table_name_;
+}
+
+void Tables::on_select_from_table_button_clicked()
+{
+    db_connection::open(auth_);
+
+
+    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),model_,ui->tableView,QHeaderView::Stretch);
+
+}
+
+//void Tables::on_pushButton_clicked()
+//{
+
+//}
+
+void Tables::on_Custom_Query_Button_clicked()
+{
+    table_query_window_->setModal(true);
+    table_query_window_->show();
+    //emit show_tables_signal();
 }

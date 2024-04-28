@@ -90,7 +90,7 @@ void Databases::create_db_slot(QString query)
         db_connection::close();
         on_showDB_button_clicked();
         //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
-        select_cells(0,0, ui->tableView);
+            //select_cells(0,0, ui->tableView);
 
     } else {
 
@@ -179,30 +179,33 @@ void Databases::on_tableView_activated(const QModelIndex &index)
 void Databases::on_tableView_clicked(const QModelIndex &index)
 {
     ////SETUP CURRENT INDEX POSITION (first 'a' index)
-    ui->tableView->setCurrentIndex(ui->tableView->model()->index(index.row(),index.column()));
+    //ui->tableView->setCurrentIndex(ui->tableView->model()->index(index.row(),index.column()));
+    ui->tableView->setCurrentIndex(index);
+    //ui->tableView->model()->data(index);
 
     //SET CURRENT DB NAME
+    //auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
     auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
 
-
-    QString val=ui->tableView->model()->data(index).toString();
-    ui->statusLine->setText("Database clicked: "+val);
-    qDebug() << ui->tableView->currentIndex();
-
-}
-
-
-
-void Databases::on_pushButton_clicked()
-{
-
-}
-
-void Databases::test()
-{
+    //QString val=ui->tableView->model()->data(index).toString();
+    //ui->statusLine->setText("Database clicked: "+val);
+    qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.db_name_;
 
 
 }
+
+
+
+//void Databases::on_pushButton_clicked()
+//{
+
+//}
+
+//void Databases::test()
+//{
+
+
+//}
 
 void Databases::on_create_db_button_clicked()
 {
