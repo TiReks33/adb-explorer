@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
+    <width>833</width>
     <height>564</height>
    </rect>
   </property>
@@ -66,6 +66,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="create_db_button">
+     <property name="styleSheet">
+      <string notr="true">background: lightblue;</string>
+     </property>
      <property name="text">
       <string>Create Database</string>
      </property>
@@ -141,7 +144,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>360</width>
+         <width>320</width>
          <height>20</height>
         </size>
        </property>

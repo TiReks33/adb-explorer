@@ -32,5 +32,5 @@ void Custom_Query::on_setFont_Button_clicked()
 
 void Custom_Query::on_buttonBox_accepted()
 {
-    emit set_custom_query(ui->plainTextEdit->toPlainText());
+    emit send_custom_query(ui->plainTextEdit->toPlainText());
 }

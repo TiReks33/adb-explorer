@@ -75,7 +75,7 @@ void loginWindow::on_pushButton_clicked()
             db_window_->show();
             emit message_to_database("Database succesfull connected.");
 
-            //this->hide();
+            this->hide();
 
 //            this->ui->Login_Form->setReadOnly(true);
 //            this->ui->Password_Form->setReadOnly(true);

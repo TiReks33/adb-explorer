@@ -51,6 +51,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
     connect(tables_window_,SIGNAL(db_show()),this,SLOT(on_showDB_button_clicked()));
 
+    connect(tables_window_,SIGNAL(db_show()),this,SLOT(db_show_slot()));
+
     connect(new_db_window_,SIGNAL(create_db_signal(QString)),this,SLOT(create_db_slot(QString)));
 
     connect(this,SIGNAL(delete_form_request()),delete_db_window_,SLOT(delete_form_request_slot()));
@@ -131,6 +133,11 @@ void Databases::delete_database_slot(QComboBox *comboBox__)
     on_showDB_button_clicked(); // view database after deletion
 }
 
+void Databases::db_show_slot()
+{
+    this->show();
+}
+
 
 void Databases::on_showDB_button_clicked()
 {
@@ -162,9 +169,10 @@ void Databases::on_showDB_button_clicked()
 
 void Databases::on_showTables_button_clicked()
 {
-    tables_window_->setModal(true);
+    //tables_window_->setModal(true);
     tables_window_->show();
     emit show_tables_signal();
+    this->hide();
 }
 
 

@@ -11,6 +11,8 @@ CONFIG += c++11
 SOURCES += \
     create_db_name.cpp \
     custom_query.cpp \
+    customqueryresult.cpp \
+    customquerysettings.cpp \
     databases.cpp \
     db_connection.cpp \
     delete_db.cpp \
@@ -23,6 +25,8 @@ HEADERS += \
     auth.h \
     create_db_name.h \
     custom_query.h \
+    customqueryresult.h \
+    customquerysettings.h \
     databases.h \
     db_connection.h \
     delete_db.h \
@@ -33,6 +37,8 @@ HEADERS += \
 FORMS += \
     create_db_name.ui \
     custom_query.ui \
+    customqueryresult.ui \
+    customquerysettings.ui \
     databases.ui \
     delete_db.ui \
     loginwindow.ui \

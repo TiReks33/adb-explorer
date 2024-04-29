@@ -17,7 +17,7 @@ public:
 
 signals:
 
-    void set_custom_query(QString);
+    void send_custom_query(QString);
 
 private slots:
     void on_setFont_Button_clicked();
