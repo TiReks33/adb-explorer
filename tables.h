@@ -10,6 +10,7 @@
 #include <QCloseEvent>
 #include <QProgressDialog>
 #include <QCheckBox>
+#include <QMessageBox>
 
 #include "auth.h"
 #include "db_connection.h"
@@ -18,6 +19,7 @@
 #include "customqueryresult.h"
 #include "customquerysettings.h"
 #include "ui_customquerysettings.h"
+#include "delete_db.h"
 
 namespace Ui {
 class Tables;
@@ -41,6 +43,10 @@ public slots:
 
     void send_custom_query_slot(QString);
 
+    void delete_form_send_slot(QComboBox*);
+
+    void delete_table_slot(QComboBox*);
+
 signals:
 
     void db_show();
@@ -48,6 +54,12 @@ signals:
     //void canceled();
 
     void custom_query(QString);
+
+    void custom_query(QString,QTableView*);
+
+    void custom_query(QString,QSqlQueryModel&,QTableView*);
+
+    void delete_form_request();
 
 private slots:
 
@@ -65,6 +77,8 @@ private slots:
     //void cancel_slot();
 
     void on_Query_settings_clicked();
+
+    void on_pushButton_clicked();
 
 protected:
     bool event(QEvent* event);
@@ -87,6 +101,8 @@ private:
     CustomQueryResult* custom_query_result_window_;
 
     CustomQuerySettings* settings_;
+
+    delete_db* delete_table_window_;
 
 };
 

@@ -6,6 +6,9 @@
 //#include <QStackedLayout>
 #include <QGraphicsEffect>
 
+#include <customqueryresult.h>
+#include <ui_customqueryresult.h>
+
 Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Tables)
@@ -14,6 +17,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , table_query_window_(new Custom_Query)
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
+  , delete_table_window_(new delete_db)
 {
     ui->setupUi(this);
 
@@ -24,6 +28,8 @@ Tables::Tables(auth& auth__,QWidget *parent) :
                                 | Qt::WindowMaximizeButtonHint
                                 | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
+
+    delete_table_window_->setWindowTitle("Remove table dialog");
 
     //QCheckBox* checkbox = new QCheckBox(ui->select_from_table_button);
 //        checkbox_ = new QCheckBox(ui->select_from_table_button);
@@ -74,6 +80,18 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
     connect(this,SIGNAL(custom_query(QString)),custom_query_result_window_,SLOT(custom_query_slot(QString)));
 
+    connect(this,SIGNAL(custom_query(QString,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QTableView*)));
+
+    connect(this,SIGNAL(custom_query(QString,QSqlQueryModel,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QSqlQueryModel,QTableView*)));
+
+    //connect(this,SIGNAL(custom_query(QString,int)),custom_query_result_window_,SLOT(custom_query_slot(QString,int)));
+
+    connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
+
+    connect(delete_table_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
+
+    connect(delete_table_window_,SIGNAL(delete_database(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
+
 }
 
 Tables::~Tables()
@@ -81,6 +99,8 @@ Tables::~Tables()
     delete ui;
     delete table_query_window_;
     delete custom_query_result_window_;
+    delete settings_;
+    delete delete_table_window_;
 }
 
 void Tables::closeEvent(QCloseEvent *event)
@@ -156,10 +176,45 @@ void Tables::send_custom_query_slot(QString query__)
     db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
     }else{
 
-    custom_query_result_window_->show();
-    emit custom_query(query__);
+        CustomQueryResult new_result_window{auth_};
+        //new_result_window.show();
+//    custom_query_result_window_->show();
+    new_result_window.custom_query_slot(query__, /*new_result_window->model_,*/ new_result_window.ui->tableView);
+    if(new_result_window.ui->tableView->model()->rowCount()!=0)
+    new_result_window.exec();
+    qDebug() << "NUMBER OF CORTEGES::"<<new_result_window.ui->tableView->model()->rowCount();
+    }
+}
+
+void Tables::delete_form_send_slot(QComboBox *comboBox__)
+{
+    db_connection::open(auth_);
+
+
+    db_connection::set_query("SHOW DATABASES;",model_,comboBox__);
+
+    comboBox__->setCurrentIndex(-1); //for blank cell default
+}
+
+void Tables::delete_table_slot(QComboBox *comboBox__)
+{
+    db_connection::open(auth_);
+
+    bool query_success=db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",model_,comboBox__);
+
+    if(query_success){
+
+        db_connection::close();
+        on_showDB_button_clicked();
+        //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
+        select_cells(0,0, ui->tableView);
+
+    } else {
+
+        QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
 
     }
+    on_showDB_button_clicked(); // view tables after deletion
 }
 
 
@@ -187,10 +242,13 @@ void Tables::on_select_from_table_button_clicked()
 
     db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),model_,ui->tableView,QHeaderView::Stretch);
     }else{
-
-    custom_query_result_window_->show();
-    emit custom_query(QString("SELECT * FROM ")+auth_.table_name_+(";"));
-
+//        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
+        CustomQueryResult new_select_window{auth_};
+        new_select_window.show();
+    //custom_query_result_window_->show();
+    new_select_window.custom_query_slot(QString("SELECT * FROM ")+auth_.table_name_+(";")/*,new_select_window->ui->tableView*/, /*new_select_window->model_,*/new_select_window.ui->tableView);
+    //if(model_.rowCount()!=0)
+    new_select_window.exec();
     }
 }
 
@@ -209,4 +267,11 @@ void Tables::on_Custom_Query_Button_clicked()
 void Tables::on_Query_settings_clicked()
 {
     settings_->show();
+}
+
+void Tables::on_pushButton_clicked()
+{
+    delete_table_window_->setModal(true);
+    delete_table_window_->show();
+    emit delete_form_request();
 }

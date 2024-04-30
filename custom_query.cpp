@@ -8,6 +8,15 @@ Custom_Query::Custom_Query(QWidget *parent) :
     ui(new Ui::Custom_Query)
 {
     ui->setupUi(this);
+
+    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
+                                | Qt::WindowMinimizeButtonHint
+                                | Qt::WindowMaximizeButtonHint
+                                | Qt::WindowCloseButtonHint;
+    this->setWindowFlags(flags);
+    ui->statusLine->setReadOnly(true);
+
+    this->ui->buttonBox->button(QDialogButtonBox::Ok)->setStyleSheet("background:green; color:white;");
 }
 
 Custom_Query::~Custom_Query()

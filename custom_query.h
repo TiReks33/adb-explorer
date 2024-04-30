@@ -2,6 +2,7 @@
 #define CUSTOM_QUERY_H
 
 #include <QDialog>
+#include <QDebug>
 
 namespace Ui {
 class Custom_Query;

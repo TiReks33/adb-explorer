@@ -44,6 +44,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
                                 | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
+    delete_db_window_->setWindowTitle("Remove database dialog");
+
     //SIGNALs
 //    connect(this,SIGNAL(select_cells_signal(const QModelIndex &,const QModelIndex &)),
 //            this,SLOT(select_cells(const QModelIndex &,const QModelIndex &)),Qt::QueuedConnection);
@@ -228,18 +230,18 @@ void Databases::on_delete_db_button_clicked()
     emit delete_form_request();
 }
 
-void Databases::on_comboBox_activated(const QString &arg1)
-{
+//void Databases::on_comboBox_activated(const QString &arg1)
+//{
+////    db_connection::open(auth_);
+
+
+////    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
+//}
+
+//void Databases::on_comboBox_test_button_clicked()
+//{
 //    db_connection::open(auth_);
 
 
 //    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
-}
-
-void Databases::on_comboBox_test_button_clicked()
-{
-    db_connection::open(auth_);
-
-
-    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
-}
+//}

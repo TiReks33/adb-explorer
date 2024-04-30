@@ -78,9 +78,9 @@ private slots:
 
     void on_delete_db_button_clicked();
 
-    void on_comboBox_activated(const QString &arg1);
+//    void on_comboBox_activated(const QString &arg1);
 
-    void on_comboBox_test_button_clicked();
+//    void on_comboBox_test_button_clicked();
 
 private:
     Ui::Databases *ui;

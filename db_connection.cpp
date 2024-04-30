@@ -71,6 +71,60 @@ bool db_connection::set_query(QString query, QSqlQueryModel&model__, QTableView 
     return false;
 }
 
+bool db_connection::set_query(QString query,/* QSqlQueryModel&model__,*/ QTableView *tableView, QHeaderView::ResizeMode scalemode/*, int*/)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+    qry.prepare(query); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    this->model_.setQuery(qry);
+
+    tableView->setModel(&this->model_);
+
+    tableView->horizontalHeader()->setSectionResizeMode(scalemode);
+
+    return true;
+    }
+    return false;
+}
+
+//                        bool db_connection::set_query(QString query, QSqlQueryModel&model__, QTableView *tableView, QHeaderView::ResizeMode scalemode, int)
+//                        {
+//                            QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+//                            qry.prepare(query); //MY_SQL_QUERY
+
+//                            if(qry.exec()){
+//                            model__.setQuery(qry);
+
+//                            tableView->setModel(&model__);
+
+//                            tableView->horizontalHeader()->setSectionResizeMode(scalemode);
+
+//                            return true;
+//                            }
+//                            return false;
+//                        }
+
+//bool db_connection::set_query(QString query, QSqlQueryModel*model__, QTableView *tableView, QHeaderView::ResizeMode scalemode)
+//{
+//    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+//    qry.prepare(query); //MY_SQL_QUERY
+
+//    if(qry.exec()){
+//    model__->setQuery(qry);
+
+//    tableView->setModel(model__);
+
+//    tableView->horizontalHeader()->setSectionResizeMode(scalemode);
+
+//    return true;
+//    }
+//    return false;
+//}
+
 bool db_connection::set_query(QString query, QSqlQueryModel &model__, QComboBox *comboBox/*, QHeaderView::ResizeMode scalemode*/)
 {
     QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());

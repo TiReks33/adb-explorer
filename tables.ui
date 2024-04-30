@@ -22,7 +22,7 @@
      <item>
       <widget class="QPushButton" name="showDB_button">
        <property name="text">
-        <string>Show tables</string>
+        <string>Show all tables in current database</string>
        </property>
       </widget>
      </item>
@@ -60,9 +60,12 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="Query_settings">
+      <widget class="QPushButton" name="pushButton">
+       <property name="styleSheet">
+        <string notr="true">background: red;</string>
+       </property>
        <property name="text">
-        <string>Query settings</string>
+        <string>DELETE TABLE</string>
        </property>
       </widget>
      </item>
@@ -78,6 +81,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="Query_settings">
+       <property name="text">
+        <string>Query settings</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

@@ -20,8 +20,15 @@ public:
 
 public slots:
 
+    friend class Tables;
+
     void custom_query_slot(QString);
 
+//    void custom_query_slot(QString,QTableView*);
+
+    void custom_query_slot(QString,QTableView*);
+
+//    void custom_query_slot(QString,QSqlQueryModel,QTableView*);
 
 private slots:
     void on_Cancel_button_clicked();
@@ -31,7 +38,9 @@ private:
 
     auth& auth_;
 
-    QSqlQueryModel model_;
+    //QSqlQueryModel model_;
+
+    db_connection* non_static_connection_;
 };
 
 #endif // CUSTOMQUERYRESULT_H
