@@ -18,6 +18,7 @@ delete_db::~delete_db()
 void delete_db::delete_form_request_slot()
 {
     emit delete_form_send(ui->comboBox);
+    qDebug() << "DELETE FORM REQUEST SLOT";
 }
 
 

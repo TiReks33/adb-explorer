@@ -16,7 +16,8 @@ Custom_Query::Custom_Query(QWidget *parent) :
     this->setWindowFlags(flags);
     ui->statusLine->setReadOnly(true);
 
-    this->ui->buttonBox->button(QDialogButtonBox::Ok)->setStyleSheet("background:green; color:white;");
+    //this->ui->buttonBox->button(QDialogButtonBox::Ok)->setStyleSheet("background:green; color:white;");
+    this->ui->Ok_button->setStyleSheet("background:green; color:white;");
 }
 
 Custom_Query::~Custom_Query()
@@ -39,7 +40,12 @@ void Custom_Query::on_setFont_Button_clicked()
 
 }
 
-void Custom_Query::on_buttonBox_accepted()
+void Custom_Query::on_Ok_button_clicked()
 {
     emit send_custom_query(ui->plainTextEdit->toPlainText());
+}
+
+void Custom_Query::on_Cancel_button_clicked()
+{
+    this->close();
 }

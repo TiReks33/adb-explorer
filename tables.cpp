@@ -17,7 +17,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , table_query_window_(new Custom_Query)
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
-  , delete_table_window_(new delete_db)
+  , delete_table_window_(new delete_table)
 {
     ui->setupUi(this);
 
@@ -82,16 +82,19 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
     connect(this,SIGNAL(custom_query(QString,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QTableView*)));
 
-    connect(this,SIGNAL(custom_query(QString,QSqlQueryModel,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QSqlQueryModel,QTableView*)));
+//    connect(this,SIGNAL(custom_query(QString,QSqlQueryModel,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QSqlQueryModel,QTableView*)));
 
     //connect(this,SIGNAL(custom_query(QString,int)),custom_query_result_window_,SLOT(custom_query_slot(QString,int)));
 
+
     connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
+//    connect(this,&Tables::delete_form_request,  delete_table_window_,&delete_table::delete_form_request_slot);
 
     connect(delete_table_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
+//    connect(delete_table_window_,&delete_table::delete_form_send,this,&Tables::delete_form_send_slot);
 
-    connect(delete_table_window_,SIGNAL(delete_database(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
-
+    connect(delete_table_window_,SIGNAL(delete_table_sig(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
+//    connect(delete_table_window_,&delete_table::delete_table_sig,this,&Tables::delete_table_slot);
 }
 
 Tables::~Tables()
@@ -180,9 +183,10 @@ void Tables::send_custom_query_slot(QString query__)
         //new_result_window.show();
 //    custom_query_result_window_->show();
     new_result_window.custom_query_slot(query__, /*new_result_window->model_,*/ new_result_window.ui->tableView);
-    if(new_result_window.ui->tableView->model()->rowCount()!=0)
+    //if(new_result_window.ui->tableView->model()->rowCount()!=0)
+    if((new_result_window.ui->tableView->model())!=nullptr)
     new_result_window.exec();
-    qDebug() << "NUMBER OF CORTEGES::"<<new_result_window.ui->tableView->model()->rowCount();
+    qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
     }
 }
 
@@ -191,7 +195,7 @@ void Tables::delete_form_send_slot(QComboBox *comboBox__)
     db_connection::open(auth_);
 
 
-    db_connection::set_query("SHOW DATABASES;",model_,comboBox__);
+    db_connection::set_query("SHOW TABLES;",model_,comboBox__);
 
     comboBox__->setCurrentIndex(-1); //for blank cell default
 }

@@ -20,6 +20,7 @@
 #include "customquerysettings.h"
 #include "ui_customquerysettings.h"
 #include "delete_db.h"
+#include "delete_table.h"
 
 namespace Ui {
 class Tables;
@@ -60,6 +61,8 @@ signals:
     void custom_query(QString,QSqlQueryModel&,QTableView*);
 
     void delete_form_request();
+
+//    void tbl_delete_form_request();
 
 private slots:
 
@@ -102,7 +105,7 @@ private:
 
     CustomQuerySettings* settings_;
 
-    delete_db* delete_table_window_;
+    delete_table* delete_table_window_;
 
 };
 

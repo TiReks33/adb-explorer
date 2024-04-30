@@ -16,6 +16,7 @@ SOURCES += \
     databases.cpp \
     db_connection.cpp \
     delete_db.cpp \
+    delete_table.cpp \
     main.cpp \
     loginwindow.cpp \
     select_cells.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     databases.h \
     db_connection.h \
     delete_db.h \
+    delete_table.h \
     loginwindow.h \
     select_cells.hpp \
     tables.h

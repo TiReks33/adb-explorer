@@ -60,6 +60,9 @@
        <property name="text">
         <string>Show tables in selected database</string>
        </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>

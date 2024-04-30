@@ -23,7 +23,10 @@ signals:
 private slots:
     void on_setFont_Button_clicked();
 
-    void on_buttonBox_accepted();
+//    void on_buttonBox_accepted();
+    void on_Ok_button_clicked();
+
+    void on_Cancel_button_clicked();
 
 private:
     Ui::Custom_Query *ui;
