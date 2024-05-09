@@ -19,6 +19,7 @@ SOURCES += \
     delete_table.cpp \
     main.cpp \
     loginwindow.cpp \
+    newtable.cpp \
     select_cells.cpp \
     tables.cpp
 
@@ -33,6 +34,7 @@ HEADERS += \
     delete_db.h \
     delete_table.h \
     loginwindow.h \
+    newtable.h \
     select_cells.hpp \
     tables.h
 
@@ -44,6 +46,7 @@ FORMS += \
     databases.ui \
     delete_db.ui \
     loginwindow.ui \
+    newtable.ui \
     tables.ui
 
 # Default rules for deployment.
