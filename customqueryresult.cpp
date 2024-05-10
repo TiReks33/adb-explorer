@@ -42,6 +42,15 @@ void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView)
     non_static_connection_->set_query(query,this->non_static_connection_->model_,tableView,QHeaderView::Stretch);
 }
 
+void CustomQueryResult::custom_query_slot(QString query,QComboBox*comboBox)
+{
+    //db_connection non_static_con;
+    db_connection::open(auth_);
+
+
+    non_static_connection_->set_query(query,this->non_static_connection_->model_,comboBox,QHeaderView::Stretch);
+}
+
 //void CustomQueryResult::custom_query_slot(QString query, QSqlQueryModel model_, QTableView *tableView)
 //{
 //    db_connection* non_static_con = new db_connection;

@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     create_db_name.cpp \
+    create_table_constructor.cpp \
     custom_query.cpp \
     customqueryresult.cpp \
     customquerysettings.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     auth.h \
     create_db_name.h \
+    create_table_constructor.h \
     custom_query.h \
     customqueryresult.h \
     customquerysettings.h \
@@ -40,6 +42,7 @@ HEADERS += \
 
 FORMS += \
     create_db_name.ui \
+    create_table_constructor.ui \
     custom_query.ui \
     customqueryresult.ui \
     customquerysettings.ui \

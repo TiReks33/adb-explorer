@@ -21,6 +21,7 @@
 #include "ui_customquerysettings.h"
 #include "delete_db.h"
 #include "delete_table.h"
+#include "create_table_constructor.h"
 
 namespace Ui {
 class Tables;
@@ -83,6 +84,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_create_table_button_clicked();
+
 protected:
     bool event(QEvent* event);
 
@@ -106,6 +109,8 @@ private:
     CustomQuerySettings* settings_;
 
     delete_table* delete_table_window_;
+
+    CreateTableConstructor* constructor_;
 
 };
 

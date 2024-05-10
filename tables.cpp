@@ -18,6 +18,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
+  , constructor_(new CreateTableConstructor{auth_})
 {
     ui->setupUi(this);
 
@@ -104,6 +105,7 @@ Tables::~Tables()
     delete custom_query_result_window_;
     delete settings_;
     delete delete_table_window_;
+    delete constructor_;
 }
 
 void Tables::closeEvent(QCloseEvent *event)
@@ -278,4 +280,10 @@ void Tables::on_pushButton_clicked()
     delete_table_window_->setModal(true);
     delete_table_window_->show();
     emit delete_form_request();
+}
+
+void Tables::on_create_table_button_clicked()
+{
+    constructor_->setCurrentIndex(0);
+    constructor_->show();
 }

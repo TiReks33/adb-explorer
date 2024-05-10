@@ -30,6 +30,8 @@ public slots:
 
 //    void custom_query_slot(QString,QSqlQueryModel,QTableView*);
 
+    void custom_query_slot(QString,QComboBox*);
+
 private slots:
     void on_Cancel_button_clicked();
 

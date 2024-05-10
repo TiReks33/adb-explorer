@@ -21,6 +21,10 @@ static bool set_query(QString, QSqlQueryModel&,QAbstractItemView*);
 
 static bool set_query(QString, QSqlQueryModel&model__,QTableView*,QHeaderView::ResizeMode scalemode);
 
+static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,int);
+
+bool set_query(QString query, QSqlQueryModel&model__, QComboBox *comboBox, QHeaderView::ResizeMode scalemode);
+
 //static bool set_query(QString, QSqlQueryModel*,QTableView*,QHeaderView::ResizeMode scalemode);
 
 bool set_query(QString, /*QSqlQueryModel&,*/QTableView*,QHeaderView::ResizeMode scalemode/*,int*/);
