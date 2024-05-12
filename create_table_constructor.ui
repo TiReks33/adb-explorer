@@ -14,7 +14,7 @@
    <string>StackedWidget</string>
   </property>
   <property name="currentIndex">
-   <number>2</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="page">
    <widget class="QLineEdit" name="statusLine_0">
@@ -25,6 +25,9 @@
       <width>821</width>
       <height>26</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="tbl_name_label_0">
@@ -251,6 +254,9 @@
       <width>821</width>
       <height>26</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QWidget" name="formLayoutWidget">
@@ -677,6 +683,9 @@ will be entered or some file opened.&lt;/font&gt;</string>
       <width>821</width>
       <height>26</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_3">

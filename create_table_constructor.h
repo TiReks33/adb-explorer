@@ -8,6 +8,7 @@
 #include <QPlainTextEdit>
 #include <QMessageBox>
 #include <QList>
+#include <QSqlError>
 
 #include "customqueryresult.h"
 
@@ -44,6 +45,12 @@ public slots:
 
     void add_tbl_constructor_db2table_slot(QString const&);
 
+    void add_tbl_constructor_table2atribute_slot(QString const&);
+
+    void close_con(QString const &);
+
+    void closeEvent(QCloseEvent *event);
+
 private slots:
     void on_next_0_clicked();
 
@@ -74,7 +81,11 @@ private:
     db_connection* non_static_connection_;
 //    db_connection* non_static_connection_2_;
 
+//    QSqlQueryModel model_;
+    QSqlQueryModel submodel_1_;
+    QSqlQueryModel submodel_2_;
 
+    QList<QString> non_dflt_conction_names_;
 
 };
 
