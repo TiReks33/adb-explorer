@@ -3,7 +3,9 @@
 
 bool db_connection::open(auth& auth__)
 {
+//    qDebug()<<"TEST IS OPEN::"<<QSqlDatabase::database("QPSQL").isOpen();
     if(!QSqlDatabase::database().isOpen()){
+//    if(!QSqlDatabase::database(auth__.db_server_).isOpen()){
     QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth__.db_server_);
 
         db_connection_.setUserName(auth__.login_);

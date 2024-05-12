@@ -20,6 +20,7 @@ class CreateTableConstructor : public QStackedWidget
     Q_OBJECT
 
 public:
+
     explicit CreateTableConstructor(auth& auth__,QWidget *parent = nullptr);
     ~CreateTableConstructor();
 
@@ -38,6 +39,10 @@ public slots:
     void onDeleteChecked(int);
 
     void onUpdateChecked(int);
+
+//    void add_tbl_constructor_db2table_slot(int);
+
+    void add_tbl_constructor_db2table_slot(QString const&);
 
 private slots:
     void on_next_0_clicked();
@@ -64,7 +69,13 @@ private:
     QList<QString> attributes_;
 
     auth& auth_;
+    auth auth_autonome_;
+
     db_connection* non_static_connection_;
+//    db_connection* non_static_connection_2_;
+
+
+
 };
 
 #endif // CREATE_TABLE_CONSTRUCTOR_H

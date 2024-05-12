@@ -1,6 +1,7 @@
 #include "create_table_constructor.h"
 #include "ui_create_table_constructor.h"
 
+
 CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
     QStackedWidget(parent),
     ui(new Ui::CreateTableConstructor)
@@ -9,8 +10,15 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
   , first_key_(true)
   , auth_(auth__)
   , non_static_connection_(new db_connection)
+//  , non_static_connection_2_(new db_connection)
 {
     ui->setupUi(this);
+
+
+//    auth_autonome_.host_=auth_.host_;
+//    auth_autonome_.login_=auth_.login_;
+//    auth_autonome_.passw_=auth_.passw_;
+
 
     ui->atr_type_capacity_1->setMaxLength(5);
 
@@ -34,6 +42,11 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
     connect(ui->foreign_key_checkBox_2,SIGNAL(stateChanged(int)),this,SLOT(foreignkeychecked(int)));
     connect(ui->on_delete_checkBox_2,SIGNAL(stateChanged(int)),this, SLOT(onDeleteChecked(int)));
     connect(ui->on_update_checkBox_2,SIGNAL(stateChanged(int)),this, SLOT(onUpdateChecked(int)));
+
+    //constructor
+//    connect(ui->ref_DB_comboBox_2,SIGNAL(stateChanged(int)),this, SLOT(add_tbl_constructor_db2table_slot(int)));
+    connect(ui->ref_DB_comboBox_2,SIGNAL(currentTextChanged(QString const&)),this, SLOT(add_tbl_constructor_db2table_slot(const QString &)));
+
 
 }
 
@@ -394,6 +407,18 @@ void CreateTableConstructor::onUpdateChecked(int state)
      else
         ui->onUpdate_comboBox_2->setEnabled(true);
 }
+
+void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &current_item_)
+{
+
+    //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
+
+}
+
+//void CreateTableConstructor::add_tbl_constructor_db2table_slot(int)
+//{
+
+//}
 
 void CreateTableConstructor::on_next_0_clicked()
 {
