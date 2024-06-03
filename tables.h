@@ -65,6 +65,8 @@ signals:
 
 //    void tbl_delete_form_request();
 
+    void current_tables_list_signal(QList<QString>);
+
 private slots:
 
 

@@ -51,6 +51,8 @@ public slots:
 
     void closeEvent(QCloseEvent *event);
 
+    void current_exist_tables_slot(QList<QString>);
+
 private slots:
     void on_next_0_clicked();
 
@@ -86,6 +88,8 @@ private:
     QSqlQueryModel submodel_2_;
 
     QList<QString> non_dflt_conction_names_;
+
+    QList<QString> exist_table_names_;
 
 };
 

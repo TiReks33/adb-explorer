@@ -96,6 +96,8 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
     connect(delete_table_window_,SIGNAL(delete_table_sig(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
 //    connect(delete_table_window_,&delete_table::delete_table_sig,this,&Tables::delete_table_slot);
+
+    connect(this,SIGNAL(current_tables_list_signal(QList<QString>)),constructor_,SLOT(current_exist_tables_slot(QList<QString>)));
 }
 
 Tables::~Tables()
@@ -285,5 +287,20 @@ void Tables::on_pushButton_clicked()
 void Tables::on_create_table_button_clicked()
 {
     constructor_->setCurrentIndex(0);
+
+    QList<QString> list_to_send;
+
+    size_t size_of_list_=ui->tableView->model()->rowCount();
+
+    qDebug() << "NUMBER OF TABLES::" << size_of_list_;
+
+    //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
+    for(size_t i=0;i!=size_of_list_;++i)
+        list_to_send.append(ui->tableView->model()->index(i,0).data().toString());
+
+    qDebug()<< "CURRENT LIST OF STRINGs::"<<list_to_send;
+
+    emit current_tables_list_signal(list_to_send);
+
     constructor_->show();
 }

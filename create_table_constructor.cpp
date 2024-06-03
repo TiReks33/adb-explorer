@@ -289,10 +289,10 @@ bool CreateTableConstructor::add_keys(QPlainTextEdit *textEdit)
         if(ui->foreign_key_combobox_2->currentText().isEmpty()){
             ui->statusLine_2->setText("Please, select foreign key; OR unchecked the 'FOREIGN KEY' checkbox.");
         return false;
-    } else if(ui->ref_table_line_2->text().isEmpty()){
+    } else if(ui->ref_table_comboBox_2->currentText().isEmpty()){
             ui->statusLine_2->setText("Please, select reference table for key; OR unchecked the 'FOREIGN KEY' checkbox.");
         return false;
-        } else if(ui->ref_key_line_2->text().isEmpty()){
+        } else if(ui->ref_key_comboBox_2->currentText().isEmpty()){
             ui->statusLine_2->setText("Please, select reference attribute for key; OR unchecked the 'FOREIGN KEY' checkbox.");
         return false;
         }
@@ -302,7 +302,7 @@ bool CreateTableConstructor::add_keys(QPlainTextEdit *textEdit)
 
     textEdit->insertPlainText(" FOREIGN KEY ("+ui->foreign_key_combobox_2->currentText()+')');
 
-    textEdit->insertPlainText(" REFERENCES "+ui->ref_table_line_2->text()+'('+ui->ref_key_line_2->text()+')');
+    textEdit->insertPlainText(" REFERENCES "+ui->ref_table_comboBox_2->currentText()+'('+ui->ref_key_comboBox_2->currentText()+')');
 
 
     if(ui->on_delete_checkBox_2->isChecked())
@@ -415,6 +415,13 @@ void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &cu
     if(non_dflt_conction_names_.isEmpty())non_dflt_conction_names_.append("first");
     //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
     //  QSqlDatabase firstDB = QSqlDatabase::database("first");
+        {
+            if(non_dflt_conction_names_.length()>=2){
+                if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
+                    close_con(non_dflt_conction_names_.at(1));//<<-- close connection
+            }
+
+        }
     if(QSqlDatabase::database(non_dflt_conction_names_.at(0)).isOpen())
         close_con(non_dflt_conction_names_.at(0));//<<-- close connection
     }
@@ -443,7 +450,7 @@ void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &cu
             }
     }
 
-
+    ui->ref_key_comboBox_2->setCurrentIndex(-1);
     //QUERY
 
     QSqlQuery qry = QSqlQuery(QSqlDatabase::database(non_dflt_conction_names_.at(0)));
@@ -538,13 +545,34 @@ void CreateTableConstructor::close_con(QString const &con)
 
 void CreateTableConstructor::closeEvent(QCloseEvent *event)
 {
+//    if(!non_dflt_conction_names_.isEmpty()){
+//    close_con(non_dflt_conction_names_.at(0));
+//    non_dflt_conction_names_.clear();
+//    }
     if(!non_dflt_conction_names_.isEmpty()){
-    close_con(non_dflt_conction_names_.at(0));
-    non_dflt_conction_names_.clear();
+    size_t con_sum=non_dflt_conction_names_.size();
+        for(size_t i=0;i!=con_sum;++i)
+        {
+            close_con(non_dflt_conction_names_.at(i));
+        }
+        non_dflt_conction_names_.clear();
     }
+
+    first_attribute_=true;
+
+    attributes_.clear();
+    ui->foreign_key_combobox_2->clear();
 
     ui->statusLine_0->clear();
     event->accept();
+}
+
+void CreateTableConstructor::current_exist_tables_slot(QList<QString> list_)
+{
+    qDebug() << "CURRENT EXIST TABLES IN THIS DB::" << list_;
+    exist_table_names_.clear();
+    exist_table_names_=list_;
+    qDebug() << "LIST OF STRING FINALE::"<<exist_table_names_;
 }
 
 //void CreateTableConstructor::add_tbl_constructor_db2table_slot(int)
@@ -578,6 +606,15 @@ void CreateTableConstructor::on_next_0_clicked()
                 return;
             }
 
+        }
+
+        size_t list_counter = exist_table_names_.size();
+        for(size_t i=0;i!=list_counter;++i){
+            if(exist_table_names_.at(i)==ui->tbl_name_line_0->text()){
+                ui->statusLine_0->setText("Table with this name already exist in this database. Please, choose another name and"
+                                            " try again.");
+                return;
+            }
         }
 
         ui->plainTextEdit_1->clear();
@@ -619,6 +656,7 @@ void CreateTableConstructor::on_next_1_clicked()
     {
         ui->statusLine_1->setText("Please, add 1 or more attributes to current table before next step.");
     }
+    ui->ref_DB_comboBox_2->setCurrentIndex(-1);
     //}
 }
 
