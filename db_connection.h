@@ -8,6 +8,8 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QComboBox>
+#include <QSqlError>
+#include <QMessageBox>
 
 #include "auth.h"
 

@@ -49,6 +49,8 @@ public slots:
 
     void delete_table_slot(QComboBox*);
 
+    void constructor_create_tbl_query_slot(QString);
+
 signals:
 
     void db_show();
@@ -66,6 +68,7 @@ signals:
 //    void tbl_delete_form_request();
 
     void current_tables_list_signal(QList<QString>);
+
 
 private slots:
 

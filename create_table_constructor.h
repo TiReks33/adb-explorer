@@ -70,6 +70,10 @@ private slots:
 
     void on_plus_button_2_clicked();
 
+signals:
+
+    void send_custom_query(QString);
+
 private:
     Ui::CreateTableConstructor *ui;
     bool first_attribute_;

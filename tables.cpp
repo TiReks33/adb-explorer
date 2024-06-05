@@ -98,6 +98,9 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 //    connect(delete_table_window_,&delete_table::delete_table_sig,this,&Tables::delete_table_slot);
 
     connect(this,SIGNAL(current_tables_list_signal(QList<QString>)),constructor_,SLOT(current_exist_tables_slot(QList<QString>)));
+
+    //CUSTOM CREATE TABLE CONSTRUCTOR
+    connect(constructor_,SIGNAL(send_custom_query(QString)),this,SLOT(constructor_create_tbl_query_slot(QString)));
 }
 
 Tables::~Tables()
@@ -225,6 +228,26 @@ void Tables::delete_table_slot(QComboBox *comboBox__)
     on_showDB_button_clicked(); // view tables after deletion
 }
 
+void Tables::constructor_create_tbl_query_slot(QString query__)
+{
+    db_connection::open(auth_);
+
+
+//    if(!db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch))//;
+//    {
+//        QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+//        QSqlError err_=qry.lastError(); //<<-- THIS NOT WORKING, ERROR IS EMPTY BUT IT MUSTN'T
+//        ui->statusLine->setText(err_.nativeErrorCode());
+//        //qDebug() << QSqlDatabase::database().lastError();
+//        qDebug() << err_.text();
+//        //qDebug() << "!!!" << (QSqlQuery(QSqlDatabase::database().connectionName(auth_.db_server_)).lastError());
+
+//    }
+    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
+    //this->close();
+    show_tables();
+}
+
 
 void Tables::on_showDB_button_clicked()
 {
@@ -301,6 +324,8 @@ void Tables::on_create_table_button_clicked()
     qDebug()<< "CURRENT LIST OF STRINGs::"<<list_to_send;
 
     emit current_tables_list_signal(list_to_send);
+
+    //emit default_db()
 
     constructor_->show();
 }

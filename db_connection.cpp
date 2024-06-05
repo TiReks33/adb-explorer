@@ -67,8 +67,11 @@ bool db_connection::set_query(QString query, QSqlQueryModel&model__, QTableView 
     tableView->setModel(&model__);
 
     tableView->horizontalHeader()->setSectionResizeMode(scalemode);
-
+//qDebug()<<"YESS";
     return true;
+    } else {
+        QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
+        qDebug() << qry.lastError().text();
     }
     return false;
 }

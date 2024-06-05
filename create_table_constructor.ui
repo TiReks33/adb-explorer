@@ -452,7 +452,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLineEdit" name="ref_table_line_2">
+      <widget class="QComboBox" name="ref_table_comboBox_2">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -481,7 +481,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLineEdit" name="ref_key_line_2">
+      <widget class="QComboBox" name="ref_key_comboBox_2">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -699,12 +699,9 @@ will be entered or some file opened.&lt;/font&gt;</string>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QLineEdit" name="ref_DB_line_2">
+      <widget class="QComboBox" name="ref_DB_comboBox_2">
        <property name="enabled">
         <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>WIP</string>
        </property>
       </widget>
      </item>
@@ -719,36 +716,6 @@ will be entered or some file opened.&lt;/font&gt;</string>
       </widget>
      </item>
     </layout>
-   </widget>
-   <widget class="QComboBox" name="ref_DB_comboBox_2">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>140</y>
-      <width>131</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="ref_table_comboBox_2">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>140</y>
-      <width>111</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="ref_key_comboBox_2">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>140</y>
-      <width>111</width>
-      <height>26</height>
-     </rect>
-    </property>
    </widget>
   </widget>
  </widget>

@@ -289,7 +289,10 @@ bool CreateTableConstructor::add_keys(QPlainTextEdit *textEdit)
         if(ui->foreign_key_combobox_2->currentText().isEmpty()){
             ui->statusLine_2->setText("Please, select foreign key; OR unchecked the 'FOREIGN KEY' checkbox.");
         return false;
-    } else if(ui->ref_table_comboBox_2->currentText().isEmpty()){
+        } else if(ui->ref_DB_comboBox_2->currentText().isEmpty()){
+            ui->statusLine_2->setText("Please, select reference DB for key; OR unchecked the 'FOREIGN KEY' checkbox.");
+        return false;
+        } else if(ui->ref_table_comboBox_2->currentText().isEmpty()){
             ui->statusLine_2->setText("Please, select reference table for key; OR unchecked the 'FOREIGN KEY' checkbox.");
         return false;
         } else if(ui->ref_key_comboBox_2->currentText().isEmpty()){
@@ -302,7 +305,8 @@ bool CreateTableConstructor::add_keys(QPlainTextEdit *textEdit)
 
     textEdit->insertPlainText(" FOREIGN KEY ("+ui->foreign_key_combobox_2->currentText()+')');
 
-    textEdit->insertPlainText(" REFERENCES "+ui->ref_table_comboBox_2->currentText()+'('+ui->ref_key_comboBox_2->currentText()+')');
+    textEdit->insertPlainText(" REFERENCES " + ui->ref_DB_comboBox_2->currentText() + '.' +
+                              ui->ref_table_comboBox_2->currentText()+'('+ui->ref_key_comboBox_2->currentText()+')');
 
 
     if(ui->on_delete_checkBox_2->isChecked())
@@ -365,8 +369,9 @@ void CreateTableConstructor::foreignkeychecked(int state)
     if(state==0)
     {
         ui->foreign_key_combobox_2->setEnabled(false);
-        ui->ref_table_line_2->setEnabled(false);
-        ui->ref_key_line_2->setEnabled(false);
+        ui->ref_DB_comboBox_2->setEnabled(false);
+        ui->ref_table_comboBox_2->setEnabled(false);
+        ui->ref_key_comboBox_2->setEnabled(false);
 //ui->onDeleteLayout_2->setEnabled(false);
         ui->on_delete_checkBox_2->setEnabled(false);
         ui->on_update_checkBox_2->setEnabled(false);
@@ -377,8 +382,9 @@ void CreateTableConstructor::foreignkeychecked(int state)
     } else
     {
         ui->foreign_key_combobox_2->setEnabled(true);
-        ui->ref_table_line_2->setEnabled(true);
-        ui->ref_key_line_2->setEnabled(true);
+        ui->ref_DB_comboBox_2->setEnabled(true);
+        ui->ref_table_comboBox_2->setEnabled(true);
+        ui->ref_key_comboBox_2->setEnabled(true);
 //ui->onDeleteLayout_2->setEnabled(true);
         ui->on_delete_checkBox_2->setEnabled(true);
         ui->on_update_checkBox_2->setEnabled(true);
@@ -656,7 +662,20 @@ void CreateTableConstructor::on_next_1_clicked()
     {
         ui->statusLine_1->setText("Please, add 1 or more attributes to current table before next step.");
     }
-    ui->ref_DB_comboBox_2->setCurrentIndex(-1);
+
+
+    size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
+
+    qDebug() << "NUMBER OF TABLES::" << size_of_list_;
+
+    //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
+    for(size_t i=0;i!=size_of_list_;++i){
+        if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
+        ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
+        return;//break; // return or break?
+        }
+    }
+    //ui->ref_DB_comboBox_2->setCurrentIndex(-1);
     //}
 }
 
@@ -667,49 +686,14 @@ void CreateTableConstructor::on_next_1_clicked()
 
 void CreateTableConstructor::on_send_button_clicked()
 {
-//    sql_query_.clear();
 
-//    sql_query_.append(ui->plainTextEdit_2->toPlainText());
+    //qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText()+" );";
+    ui->plainTextEdit_2->insertPlainText(" );");
+    qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText();
 
+    this->close();
 
-//    if(ui->foreign_key_checkBox_2->isChecked()){
-////        ui->foreign_key_line_2->setEnabled(true);
-////        ui->references_line_2->setEnabled(true);
-//        if(ui->foreign_key_line_2->text().isEmpty()){
-//            ui->statusLine_1->setText("Please, select foreign key; OR unchecked the 'FOREIGN KEY' checkbox.");
-//        return;
-//    } else if(ui->ref_table_line_2->text().isEmpty()){
-//            ui->statusLine_1->setText("Please, select reference table for key; OR unchecked the 'FOREIGN KEY' checkbox.");
-//        return;
-//        } else if(ui->ref_key_line_2->text().isEmpty()){
-//            ui->statusLine_1->setText("Please, select reference attribute for key; OR unchecked the 'FOREIGN KEY' checkbox.");
-//        return;
-//        }
-//    sql_query_.append(", ");
-
-//    sql_query_.append(" FOREIGN KEY ("+ui->foreign_key_line_2->text()+')');
-
-//    sql_query_.append(" REFERENCES "+ui->ref_table_line_2->text()+'('+ui->ref_key_line_2->text()+')');
-
-
-//    if(ui->on_delete_checkBox_2->isChecked())
-//    sql_query_.append(" ON DELETE "+ui->onDelete_comboBox_2->currentText());
-
-//    if(ui->on_update_checkBox_2->isChecked())
-//    sql_query_.append(" ON UPDATE "+ui->onDelete_comboBox_2->currentText());
-
-
-//    }
-
-
-//    sql_query_.append(");");
-
-//    qDebug() << "FINAL SQL-QUERY::"<<sql_query_;
-
-
-    //ui->plainTextEdit_2->clear();
-    //ui->plainTextEdit_2->insertPlainText(ui->plainTextEdit_1->toPlainText());
-    qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText()+" );";
+    emit send_custom_query(ui->plainTextEdit_2->toPlainText());
 
 }
 
