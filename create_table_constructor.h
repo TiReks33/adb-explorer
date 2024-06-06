@@ -11,6 +11,7 @@
 #include <QSqlError>
 
 #include "customqueryresult.h"
+#include "ui_customqueryresult.h"
 
 namespace Ui {
 class CreateTableConstructor;
@@ -70,6 +71,8 @@ private slots:
 
     void on_plus_button_2_clicked();
 
+    void on_describe_tbl_button_2_clicked();
+
 signals:
 
     void send_custom_query(QString);
@@ -94,6 +97,8 @@ private:
     QList<QString> non_dflt_conction_names_;
 
     QList<QString> exist_table_names_;
+
+    int window_counter_=0;
 
 };
 

@@ -717,6 +717,19 @@ will be entered or some file opened.&lt;/font&gt;</string>
      </item>
     </layout>
    </widget>
+   <widget class="QPushButton" name="describe_tbl_button_2">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>250</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Describe table</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

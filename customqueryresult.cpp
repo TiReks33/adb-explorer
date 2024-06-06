@@ -42,6 +42,15 @@ void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView)
     non_static_connection_->set_query(query,this->non_static_connection_->model_,tableView,QHeaderView::Stretch);
 }
 
+void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView,QString db_name__)
+{
+    //db_connection non_static_con;
+    db_connection::open(auth_,db_name__);
+
+qDebug() << "ZAYCHIK";
+    non_static_connection_->set_query(query,this->sub_model_,tableView,QHeaderView::Stretch,db_name__);
+}
+
 void CustomQueryResult::custom_query_slot(QString query,QComboBox*comboBox)
 {
     //db_connection non_static_con;

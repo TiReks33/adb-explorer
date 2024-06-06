@@ -803,3 +803,30 @@ void CreateTableConstructor::on_plus_button_2_clicked()
 
 }
 
+
+void CreateTableConstructor::on_describe_tbl_button_2_clicked()
+{
+    auth __auth = auth_;
+    __auth.db_name_=ui->ref_DB_comboBox_2->currentText();
+qDebug() << "COUNTER BEFORE::" << window_counter_;
+    ++window_counter_;
+
+    CustomQueryResult new_select_window{__auth};
+
+    //__auth.db_name_=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
+    QString _con_name=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
+
+    new_select_window.setWindowTitle(ui->ref_table_comboBox_2->currentText());
+    new_select_window.show();
+//custom_query_result_window_->show();
+new_select_window.custom_query_slot(QString(/*"USE "+ui->ref_DB_comboBox_2->currentText()+';'+' '+*/"DESCRIBE ")+
+                                    ui->ref_table_comboBox_2->currentText()+(";")/*,new_select_window->ui->tableView*/,
+                                    /*new_select_window->model_,*/new_select_window.ui->tableView, _con_name/*__auth.db_name_*/);
+//if(model_.rowCount()!=0)
+new_select_window.exec();
+
+
+close_con(_con_name/*__auth.db_name_*/);
+--window_counter_;
+qDebug() << "COUNTER AFTER::" << window_counter_;
+}
