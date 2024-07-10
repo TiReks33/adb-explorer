@@ -73,6 +73,12 @@ private slots:
 
     void on_describe_tbl_button_2_clicked();
 
+    void on_cancel_2_clicked();
+
+    void on_back_button_2_clicked();
+
+    void on_back_button_1_clicked();
+
 signals:
 
     void send_custom_query(QString);

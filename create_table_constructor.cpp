@@ -671,7 +671,7 @@ void CreateTableConstructor::on_next_1_clicked()
     //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
     for(size_t i=0;i!=size_of_list_;++i){
         if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
-        ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
+            ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
         return;//break; // return or break?
         }
     }
@@ -719,7 +719,7 @@ void CreateTableConstructor::on_plus_button_1_clicked(){
 //    if(ui->NOT_NULL_checkBox_1->isChecked())
 //                        ui->plainTextEdit_1->insertPlainText(" NOT NULL ");
 
-    if(add_attributes(ui->plainTextEdit_1)){
+    if(add_attributes(ui->plainTextEdit_1)){ // IF CHECK STRING FUNCTION IS OK (REG. EXP. CHECK)
 
         first_attribute_=false;
 
@@ -829,4 +829,29 @@ new_select_window.exec();
 close_con(_con_name/*__auth.db_name_*/);
 --window_counter_;
 qDebug() << "COUNTER AFTER::" << window_counter_;
+}
+
+void CreateTableConstructor::on_cancel_2_clicked()
+{
+
+}
+
+void CreateTableConstructor::on_back_button_2_clicked()
+{
+    ui->plainTextEdit_1->clear();
+    ui->plainTextEdit_1->insertPlainText("CREATE TABLE "+ui->tbl_name_line_0->text()+" ( ");
+        this->setCurrentIndex(1);
+    first_attribute_=true;
+    attributes_.clear();
+    ui->foreign_key_combobox_2->clear();
+    ui->foreign_key_checkBox_2->setChecked(false);
+}
+
+void CreateTableConstructor::on_back_button_1_clicked()
+{
+    this->setCurrentIndex(0);
+    ui->plainTextEdit_1->clear();
+    first_attribute_=true;
+    attributes_.clear();
+    ui->foreign_key_combobox_2->clear();
 }

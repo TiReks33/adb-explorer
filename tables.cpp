@@ -192,7 +192,7 @@ void Tables::send_custom_query_slot(QString query__)
     new_result_window.custom_query_slot(query__, /*new_result_window->model_,*/ new_result_window.ui->tableView);
     //if(new_result_window.ui->tableView->model()->rowCount()!=0)
     if((new_result_window.ui->tableView->model())!=nullptr)
-    new_result_window.exec();
+        new_result_window.exec();
     qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
     }
 }
