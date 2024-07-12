@@ -101,6 +101,12 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
     //CUSTOM CREATE TABLE CONSTRUCTOR
     connect(constructor_,SIGNAL(send_custom_query(QString)),this,SLOT(constructor_create_tbl_query_slot(QString)));
+
+    connect(this,SIGNAL(close_custom_query_form()),table_query_window_,SLOT(close_window()));
+
+    connect(this,&Tables::constructor_query_success, [=] () { constructor_->close(); });
+
+    connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
 }
 
 Tables::~Tables()
@@ -191,8 +197,16 @@ void Tables::send_custom_query_slot(QString query__)
 //    custom_query_result_window_->show();
     new_result_window.custom_query_slot(query__, /*new_result_window->model_,*/ new_result_window.ui->tableView);
     //if(new_result_window.ui->tableView->model()->rowCount()!=0)
-    if((new_result_window.ui->tableView->model())!=nullptr)
-        new_result_window.exec();
+    if((new_result_window.ui->tableView->model())!=nullptr) {
+
+        qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
+        emit close_custom_query_form();
+        if(new_result_window.ui->tableView->model()->columnCount()>0){
+            new_result_window.show();
+            new_result_window.exec();
+        }
+
+    }
     qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
     }
 }
@@ -243,8 +257,10 @@ void Tables::constructor_create_tbl_query_slot(QString query__)
 //        //qDebug() << "!!!" << (QSqlQuery(QSqlDatabase::database().connectionName(auth_.db_server_)).lastError());
 
 //    }
-    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
-    //this->close();
+    if(db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch)) //TABLE MAIN WINDOW MODEL
+        emit constructor_query_success();
+    else
+        emit constructor_query_fails();
     show_tables();
 }
 

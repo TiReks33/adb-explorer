@@ -22,7 +22,8 @@
      <item>
       <widget class="QPushButton" name="showDB_button">
        <property name="text">
-        <string>Show all tables in current database</string>
+        <string>Show all tables in current database
+(reload tables list)</string>
        </property>
       </widget>
      </item>

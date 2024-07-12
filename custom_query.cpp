@@ -18,6 +18,8 @@ Custom_Query::Custom_Query(QWidget *parent) :
 
     //this->ui->buttonBox->button(QDialogButtonBox::Ok)->setStyleSheet("background:green; color:white;");
     this->ui->Ok_button->setStyleSheet("background:green; color:white;");
+
+
 }
 
 Custom_Query::~Custom_Query()
@@ -47,5 +49,11 @@ void Custom_Query::on_Ok_button_clicked()
 
 void Custom_Query::on_Cancel_button_clicked()
 {
+    this->close();
+}
+
+void Custom_Query::close_window()
+{
+    qDebug()<<"Close custom query form signal handled";
     this->close();
 }

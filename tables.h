@@ -69,6 +69,11 @@ signals:
 
     void current_tables_list_signal(QList<QString>);
 
+    void close_custom_query_form();
+
+    void constructor_query_success();
+
+    void constructor_query_fails();
 
 private slots:
 

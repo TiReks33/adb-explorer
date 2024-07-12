@@ -54,6 +54,8 @@ public slots:
 
     void current_exist_tables_slot(QList<QString>);
 
+    void constructor_query_fails_handle();
+
 private slots:
     void on_next_0_clicked();
 

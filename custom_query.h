@@ -28,6 +28,8 @@ private slots:
 
     void on_Cancel_button_clicked();
 
+    void close_window();
+
 private:
     Ui::Custom_Query *ui;
 };

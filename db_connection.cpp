@@ -98,6 +98,7 @@ void db_connection::close()
     tableView->horizontalHeader()->setSectionResizeMode(scalemode);
 //qDebug()<<"YESS";
     qDebug()<<"VOT ETO POVOROT4";
+
     return true;
     } else {
         QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);

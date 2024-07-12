@@ -581,6 +581,14 @@ void CreateTableConstructor::current_exist_tables_slot(QList<QString> list_)
     qDebug() << "LIST OF STRING FINALE::"<<exist_table_names_;
 }
 
+void CreateTableConstructor::constructor_query_fails_handle()
+{
+    db_connection::open(auth_);
+
+
+    db_connection::set_query("SHOW DATABASES;",this->non_static_connection_->model_,ui->ref_DB_comboBox_2,1);
+}
+
 //void CreateTableConstructor::add_tbl_constructor_db2table_slot(int)
 //{
 
@@ -691,7 +699,7 @@ void CreateTableConstructor::on_send_button_clicked()
     ui->plainTextEdit_2->insertPlainText(" );");
     qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText();
 
-    this->close();
+    //this->close();
 
     emit send_custom_query(ui->plainTextEdit_2->toPlainText());
 
