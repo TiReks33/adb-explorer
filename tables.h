@@ -22,6 +22,7 @@
 #include "delete_db.h"
 #include "delete_table.h"
 #include "create_table_constructor.h"
+#include "createtupleconstructor.h"
 
 namespace Ui {
 class Tables;
@@ -75,6 +76,8 @@ signals:
 
     void constructor_query_fails();
 
+    void tpl_cnstr_upd_tables();
+
 private slots:
 
 
@@ -95,6 +98,8 @@ private slots:
     void on_pushButton_clicked();
 
     void on_create_table_button_clicked();
+
+    void on_insert_inTable_button_clicked();
 
 protected:
     bool event(QEvent* event);
@@ -121,6 +126,8 @@ private:
     delete_table* delete_table_window_;
 
     CreateTableConstructor* constructor_;
+
+    createTupleConstructor* insert_constructor_;
 
 };
 

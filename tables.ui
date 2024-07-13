@@ -28,27 +28,56 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="select_from_table_button">
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>Show table content</string>
-       </property>
-       <property name="default">
-        <bool>true</bool>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QPushButton" name="select_from_table_button">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Show table content</string>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="styleSheet">
+          <string notr="true">background-color: yellow</string>
+         </property>
+         <property name="text">
+          <string>Describe table</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
    <item>
     <widget class="QPushButton" name="create_table_button">
+     <property name="font">
+      <font>
+       <underline>false</underline>
+      </font>
+     </property>
      <property name="styleSheet">
       <string notr="true">background: lightblue;</string>
      </property>
      <property name="text">
       <string>Create Table</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="insert_inTable_button">
+     <property name="styleSheet">
+      <string notr="true">background-color: violet</string>
+     </property>
+     <property name="text">
+      <string>Insert into table</string>
      </property>
     </widget>
    </item>

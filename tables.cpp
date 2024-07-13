@@ -19,6 +19,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
   , constructor_(new CreateTableConstructor{auth_})
+  , insert_constructor_{new createTupleConstructor{auth_}}
 {
     ui->setupUi(this);
 
@@ -107,6 +108,8 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     connect(this,&Tables::constructor_query_success, [=] () { constructor_->close(); });
 
     connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
+
+    connect(this,&Tables::tpl_cnstr_upd_tables, insert_constructor_, &createTupleConstructor::update_tables_handler);
 }
 
 Tables::~Tables()
@@ -117,6 +120,7 @@ Tables::~Tables()
     delete settings_;
     delete delete_table_window_;
     delete constructor_;
+    delete insert_constructor_;
 }
 
 void Tables::closeEvent(QCloseEvent *event)
@@ -344,4 +348,10 @@ void Tables::on_create_table_button_clicked()
     //emit default_db()
 
     constructor_->show();
+}
+
+void Tables::on_insert_inTable_button_clicked()
+{
+    emit tpl_cnstr_upd_tables();
+    insert_constructor_->show();
 }

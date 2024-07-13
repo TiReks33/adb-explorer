@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     create_db_name.cpp \
     create_table_constructor.cpp \
+    createtupleconstructor.cpp \
     custom_query.cpp \
     customqueryresult.cpp \
     customquerysettings.cpp \
@@ -18,9 +19,9 @@ SOURCES += \
     db_connection.cpp \
     delete_db.cpp \
     delete_table.cpp \
+    inserttupleconfirm.cpp \
     main.cpp \
     loginwindow.cpp \
-    newtable.cpp \
     select_cells.cpp \
     tables.cpp
 
@@ -28,6 +29,7 @@ HEADERS += \
     auth.h \
     create_db_name.h \
     create_table_constructor.h \
+    createtupleconstructor.h \
     custom_query.h \
     customqueryresult.h \
     customquerysettings.h \
@@ -35,21 +37,22 @@ HEADERS += \
     db_connection.h \
     delete_db.h \
     delete_table.h \
+    inserttupleconfirm.h \
     loginwindow.h \
-    newtable.h \
     select_cells.hpp \
     tables.h
 
 FORMS += \
     create_db_name.ui \
     create_table_constructor.ui \
+    createtupleconstructor.ui \
     custom_query.ui \
     customqueryresult.ui \
     customquerysettings.ui \
     databases.ui \
     delete_db.ui \
+    inserttupleconfirm.ui \
     loginwindow.ui \
-    newtable.ui \
     tables.ui
 
 # Default rules for deployment.
