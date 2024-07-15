@@ -48,7 +48,7 @@ public slots:
 
     void add_tbl_constructor_table2atribute_slot(QString const&);
 
-    void close_con(QString const &);
+//    void close_con(QString const &);
 
     void closeEvent(QCloseEvent *event);
 

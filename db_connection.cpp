@@ -57,6 +57,37 @@ bool db_connection::open(auth &auth__, QString con_name__)
         }
             qDebug()<<("11Server from connection ::"+con_name__+":: already connected.");
             return true;
+//            return false;
+}
+
+int db_connection::open(auth &auth__, QString con_name__,int)
+{
+    //    qDebug()<<"TEST IS OPEN::"<<QSqlDatabase::database("QPSQL").isOpen();
+        //if(!QSqlDatabase::database().isOpen()){
+        if(!QSqlDatabase::database(con_name__).isOpen()){
+    //    if(!QSqlDatabase::database(auth__.db_server_).isOpen()){
+        QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth__.db_server_,con_name__);
+
+            db_connection_.setUserName(auth__.login_);
+
+            db_connection_.setPassword(auth__.passw_);
+
+            //db_connection_.setHostName("localhost");//<-remote IP
+
+            db_connection_.setDatabaseName(auth__.db_name_);
+
+            if(!db_connection_.open()){
+                qDebug() << ("(x)Error connection to database.");
+                return 0;
+            }
+            else{
+                qDebug()<<("Database succesfull connected.");
+                return 1;
+            }
+        }
+            qDebug()<<("11Server from connection ::"+con_name__+":: already connected.");
+            return 2;
+//            return false;
 }
 
 void db_connection::close()
@@ -66,6 +97,16 @@ void db_connection::close()
         db.close();
     }
     QSqlDatabase::removeDatabase( QSqlDatabase::defaultConnection/*QSqlDatabase::database().connectionName()*/ );
+}
+
+void db_connection::close_con(const QString &con_)
+{
+    {
+        QSqlDatabase db = QSqlDatabase::database(con_);
+        if(db.isOpen())db.close();
+    }
+QSqlDatabase::removeDatabase( con_/*QSqlDatabase::database().connectionName()*/ );
+qDebug() << con_+" connection was closed.";
 }
 
 /*static*/bool db_connection::set_query(QString query, QSqlQueryModel&model__, QAbstractItemView* itemView)
@@ -97,7 +138,7 @@ void db_connection::close()
 
     tableView->horizontalHeader()->setSectionResizeMode(scalemode);
 //qDebug()<<"YESS";
-    qDebug()<<"VOT ETO POVOROT4";
+    qDebug()<<"VOT ETO POVOROT434";
 
     return true;
     } else {
@@ -129,6 +170,24 @@ bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QTableVi
     return false;
 }
 
+bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QComboBox*comboBox, QString db_name__,int)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(db_name__));
+
+    qry.prepare(query__); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    comboBox->setModel(&model__);
+
+//    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+qDebug() << "TUT VSE MENYAT NADO";
+    return true;
+    }
+    return false;
+}
+
 /*static*/bool db_connection::set_query(QString query, QSqlQueryModel &model__, QComboBox *comboBox, int)
 {
     QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
@@ -141,7 +200,25 @@ bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QTableVi
     comboBox->setModel(&model__);
 
 //    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+qDebug() << "ZVEZDOCHKI ( I SEE A STARS )";
+    return true;
+    }
+    return false;
+}
 
+bool db_connection::set_query(QString query, QSqlQueryModel *model__, QComboBox *comboBox, int)
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
+
+    qry.prepare(query); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__->setQuery(qry);
+
+    comboBox->setModel(model__);
+
+//    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+qDebug() << "ZVEZDOCHKI ( I SEE A STARS )";
     return true;
     }
     return false;

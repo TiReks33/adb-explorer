@@ -424,12 +424,12 @@ void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &cu
         {
             if(non_dflt_conction_names_.length()>=2){
                 if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
-                    close_con(non_dflt_conction_names_.at(1));//<<-- close connection
+                    db_connection::close_con(non_dflt_conction_names_.at(1));//<<-- close connection
             }
 
         }
     if(QSqlDatabase::database(non_dflt_conction_names_.at(0)).isOpen())
-        close_con(non_dflt_conction_names_.at(0));//<<-- close connection
+        db_connection::close_con(non_dflt_conction_names_.at(0));//<<-- close connection
     }
 
     {
@@ -489,7 +489,7 @@ void CreateTableConstructor::add_tbl_constructor_table2atribute_slot(const QStri
     //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
     //  QSqlDatabase firstDB = QSqlDatabase::database("first");
     if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
-        close_con(non_dflt_conction_names_.at(1));//<<-- close connection
+        db_connection::close_con(non_dflt_conction_names_.at(1));//<<-- close connection
     }
 
     {
@@ -539,15 +539,15 @@ void CreateTableConstructor::add_tbl_constructor_table2atribute_slot(const QStri
     }
 }
 
-void CreateTableConstructor::close_con(QString const &con)
-{
-        {
-            QSqlDatabase db = QSqlDatabase::database(con);
-            if(db.isOpen())db.close();
-        }
-    QSqlDatabase::removeDatabase( con/*QSqlDatabase::database().connectionName()*/ );
-    qDebug() << "Connection was closed.";
-}
+//void CreateTableConstructor::close_con(QString const &con)
+//{
+//        {
+//            QSqlDatabase db = QSqlDatabase::database(con);
+//            if(db.isOpen())db.close();
+//        }
+//    QSqlDatabase::removeDatabase( con/*QSqlDatabase::database().connectionName()*/ );
+//    qDebug() << "Connection was closed.";
+//}
 
 void CreateTableConstructor::closeEvent(QCloseEvent *event)
 {
@@ -559,7 +559,7 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
     size_t con_sum=non_dflt_conction_names_.size();
         for(size_t i=0;i!=con_sum;++i)
         {
-            close_con(non_dflt_conction_names_.at(i));
+            db_connection::close_con(non_dflt_conction_names_.at(i));
         }
         non_dflt_conction_names_.clear();
     }
@@ -834,7 +834,7 @@ new_select_window.custom_query_slot(QString(/*"USE "+ui->ref_DB_comboBox_2->curr
 new_select_window.exec();
 
 
-close_con(_con_name/*__auth.db_name_*/);
+db_connection::close_con(_con_name/*__auth.db_name_*/);
 --window_counter_;
 qDebug() << "COUNTER AFTER::" << window_counter_;
 }

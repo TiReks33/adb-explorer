@@ -23,7 +23,8 @@ SOURCES += \
     main.cpp \
     loginwindow.cpp \
     select_cells.cpp \
-    tables.cpp
+    tables.cpp \
+    twolistselection.cpp
 
 HEADERS += \
     auth.h \
@@ -40,7 +41,8 @@ HEADERS += \
     inserttupleconfirm.h \
     loginwindow.h \
     select_cells.hpp \
-    tables.h
+    tables.h \
+    twolistselection.h
 
 FORMS += \
     create_db_name.ui \

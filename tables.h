@@ -127,7 +127,7 @@ private:
 
     CreateTableConstructor* constructor_;
 
-    createTupleConstructor* insert_constructor_;
+//    createTupleConstructor* insert_constructor_;
 
 };
 

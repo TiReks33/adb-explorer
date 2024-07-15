@@ -438,13 +438,6 @@ list</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-    </layout>
-   </item>
-   <item>
     <widget class="QFrame" name="frame_5">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

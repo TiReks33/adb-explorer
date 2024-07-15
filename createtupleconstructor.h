@@ -6,6 +6,7 @@
 //#include "auth.h"
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
+#include "twolistselection.h"
 
 namespace Ui {
 class createTupleConstructor;
@@ -28,6 +29,10 @@ private slots:
 
     void table_changed_handler(QString const&);
 
+    void on_addColsButton_clicked();
+
+    void closeEvent(QCloseEvent *event);
+
 public slots:
     void update_tables_handler();
 
@@ -36,8 +41,21 @@ private:
     auth& auth_;
     insertTupleConfirm* confirm_window_;
 
-    db_connection* non_static_connection_;
+//    db_connection* non_static_connection_;
 
+    TwoListSelection* list_selection_window_;
+
+    // connection-query solution to multiply signals-->
+    static QStringList multi_con_names_;
+
+//    static QList<QSqlQueryModel*> multi_con_models_;
+    QSqlQueryModel tables_model_;
+    QString con_name_;
+
+    static int con_counter_;
+    static int unique_number_;
+//    inline static int con_counter_ = 1;
+    //<<-
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H

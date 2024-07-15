@@ -86,7 +86,7 @@ void loginWindow::on_pushButton_clicked()
 
             //emit message_to_database(QString::number(db_connection_.isValid()));
         }
-
+//qDebug() << this->metaObject()->className();
 }
 
 
