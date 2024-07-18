@@ -22,6 +22,7 @@ SOURCES += \
     inserttupleconfirm.cpp \
     main.cpp \
     loginwindow.cpp \
+    multi_connection.cpp \
     select_cells.cpp \
     tables.cpp \
     twolistselection.cpp
@@ -40,6 +41,7 @@ HEADERS += \
     delete_table.h \
     inserttupleconfirm.h \
     loginwindow.h \
+    multi_connection.h \
     select_cells.hpp \
     tables.h \
     twolistselection.h

@@ -355,7 +355,7 @@ void Tables::on_insert_inTable_button_clicked()
 
     //insert_constructor_->show();
     createTupleConstructor constr_window_{auth_};
-    constr_window_.update_tables_handler();
+    constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
     //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
     //emit tpl_cnstr_upd_tables();
     constr_window_.setModal(false);

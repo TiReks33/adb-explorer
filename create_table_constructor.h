@@ -2,7 +2,6 @@
 #define CREATE_TABLE_CONSTRUCTOR_H
 
 #include <QStackedWidget>
-
 #include "QDebug"
 #include <QString>
 #include <QPlainTextEdit>
@@ -12,6 +11,7 @@
 
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
+#include "db_connection.h"
 
 namespace Ui {
 class CreateTableConstructor;

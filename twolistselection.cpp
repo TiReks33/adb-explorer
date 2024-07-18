@@ -1,6 +1,11 @@
 #include "twolistselection.h"
+#include "db_connection.h"
 
-TwoListSelection::TwoListSelection(QWidget *parent) : QWidget{parent} { //CONSTRUCTOR
+
+TwoListSelection::TwoListSelection(auth& auth__,QDialog *parent) :
+    QDialog{parent}
+  , auth_(auth__)
+{ //CONSTRUCTOR
     init();
     connections();
 }
@@ -10,6 +15,7 @@ void TwoListSelection::addAvailableItems(const QStringList &items) {
         list_before_changes_.append(s);
     mInput->addItems(items);
     qDebug() << "list::"<<list_before_changes_;
+
 }
 
 QStringList TwoListSelection::selectedItems() {
@@ -17,6 +23,34 @@ QStringList TwoListSelection::selectedItems() {
     for (int i = 0; i < mOutput->count(); i++)
         selected << mOutput->item(i)->text();
     return selected;
+}
+
+void TwoListSelection::update_doublelist()
+{
+    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+        qDebug() << QString("(x)There is error while update tables (connection is not established).");
+        return;
+    }
+    QSqlQueryModel model;
+//    db_connection::set_query("SHOW TABLES;", /*multi_con_models_.at(models_cap)*/model,mInput,multi_con_.con_name_,1);
+
+//        for(int i = 0; i != mInput->count(); i++)
+//        {
+//            list_before_changes_ << mInput->takeItem(i)->text();
+//        }
+    db_connection::set_query("SHOW TABLES;", /*multi_con_models_.at(models_cap)*/model,this,multi_con_.con_name_,1);
+//    QStringList input;
+//    for (int i = 0; i < 10; i++) {
+//      input << QString("item-%1").arg(i);
+//    }
+//    double_list->clear();
+//    double_list->addAvailableItems(input);
+//    double_list->show();
+}
+
+void TwoListSelection::update_doublelist_handler()
+{
+    qDebug() << "Update double list handler activated";
 }
 
 //void TwoListSelection::reset_handler()

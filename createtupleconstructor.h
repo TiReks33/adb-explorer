@@ -1,9 +1,9 @@
 #ifndef CREATETUPLECONSTRUCTOR_H
 #define CREATETUPLECONSTRUCTOR_H
 
-#include <QDialog>
 #include "inserttupleconfirm.h"
-//#include "auth.h"
+
+#include <QDialog>
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "twolistselection.h"
@@ -34,7 +34,7 @@ private slots:
     void closeEvent(QCloseEvent *event);
 
 public slots:
-    void update_tables_handler();
+    void /*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
 
 private:
     Ui::createTupleConstructor *ui;
@@ -43,17 +43,17 @@ private:
 
 //    db_connection* non_static_connection_;
 
-    TwoListSelection* list_selection_window_;
+                                                    //TwoListSelection* list_selection_window_;
 
     // connection-query solution to multiply signals-->
-    static QStringList multi_con_names_;
+//    static QStringList multi_con_names_;
 
 //    static QList<QSqlQueryModel*> multi_con_models_;
     QSqlQueryModel tables_model_;
-    QString con_name_;
-
-    static int con_counter_;
-    static int unique_number_;
+//    QString con_name_;
+    multi_connection multi_con_; //STRUCTURE IN DB_CONNECTION.H FILE
+//    static int con_counter_;
+//    static int unique_number_;
 //    inline static int con_counter_ = 1;
     //<<-
 };

@@ -1,7 +1,6 @@
 #ifndef AUTH_H
 #define AUTH_H
 #include <QString>
-
 struct auth{
     auth() :
         db_server_("QMYSQL")

@@ -10,8 +10,13 @@
 #include <QComboBox>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QListWidget>
+#include <QSqlRecord>
 
 #include "auth.h"
+
+struct multi_connection; // declarations
+class TwoListSelection;
 
 struct db_connection{
 
@@ -20,6 +25,8 @@ static bool open(auth&);
 static bool open(auth&,QString);
 
 static int open(auth&,QString,int);
+
+static bool open (auth&,/*QString*/QMetaObject const *,multi_connection*);
 
 static void close();
 
@@ -32,6 +39,10 @@ static bool set_query(QString, QSqlQueryModel&model__,QTableView*,QHeaderView::R
 static bool set_query(QString, QSqlQueryModel&model__,QTableView*,QHeaderView::ResizeMode scalemode,QString); //NEWNEW
 
 static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,QString,int); //NEWNEWNEW
+
+static bool set_query(QString, QSqlQueryModel&model__,QListWidget*,QString,int); //*qlistwidget
+
+static bool set_query(QString, QSqlQueryModel&model__,TwoListSelection*,QString,int); //*double-list class
 
 static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,int);
 
@@ -50,6 +61,9 @@ bool set_query(QString, /*QSqlQueryModel&,*/QTableView*,QHeaderView::ResizeMode 
 static bool set_query(QString, QSqlQueryModel&,QComboBox*/*,QHeaderView::ResizeMode scalemode*/);
 
 QSqlQueryModel model_;
+
 };
+
+
 
 #endif // DB_CONNECTION_H

@@ -1,5 +1,8 @@
+//#ifndef DB_CONNECTION_CPP
+//#define DB_CONNECTION_CPP
 #include "db_connection.h"
-
+#include "multi_connection.h"
+#include "twolistselection.h"
 
 bool db_connection::open(auth& auth__)
 {
@@ -90,6 +93,35 @@ int db_connection::open(auth &auth__, QString con_name__,int)
 //            return false;
 }
 
+bool db_connection::open(auth &auth__, QMetaObject const * class_meta_obj__/*QString con_name__*/,multi_connection*multi_con__)
+{
+//    if(!QSqlDatabase::database(multi_con__->con_name_).isOpen()){
+    QString con_name = class_meta_obj__->className()+QString::number(multi_con__->unique_number_);
+    int db_con = db_connection::open(auth__,con_name,1);
+    if(!db_con){
+        qDebug() << QString("(x)There is error while establishing connection %1.").arg(con_name);
+        return false;
+    } else if (db_con==1){
+        qDebug() << QString("Connection %1 successful established.").arg(con_name);
+
+        multi_con__->con_name_=con_name;
+        multi_con__->multi_con_names_.append(con_name);
+        ++multi_con__->con_counter_;
+        ++multi_con__->unique_number_;
+    } else { //if already exist
+        qDebug() << QString("Connection %1 already exist.").arg(con_name);
+    }
+
+    qDebug() << "Con counter after::"<< multi_con__->con_counter_;
+//    QSqlQueryModel* model = new QSqlQueryModel;
+//    int models_cap = multi_con_models_.length();
+//    qDebug() << "length of multi_con_models_"<< models_cap;
+//    multi_con_models_.append(model);
+
+//    }
+    return true;
+}
+
 void db_connection::close()
 {
     {
@@ -148,9 +180,9 @@ qDebug() << con_+" connection was closed.";
     return false;
 }
 
-bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QTableView *tableView__, QHeaderView::ResizeMode scalemode__, QString db_name__)
+bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QTableView *tableView__, QHeaderView::ResizeMode scalemode__, QString con_name__)
 {
-    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(db_name__));
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
 
     qry.prepare(query__); //MY_SQL_QUERY
 
@@ -170,9 +202,9 @@ bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QTableVi
     return false;
 }
 
-bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QComboBox*comboBox, QString db_name__,int)
+bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QComboBox*comboBox, QString con_name__,int)
 {
-    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(db_name__));
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
 
     qry.prepare(query__); //MY_SQL_QUERY
 
@@ -183,6 +215,53 @@ bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QComboBo
 
 //    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
 qDebug() << "TUT VSE MENYAT NADO";
+    return true;
+    }
+    return false;
+}
+
+bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QListWidget*list, QString con_name__,int) //QListWidget
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
+
+    qry.prepare(query__); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    QStringList query_2_list;
+    for(int i = 0; i < model__.rowCount(); ++i){
+        qDebug() << QString("db_connection::QListWidget::model::record(%1)::").arg(i)<< model__.record(i).value(0).toString();
+        query_2_list.append(model__.record(i).value(0).toString());
+    }
+    qDebug() << "query2list::"<<query_2_list;
+    list->addItems(query_2_list);
+//    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+qDebug() << "list after query::" << list;
+    return true;
+    }
+    return false;
+}
+
+bool db_connection::set_query(QString query__, QSqlQueryModel &model__, TwoListSelection*double_list, QString con_name__,int) //double-list class
+{
+    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
+
+    qry.prepare(query__); //MY_SQL_QUERY
+
+    if(qry.exec()){
+    model__.setQuery(qry);
+
+    QStringList query_2_list;
+    for(int i = 0; i < model__.rowCount(); ++i){
+        qDebug() << QString("db_connection::QListWidget::model::record(%1)::").arg(i)<< model__.record(i).value(0).toString();
+        query_2_list.append(model__.record(i).value(0).toString());
+    }
+    qDebug() << "query2list::"<<query_2_list;
+    //list->addItems(query_2_list);
+    double_list->addAvailableItems(query_2_list);
+//    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
+//qDebug() << "list after query::" << list;
     return true;
     }
     return false;
@@ -351,3 +430,9 @@ qDebug()<<"VOT ETO POVOROT2";
     }
     return false;
 }
+
+int multi_connection::con_counter_ = 0;
+int multi_connection::unique_number_ = 0;
+QStringList multi_connection::multi_con_names_;
+
+//#endif // DB_CONNECTION_CPP
