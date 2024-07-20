@@ -243,19 +243,20 @@ qDebug() << "list after query::" << list;
     return false;
 }
 
-bool db_connection::set_query(QString query__, QSqlQueryModel &model__, TwoListSelection*double_list, QString con_name__,int) //double-list class
+bool db_connection::set_query(QString query__, /*QSqlQueryModel &model__,*/ TwoListSelection*double_list, QString con_name__/*,int*/) //double-list class
 {
     QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
 
     qry.prepare(query__); //MY_SQL_QUERY
 
     if(qry.exec()){
-    model__.setQuery(qry);
+    QSqlQueryModel model;
+    model.setQuery(qry);
 
     QStringList query_2_list;
-    for(int i = 0; i < model__.rowCount(); ++i){
-        qDebug() << QString("db_connection::QListWidget::model::record(%1)::").arg(i)<< model__.record(i).value(0).toString();
-        query_2_list.append(model__.record(i).value(0).toString());
+    for(int i = 0; i < model.rowCount(); ++i){
+        qDebug() << QString("db_connection::QListWidget::model::record(%1)::").arg(i)<< model.record(i).value(0).toString();
+        query_2_list.append(model.record(i).value(0).toString());
     }
     qDebug() << "query2list::"<<query_2_list;
     //list->addItems(query_2_list);

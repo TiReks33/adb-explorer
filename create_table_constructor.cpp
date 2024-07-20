@@ -589,6 +589,17 @@ void CreateTableConstructor::constructor_query_fails_handle()
     db_connection::set_query("SHOW DATABASES;",this->non_static_connection_->model_,ui->ref_DB_comboBox_2,1);
 }
 
+void CreateTableConstructor::erase()
+{
+    ui->plainTextEdit_1->clear();
+    ui->plainTextEdit_1->insertPlainText("CREATE TABLE "+ui->tbl_name_line_0->text()+" ( ");
+    first_attribute_=true;
+    attributes_.clear();
+    ui->statusLine_1->clear();
+    ui->number_line_1->setText(QString::number(0));
+    attributes_added_=0;
+}
+
 //void CreateTableConstructor::add_tbl_constructor_db2table_slot(int)
 //{
 
@@ -739,6 +750,7 @@ void CreateTableConstructor::on_plus_button_1_clicked(){
         ui->NOT_NULL_checkBox_1->setChecked(false);
         ui->AUTO_INCREMENT_checkBox_1->setChecked(false);
 
+        ui->number_line_1->setText(QString::number(++attributes_added_));
     }
 
 }
@@ -746,11 +758,16 @@ void CreateTableConstructor::on_plus_button_1_clicked(){
 
 void CreateTableConstructor::on_erase_button_1_clicked()
 {
-    ui->plainTextEdit_1->clear();
-    ui->plainTextEdit_1->insertPlainText("CREATE TABLE "+ui->tbl_name_line_0->text()+" ( ");
-    first_attribute_=true;
-    attributes_.clear();
-    ui->statusLine_1->clear();
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to start"
+                                " adding attributes from the beginning? All current progress will be lost.",
+                                                             QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::Yes) {
+        qDebug() << "Create Table constr erase:: Yes was clicked";
+        erase();
+      } else {
+        qDebug() << "Create Table constr erase:: cancel was clicked";
+      }
+
 }
 
 void CreateTableConstructor::on_help_button_2_clicked()
@@ -846,11 +863,17 @@ void CreateTableConstructor::on_cancel_2_clicked()
 
 void CreateTableConstructor::on_back_button_2_clicked()
 {
-    ui->plainTextEdit_1->clear();
-    ui->plainTextEdit_1->insertPlainText("CREATE TABLE "+ui->tbl_name_line_0->text()+" ( ");
-        this->setCurrentIndex(1);
-    first_attribute_=true;
-    attributes_.clear();
+//    ui->plainTextEdit_1->clear();
+//    ui->plainTextEdit_1->insertPlainText("CREATE TABLE "+ui->tbl_name_line_0->text()+" ( ");
+//    first_attribute_=true;
+//    attributes_.clear();
+//    ui->statusLine_1->clear();
+//    ui->number_line_1->setText(QString::number(0));
+//    attributes_added_=0;
+    erase();
+
+    this->setCurrentIndex(1);
+
     ui->foreign_key_combobox_2->clear();
     ui->foreign_key_checkBox_2->setChecked(false);
 }

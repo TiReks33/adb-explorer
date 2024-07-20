@@ -234,7 +234,7 @@ list</string>
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame_6">
+    <widget class="QFrame" name="frame_3">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -312,7 +312,7 @@ list</string>
       <item>
        <widget class="QPushButton" name="describeButton">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -335,7 +335,10 @@ list</string>
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame_3">
+    <widget class="QFrame" name="frame_4">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -404,7 +407,7 @@ list</string>
          </sizepolicy>
         </property>
         <property name="placeholderText">
-         <string>Insert 1 tuple (separate columns values by comma) (REG. EXP FOR COMMAS)</string>
+         <string>Insert 1 tuple (separate columns values by comma) (REG. EXP FOR COMMAS, NO BRACKETS)</string>
         </property>
        </widget>
       </item>
@@ -430,7 +433,7 @@ list</string>
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Add values</string>
+         <string>Add tuple</string>
         </property>
        </widget>
       </item>
@@ -466,7 +469,7 @@ list</string>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="label_amount">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -474,7 +477,10 @@ list</string>
          </sizepolicy>
         </property>
         <property name="text">
-         <string>123</string>
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>

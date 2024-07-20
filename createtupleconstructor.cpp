@@ -19,6 +19,9 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
 //    SIGNALS::
 
     connect(ui->comboBox,&QComboBox::currentTextChanged, this, &createTupleConstructor::table_changed_handler);
+    connect(ui->plainTextEdit_2,&QPlainTextEdit::textChanged, this, &createTupleConstructor::columns_selected_handler);
+
+
 qDebug() << "window counter::"<< multi_con_.con_counter_;
     //on_update_tables_button_clicked();
 }
@@ -38,6 +41,21 @@ createTupleConstructor::~createTupleConstructor()
 //    if(con_counter_==0)
 //        unique_number_=0;
     qDebug() << "TupleConstr ~Destructor activated";
+}
+
+void createTupleConstructor::reset()
+{
+    ui->frame->setEnabled(true);
+    ui->frame->setStyleSheet("background: white");
+    ui->frame_2->setEnabled(false);
+    ui->frame_2->setStyleSheet("background: palette(window)");
+    ui->frame_3->setEnabled(false);
+    ui->frame_3->setStyleSheet("background: palette(window)");
+    ui->frame_4->setEnabled(false);
+    ui->frame_4->setStyleSheet("background: palette(window)");
+    ui->plainTextEdit_2->clear();
+    ui->label_amount->setText(QString::number(0));
+    tuples_added_=0;
 }
 
 void createTupleConstructor::on_okButton_clicked()
@@ -87,22 +105,34 @@ void createTupleConstructor::/*update_tables_handler*/sql_connection_initialize(
 {
     //multi_con_.con_name_=this->metaObject()->className()+QString::number(multi_con_.unique_number_);
     on_update_tables_button_clicked();
-//    ui->comboBox->setCurrentIndex(-1);
+    //    ui->comboBox->setCurrentIndex(-1);
+}
+
+void createTupleConstructor::import_list(QStringList list__)
+{
+    qDebug() << "List from double list::" << list__;
+    ui->plainTextEdit_2->setPlainText(pack_(list__));
 }
 
 void createTupleConstructor::on_reset_button_clicked()
 {
-    ui->frame->setEnabled(true);
-    ui->frame->setStyleSheet("background: white");
-    ui->frame_2->setEnabled(false);
-    ui->frame_2->setStyleSheet("background: palette(window)");
-    ui->frame_3->setEnabled(false);
-    ui->frame_3->setStyleSheet("background: palette(window)");
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to start"
+                                " adding fields from the beginning? All current progress will be lost.",
+                                                             QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::Yes) {
+        qDebug() << "Yes was clicked";
+        reset();
+      } else {
+        qDebug() << "cancel";
+      }
+
 }
 
 void createTupleConstructor::table_changed_handler(QString const& string_)
 {
-    if (string_==/*static*/""){
+    auth_.table_name_=string_;
+    qDebug() << "auth table name after textchanged()"<<auth_.table_name_;
+    if (string_==""){
         ui->frame->setEnabled(true);
         ui->update_tables_button->setEnabled(true);
         ui->frame->setStyleSheet("background: white");
@@ -119,6 +149,19 @@ void createTupleConstructor::table_changed_handler(QString const& string_)
     }
 }
 
+void createTupleConstructor::columns_selected_handler()
+{
+    qDebug() << "(✓)columns selected";
+    if (ui->plainTextEdit_2->toPlainText()!=""){
+        ui->frame_3->setEnabled(true);
+        ui->frame_3->setStyleSheet("background: white");
+        ui->frame_4->setEnabled(true);
+        ui->frame_4->setStyleSheet("background: white");
+        ui->frame_2->setEnabled(false);
+        ui->frame_2->setStyleSheet("background: palette(window)");
+    }
+}
+
 void createTupleConstructor::on_addColsButton_clicked()
 {
 //    QStringList input;
@@ -131,7 +174,7 @@ void createTupleConstructor::on_addColsButton_clicked()
     /*auth_.db_name_=ui->comboBox->currentText();*/
 
     TwoListSelection doublelist{auth_};
-
+connect(&doublelist,SIGNAL(export_list(QStringList)),this,SLOT(import_list(QStringList)));
     doublelist.update_doublelist();
     doublelist.setModal(true);
     doublelist/*list_selection_window_->*/.show();
@@ -150,4 +193,12 @@ void createTupleConstructor::closeEvent(QCloseEvent *event)
 //            multi_con_.unique_number_=0;
     multi_con_.delete_sql_connection();
         event->accept();
+}
+
+void createTupleConstructor::on_addTupleButton_clicked()
+{
+
+
+
+    ui->label_amount->setText(QString::number(++tuples_added_));
 }

@@ -56,6 +56,8 @@ public slots:
 
     void constructor_query_fails_handle();
 
+    void erase();
+
 private slots:
     void on_next_0_clicked();
 
@@ -107,6 +109,8 @@ private:
     QList<QString> exist_table_names_;
 
     int window_counter_=0;
+
+    int attributes_added_=0;
 
 };
 

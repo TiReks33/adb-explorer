@@ -42,7 +42,7 @@ static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,QString,int); /
 
 static bool set_query(QString, QSqlQueryModel&model__,QListWidget*,QString,int); //*qlistwidget
 
-static bool set_query(QString, QSqlQueryModel&model__,TwoListSelection*,QString,int); //*double-list class
+static bool set_query(QString, /*QSqlQueryModel&model__,*/TwoListSelection*,QString/*,int*/); //*double-list class
 
 static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,int);
 

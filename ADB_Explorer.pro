@@ -19,6 +19,7 @@ SOURCES += \
     db_connection.cpp \
     delete_db.cpp \
     delete_table.cpp \
+    helping_stuff.cpp \
     inserttupleconfirm.cpp \
     main.cpp \
     loginwindow.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     db_connection.h \
     delete_db.h \
     delete_table.h \
+    helping_stuff.h \
     inserttupleconfirm.h \
     loginwindow.h \
     multi_connection.h \

@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QDebug>
 #include <QDialog>
+#include <QCloseEvent>
 
 #include "auth.h"
 
@@ -32,6 +33,8 @@ private slots:
 //  void cancel_handler(){this->close(); }
 
 //  void ok_handler();
+
+  void closeEvent(QCloseEvent *event);
 
 public slots:
 
