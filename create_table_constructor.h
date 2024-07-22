@@ -83,6 +83,8 @@ private slots:
 
     void on_back_button_1_clicked();
 
+    void on_cancel_0_clicked();
+
 signals:
 
     void send_custom_query(QString);

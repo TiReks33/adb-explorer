@@ -886,3 +886,8 @@ void CreateTableConstructor::on_back_button_1_clicked()
     attributes_.clear();
     ui->foreign_key_combobox_2->clear();
 }
+
+void CreateTableConstructor::on_cancel_0_clicked()
+{
+    this->close();
+}

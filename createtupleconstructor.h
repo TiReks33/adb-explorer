@@ -9,6 +9,7 @@
 #include "twolistselection.h"
 #include "helping_stuff.h"
 
+
 namespace Ui {
 class createTupleConstructor;
 }
@@ -45,10 +46,14 @@ public slots:
 
     void import_list(QStringList);
 
+signals:
+
+    void final_query_sig(QString);
+
 private:
     Ui::createTupleConstructor *ui;
     auth& auth_;
-    insertTupleConfirm* confirm_window_;
+    ////insertTupleConfirm* confirm_window_;
 
 //    db_connection* non_static_connection_;
 
@@ -60,12 +65,13 @@ private:
 //    static QList<QSqlQueryModel*> multi_con_models_;
     QSqlQueryModel tables_model_;
 //    QString con_name_;
-    multi_connection multi_con_; //STRUCTURE IN DB_CONNECTION.H FILE
+    multi_connection multi_con_;
 //    static int con_counter_;
 //    static int unique_number_;
 //    inline static int con_counter_ = 1;
     //<<-
     int tuples_added_=0;
+    QStringList tuples_;
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H

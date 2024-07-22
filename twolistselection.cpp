@@ -87,6 +87,7 @@ void TwoListSelection::init() {
     //
     ok_button_ = new QPushButton("OK");
     ok_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    ok_button_->setEnabled(false);
 
     cancel_button_ = new QPushButton("Cancel");
     cancel_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -219,8 +220,20 @@ void TwoListSelection::connections() {
 });
 //    connect(ok_button_,&QPushButton::clicked,this,&TwoListSelection::ok_handler);
     connect(ok_button_,&QPushButton::clicked, [=]() {
+            //if(mOutput->count()!=0){
             emit export_list(this->selectedItems());
             this->close();
+
+    });
+    connect(mOutput->model(),&QAbstractItemModel::rowsRemoved, [=]() {
+            if(mOutput->count()==0)
+                 ok_button_->setEnabled(false);
+             //else
+                 //ok_button_->setEnabled(true);
+    });
+    connect(mOutput->model(),&QAbstractItemModel::rowsInserted, [=]() {
+            //if(mOutput->count()!=0)
+                 ok_button_->setEnabled(true);
     });
 }
 

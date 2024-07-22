@@ -9,7 +9,7 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::createTupleConstructor)
   , auth_(auth__)
-  , confirm_window_(new insertTupleConfirm{})
+////  , confirm_window_(new insertTupleConfirm{})
   //, non_static_connection_(new db_connection)
 //  , list_selection_window_(new TwoListSelection{})
   //, con_name_{""}
@@ -20,16 +20,21 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
 
     connect(ui->comboBox,&QComboBox::currentTextChanged, this, &createTupleConstructor::table_changed_handler);
     connect(ui->plainTextEdit_2,&QPlainTextEdit::textChanged, this, &createTupleConstructor::columns_selected_handler);
-
+    connect(ui->plainTextEdit,&QPlainTextEdit::textChanged, [=] ()
+            {
+                    ui->statusLine->clear();
+            });
+    //connect(this, &createTupleConstructor::final_query_sig, confirm_window_, &insertTupleConfirm::final_query_slot);
 
 qDebug() << "window counter::"<< multi_con_.con_counter_;
     //on_update_tables_button_clicked();
+
 }
 
 createTupleConstructor::~createTupleConstructor()
 {
     delete ui;
-    delete confirm_window_;
+    ////delete confirm_window_;
 //    delete list_selection_window_;
 
 //    if(con_name_!=""){
@@ -56,11 +61,28 @@ void createTupleConstructor::reset()
     ui->plainTextEdit_2->clear();
     ui->label_amount->setText(QString::number(0));
     tuples_added_=0;
+    tuples_.clear();
+    ui->comboBox->setCurrentIndex(-1);
+    ui->plainTextEdit->clear();
 }
 
 void createTupleConstructor::on_okButton_clicked()
 {
-    confirm_window_->show();
+    QString final_query = "INSERT INTO "+auth_.table_name_+" ("+ui->plainTextEdit_2->toPlainText()+") "+"VALUES ";
+
+    int count = tuples_.count();
+    for (int i=0;i!=count;++i)
+    {
+        final_query+= '(' + tuples_.at(i) + ')';
+        if (i!=count-1) final_query+=", ";
+    }
+
+    final_query+=';';
+
+    qDebug() << "final query::" <<final_query;
+    emit final_query_sig(final_query);
+    //confirm_window_->show();
+    this->close();
 }
 
 void createTupleConstructor::on_update_tables_button_clicked()
@@ -197,8 +219,45 @@ void createTupleConstructor::closeEvent(QCloseEvent *event)
 
 void createTupleConstructor::on_addTupleButton_clicked()
 {
+    //IS EMPTY check
+    if(ui->plainTextEdit->toPlainText().isEmpty()){
+        ui->statusLine->setText("Tuple is empty. Nothing to add.");
+        return;
+    } else {
+        //EXCLUDING ADDITIONAL BRACKETS FROM SINGLE TURPLE
+        QRegularExpression re("^[^()]*$");
+        QRegularExpressionValidator v(re, 0);
+        QString str = ui->plainTextEdit->toPlainText();
+        int pos=0;
+        if(v.validate(str, pos)!=QValidator::Acceptable)
+        {
+            ui->statusLine->setText("There's no need for additional brackets in tuple.");
+            return;
+        } else{
+            //COUNT NUMBER OF COMMAS
+//            QRegularExpression re("^[a-zA-Z0-9_]*$");
+//            QRegularExpressionValidator v(re, 0);
+//            QString str = ui->tbl_name_line_0->text();
+//            int pos=0;
+//            if(v.validate(str, pos)!=QValidator::Acceptable)
+//            {
+//                ui->statusLine_0->setText("Incorrect symbols in table's name. Please use low and upper letters, digits or '_'");
+//                return;
+//            }
 
+            int input_commas = ui->plainTextEdit_2->toPlainText().count(',');
+            qDebug() << "number of commas input::"<< input_commas;
+            int tuple_commas = ui->plainTextEdit->toPlainText().count(',');
+            qDebug() << "number of commas in tuple::"<<tuple_commas;
+                if(input_commas!=tuple_commas)
+                {
+                        ui->statusLine->setText("Number of elements in tuple does not match to number of selected attributes.");
+                    return;
+                }
+        }
+    }
 
+    tuples_.append(ui->plainTextEdit->toPlainText());
 
     ui->label_amount->setText(QString::number(++tuples_added_));
 }

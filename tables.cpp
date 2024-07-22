@@ -110,6 +110,8 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
 
 //    connect(this,&Tables::tpl_cnstr_upd_tables, insert_constructor_, &createTupleConstructor::update_tables_handler);
+
+
 }
 
 Tables::~Tables()
@@ -193,7 +195,13 @@ void Tables::send_custom_query_slot(QString query__)
     db_connection::open(auth_);
 
 
-    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
+    if(db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch))
+        emit close_custom_query_form();
+    if(!ui->tableView->model()->columnCount()) {
+        show_tables();
+        qDebug() << "rowCount() in model_==0::display result ignored.";
+
+    }
     }else{
 
         CustomQueryResult new_result_window{auth_};
@@ -357,6 +365,7 @@ void Tables::on_insert_inTable_button_clicked()
     createTupleConstructor constr_window_{auth_};
     constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
     //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
+    connect(&constr_window_, &createTupleConstructor::final_query_sig, this, &Tables::send_custom_query_slot);
     //emit tpl_cnstr_upd_tables();
     constr_window_.setModal(false);
     constr_window_.show();

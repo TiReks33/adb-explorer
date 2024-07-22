@@ -15,6 +15,9 @@ public:
     explicit insertTupleConfirm(QWidget *parent = nullptr);
     ~insertTupleConfirm();
 
+public slots:
+    void final_query_slot(QString);
+
 private:
     Ui::insertTupleConfirm *ui;
 };

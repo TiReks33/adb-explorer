@@ -5,9 +5,14 @@
 //    return list.join(separator);
 //}
 
-QString pack_(const QStringList &list, QString separator)
+//QString pack_(const QStringList &list, QString separator)
+//{
+//    return list.join(separator);
+//}
+
+QString pack_(const QStringList &list/*, QString separator*/)
 {
-    return list.join(separator);
+    return list.join(/*separator*/ ", ");
 }
 
 //QStringList unpack_(const QString &string, QChar separator)
@@ -15,7 +20,12 @@ QString pack_(const QStringList &list, QString separator)
 //    return string.split(separator);
 //}
 
-QStringList unpack_(const QString &string, QString separator)
+//QStringList unpack_(const QString &string, QString separator)
+//{
+//    return string.split(separator);
+//}
+
+QStringList unpack_(const QString &string/*, QString separator*/)
 {
-    return string.split(separator);
+    return string.split(/*separator*/ ", ");
 }

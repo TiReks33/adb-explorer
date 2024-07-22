@@ -193,8 +193,11 @@ list</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
         <property name="text">
-         <string>add columns</string>
+         <string>add attributes</string>
         </property>
        </widget>
       </item>
@@ -220,7 +223,7 @@ list</string>
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&lt;-- Choose columns to add from table</string>
+         <string>&lt;-- Choose attributes to add from table</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -252,7 +255,7 @@ list</string>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>120</width>
+          <width>160</width>
           <height>20</height>
          </size>
         </property>
@@ -277,8 +280,19 @@ list</string>
             <verstretch>2</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+            <weight>50</weight>
+            <italic>false</italic>
+            <bold>false</bold>
+            <underline>false</underline>
+            <strikeout>false</strikeout>
+            <kerning>true</kerning>
+           </font>
+          </property>
           <property name="styleSheet">
-           <string notr="true">background-color: lightgray</string>
+           <string notr="true">background-color: darkgray;color:white;</string>
           </property>
           <property name="readOnly">
            <bool>true</bool>
@@ -287,27 +301,31 @@ list</string>
            <string/>
           </property>
           <property name="placeholderText">
-           <string>Choosen columns from &quot;add columns&quot;</string>
+           <string>Choosen attributes from &quot;add attributes&quot;</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLabel" name="label_7">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>80</width>
-          <height>20</height>
-         </size>
+        <property name="text">
+         <string>&lt;-- Chosen
+     attributes</string>
         </property>
-       </spacer>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="describeButton">
@@ -405,6 +423,11 @@ list</string>
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
         </property>
         <property name="placeholderText">
          <string>Insert 1 tuple (separate columns values by comma) (REG. EXP FOR COMMAS, NO BRACKETS)</string>
