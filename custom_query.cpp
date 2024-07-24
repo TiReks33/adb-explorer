@@ -27,6 +27,11 @@ Custom_Query::~Custom_Query()
     delete ui;
 }
 
+QString Custom_Query::get_text()
+{
+    return this->ui->plainTextEdit->toPlainText();
+}
+
 void Custom_Query::on_setFont_Button_clicked()
 {
     bool ok;
@@ -44,7 +49,8 @@ void Custom_Query::on_setFont_Button_clicked()
 
 void Custom_Query::on_Ok_button_clicked()
 {
-    emit send_custom_query(ui->plainTextEdit->toPlainText());
+////    emit send_custom_query(ui->plainTextEdit->toPlainText());
+        emit send_custom_query(/*ui->plainTextEdit->toPlainText(),*/this);
 }
 
 void Custom_Query::on_Cancel_button_clicked()
@@ -56,4 +62,9 @@ void Custom_Query::close_window()
 {
     qDebug()<<"Close custom query form signal handled";
     this->close();
+}
+
+void Custom_Query::set_text(QString text__)
+{
+    this->ui->plainTextEdit->setPlainText(text__);
 }

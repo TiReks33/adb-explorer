@@ -14,7 +14,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     ui(new Ui::Tables)
 //  , db_server_("QMYSQL")
   , auth_(auth__)
-  , table_query_window_(new Custom_Query)
+////  , table_query_window_(new Custom_Query)
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
@@ -78,7 +78,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
 
     //SIGNALS
-    connect(table_query_window_,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
+////    connect(table_query_window_,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
 
     connect(this,SIGNAL(custom_query(QString)),custom_query_result_window_,SLOT(custom_query_slot(QString)));
 
@@ -103,7 +103,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     //CUSTOM CREATE TABLE CONSTRUCTOR
     connect(constructor_,SIGNAL(send_custom_query(QString)),this,SLOT(constructor_create_tbl_query_slot(QString)));
 
-    connect(this,SIGNAL(close_custom_query_form()),table_query_window_,SLOT(close_window()));
+////    connect(this,SIGNAL(close_custom_query_form()),table_query_window_,SLOT(close_window()));
 
     connect(this,&Tables::constructor_query_success, [=] () { constructor_->close(); });
 
@@ -117,7 +117,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 Tables::~Tables()
 {
     delete ui;
-    delete table_query_window_;
+////    delete table_query_window_;
     delete custom_query_result_window_;
     delete settings_;
     delete delete_table_window_;
@@ -129,7 +129,9 @@ void Tables::closeEvent(QCloseEvent *event)
 {
     emit db_show();
     event->accept();
-    table_query_window_->close();
+////    table_query_window_->close();
+    emit custom_query_windows_close();
+
     custom_query_result_window_->close();
 }
 
@@ -223,6 +225,53 @@ void Tables::send_custom_query_slot(QString query__)
     }
 }
 
+
+void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_query_window__)
+{
+//    //qDebug()<<"test";
+//    db_connection::open(auth_);
+
+
+//    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
+
+//                                                                custom_query_result_window_->show();
+//                                                                emit custom_query(query__);
+
+    if(!settings_->ui->custom_checkbox->isChecked()){
+    db_connection::open(auth_);
+
+
+    if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),model_,ui->tableView,QHeaderView::Stretch))
+        ////emit close_custom_query_form();
+        custom_query_window__->close_window();
+    if(!ui->tableView->model()->columnCount()) {
+        show_tables();
+        qDebug() << "rowCount() in model_==0::display result ignored.";
+
+    }
+    }else{
+
+        CustomQueryResult new_result_window{auth_};
+        //new_result_window.show();
+//    custom_query_result_window_->show();
+    new_result_window.custom_query_slot(/*query__*/custom_query_window__->get_text(), /*new_result_window->model_,*/ new_result_window.ui->tableView);
+    //if(new_result_window.ui->tableView->model()->rowCount()!=0)
+    if((new_result_window.ui->tableView->model())!=nullptr) {
+
+        qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
+        ////emit close_custom_query_form();
+        custom_query_window__->close_window();
+        if(new_result_window.ui->tableView->model()->columnCount()>0){
+            new_result_window.show();
+            new_result_window.exec();
+        }
+
+    }
+    qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
+    }
+}
+
+
 void Tables::delete_form_send_slot(QComboBox *comboBox__)
 {
     db_connection::open(auth_);
@@ -311,17 +360,62 @@ void Tables::on_select_from_table_button_clicked()
     }
 }
 
-//void Tables::on_pushButton_clicked()
-//{
+void Tables::get_custom_query_window_()
+{
+    //    table_query_window_->setModal(true);
+    ////    table_query_window_->show();
+        Custom_Query custom_query_window;
 
-//}
+    ////    connect(&custom_query_window,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
+            connect(&custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query*)>(&Custom_Query::send_custom_query),
+                    this,static_cast<void(Tables::*)(/*QString,*/Custom_Query*)>(&Tables::send_custom_query_slot));
+    ////    connect(this,&Tables::close_custom_query_form,[&](){ custom_query_window.close_window();});
+
+        connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
+
+        custom_query_window.setModal(false);
+        custom_query_window.show();
+        custom_query_window.exec();
+        //emit show_tables_signal();
+}
+
+void Tables::get_custom_query_window_(QString __pre_query)
+{
+        Custom_Query custom_query_window;
+
+            connect(&custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query*)>(&Custom_Query::send_custom_query),
+                    this,static_cast<void(Tables::*)(/*QString,*/Custom_Query*)>(&Tables::send_custom_query_slot));
+
+        connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
+
+        custom_query_window.set_text(__pre_query);
+
+        custom_query_window.setModal(false);
+        custom_query_window.show();
+        custom_query_window.exec();
+}
 
 void Tables::on_Custom_Query_Button_clicked()
 {
-//    table_query_window_->setModal(true);
-    table_query_window_->show();
-    //emit show_tables_signal();
+////    table_query_window_->setModal(true);
+//////    table_query_window_->show();
+//    Custom_Query custom_query_window;
+
+//////    connect(&custom_query_window,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
+//        connect(&custom_query_window,static_cast<void(Custom_Query::*)(QString,Custom_Query*)>(&Custom_Query::send_custom_query),
+//                this,static_cast<void(Tables::*)(QString,Custom_Query*)>(&Tables::send_custom_query_slot));
+//////    connect(this,&Tables::close_custom_query_form,[&](){ custom_query_window.close_window();});
+
+//    connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
+
+//    custom_query_window.setModal(false);
+//    custom_query_window.show();
+//    custom_query_window.exec();
+//    //emit show_tables_signal();
+    get_custom_query_window_();
 }
+
+
 
 void Tables::on_Query_settings_clicked()
 {
@@ -365,7 +459,9 @@ void Tables::on_insert_inTable_button_clicked()
     createTupleConstructor constr_window_{auth_};
     constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
     //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
-    connect(&constr_window_, &createTupleConstructor::final_query_sig, this, &Tables::send_custom_query_slot);
+////    connect(&constr_window_, /*&createTupleConstructor::*/SIGNAL(final_query_sig(QString)), this, SLOT(/*&Tables::*/send_custom_query_slot(QString)));
+    connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString)>(&createTupleConstructor::final_query_sig),
+            this, static_cast<void (Tables::*) (QString)>(&Tables::get_custom_query_window_));
     //emit tpl_cnstr_upd_tables();
     constr_window_.setModal(false);
     constr_window_.show();

@@ -46,11 +46,15 @@ public slots:
 
     void send_custom_query_slot(QString);
 
+    void send_custom_query_slot(/*QString,*/Custom_Query*);
+
     void delete_form_send_slot(QComboBox*);
 
     void delete_table_slot(QComboBox*);
 
     void constructor_create_tbl_query_slot(QString);
+
+//    void insert_into_query_handle(QString);
 
 signals:
 
@@ -78,6 +82,8 @@ signals:
 
     void tpl_cnstr_upd_tables();
 
+    void custom_query_windows_close();
+
 private slots:
 
 
@@ -101,6 +107,10 @@ private slots:
 
     void on_insert_inTable_button_clicked();
 
+    void get_custom_query_window_();
+
+    void get_custom_query_window_(QString);
+
 protected:
     bool event(QEvent* event);
 
@@ -115,7 +125,7 @@ private:
 
     QSqlQueryModel model_;
 
-    Custom_Query* table_query_window_;
+////    Custom_Query* table_query_window_;
 
     //QCheckBox* checkbox_;
 
