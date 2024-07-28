@@ -18,11 +18,11 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
-  , constructor_(new CreateTableConstructor{auth_})
+  , constructor_(new CreateTableConstructor{auth_/*,this*/})
 //  , insert_constructor_{new createTupleConstructor{auth_}}
 {
     ui->setupUi(this);
-
+//constructor_->setWindowFlag(Qt::Dialog);
     ui->statusLine->setReadOnly(true);
 
     Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
@@ -105,9 +105,18 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
 ////    connect(this,SIGNAL(close_custom_query_form()),table_query_window_,SLOT(close_window()));
 
-    connect(this,&Tables::constructor_query_success, [=] () { constructor_->close(); });
+    connect(this,&Tables::constructor_query_success, [=] () {
+        constructor_->set_warning_flag_(false);
+        constructor_->close();
+        constructor_->set_warning_flag_(true);
+        qDebug() << "(✓)Table constructor query successful completed.";
+    });
 
     connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
+
+    connect(this,&Tables::constructor_query_fails, [=] () {
+        qDebug() << "(x)Table constructor query fails.";
+    });
 
 //    connect(this,&Tables::tpl_cnstr_upd_tables, insert_constructor_, &createTupleConstructor::update_tables_handler);
 
@@ -198,7 +207,7 @@ void Tables::send_custom_query_slot(QString query__)
 
 
     if(db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch))
-        emit close_custom_query_form();
+        emit close_custom_query_form(); // don't need anymore?
     if(!ui->tableView->model()->columnCount()) {
         show_tables();
         qDebug() << "rowCount() in model_==0::display result ignored.";
@@ -214,7 +223,7 @@ void Tables::send_custom_query_slot(QString query__)
     if((new_result_window.ui->tableView->model())!=nullptr) {
 
         qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
-        emit close_custom_query_form();
+        emit close_custom_query_form(); // don't need anymore?
         if(new_result_window.ui->tableView->model()->columnCount()>0){
             new_result_window.show();
             new_result_window.exec();
@@ -431,9 +440,12 @@ void Tables::on_pushButton_clicked()
 
 void Tables::on_create_table_button_clicked()
 {
+
+    if(!constructor_->isVisible()){
+
     constructor_->setCurrentIndex(0);
 
-    QList<QString> list_to_send;
+    QList<QString> list_to_send; // UNIQUE NAME CHECK
 
     size_t size_of_list_=ui->tableView->model()->rowCount();
 
@@ -449,7 +461,30 @@ void Tables::on_create_table_button_clicked()
 
     //emit default_db()
 
+//CONSTRUCTOR WINDOW AT THE CENTER OF TABLE WINDOW
+    //constructor_->move(this->geometry().center());
+
+//    QPoint centerPoint = this->geometry().center();
+
+//    constructor_->adjustSize();
+//    constructor_->move(centerPoint.x() - constructor_->width()/2, centerPoint.y() - constructor_->height()/2);
+    window_center_from_another_(this,constructor_);
+
+    constructor_->setParent(this);
+//    constructor_->setWindowFlag(Qt::Window);
+    constructor_->setWindowFlag(Qt::Dialog);
+
+
+    constructor_->setWindowModality(Qt::WindowModal);
+//    constructor_->setWindowModality(Qt::NonModal);
     constructor_->show();
+
+    } else {
+
+        constructor_->raise();
+
+    }
+
 }
 
 void Tables::on_insert_inTable_button_clicked()

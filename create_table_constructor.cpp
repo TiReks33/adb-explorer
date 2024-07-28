@@ -28,7 +28,7 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
     ui->plainTextEdit_2->setReadOnly(true);
     ui->statusLine_2->setReadOnly(true);
 
-    //"Search button"
+    //"Help buttons"
        ui->help_button_2->setFixedSize(67,67);
         QRect rect(0,0,67,67);
        QRegion region(rect, QRegion::Ellipse);
@@ -37,6 +37,15 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
             "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
                         "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
                                 );
+
+           ui->help_button_1->setFixedSize(67,67);
+            rect=QRect(0,0,67,67);
+           region=QRegion(rect, QRegion::Ellipse);
+           ui->help_button_1->setMask(region);
+            ui->help_button_1->setStyleSheet("border: none;"
+                "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
+                            "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
+                                    );
 
     //SIGNALs
     connect(ui->atr_type_comboBox_1,SIGNAL(currentTextChanged(QString const&)),this,SLOT(AttrTypeChanged(QString const&)));
@@ -251,6 +260,12 @@ bool CreateTableConstructor::add_attributes(QPlainTextEdit* textEdit)
 //    ui->plainTextEdit_2->insertPlainText(ui->plainTextEdit_1->toPlainText()+ui->atr_name_line_1->text()+' '
 //                                         +ui->atr_type_comboBox_1->currentText());
         //textEdit->insertPlainText(ui->plainTextEdit_1->toPlainText());
+
+//TextCursor things
+//        QTextCursor cursor = this->ui->plainTextEdit_1->textCursor();
+//        cursor.movePosition(QTextCursor::End);
+//        this->ui->plainTextEdit_1->setTextCursor(cursor);
+        set_cursor_to_end_(this->ui->plainTextEdit_1);
 
         attributes_.append(ui->atr_name_line_1->text());
 
@@ -551,6 +566,19 @@ void CreateTableConstructor::add_tbl_constructor_table2atribute_slot(const QStri
 
 void CreateTableConstructor::closeEvent(QCloseEvent *event)
 {
+    if(_warning_flag_){
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to close constructor window?",
+                                                             QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::No) {
+        qDebug() << "Create Table constr close:: cancel closing";
+        event->ignore();
+        return;
+      } else {
+        qDebug() << "Create Table constr close:: closing accepted";
+      }
+    }
+
+
 //    if(!non_dflt_conction_names_.isEmpty()){
 //    close_con(non_dflt_conction_names_.at(0));
 //    non_dflt_conction_names_.clear();
@@ -564,12 +592,14 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
         non_dflt_conction_names_.clear();
     }
 
-    first_attribute_=true;
-
-    attributes_.clear();
+    //first_attribute_=true;
+    erase();
+    //attributes_.clear();
     ui->foreign_key_combobox_2->clear();
 
+    ui->tbl_name_line_0->clear();
     ui->statusLine_0->clear();
+
     event->accept();
 }
 
@@ -587,6 +617,8 @@ void CreateTableConstructor::constructor_query_fails_handle()
 
 
     db_connection::set_query("SHOW DATABASES;",this->non_static_connection_->model_,ui->ref_DB_comboBox_2,1);
+
+    this->ui->statusLine_2->setText("(x)Table constructor query fails.");
 }
 
 void CreateTableConstructor::erase()
@@ -705,7 +737,7 @@ void CreateTableConstructor::on_next_1_clicked()
 
 void CreateTableConstructor::on_send_button_clicked()
 {
-
+    set_cursor_to_end_(this->ui->plainTextEdit_2);
     //qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText()+" );";
     ui->plainTextEdit_2->insertPlainText(" );");
     qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText();
@@ -792,7 +824,7 @@ void CreateTableConstructor::on_help_button_2_clicked()
 //                             " was made JFF and Qt/C++ learning basic technics goal.:)</p><br>"
 //                                              +logo);
 
-    QString reference_info=":/txt/references_help.txt";
+    QString reference_info=":/txt/references_help_2.txt";
     //    success="<img src='"+success+"' height='32' width='32'>";
 
     //        QFile file(":/rec/icons/rec/icons/logo.txt");
@@ -804,8 +836,17 @@ void CreateTableConstructor::on_help_button_2_clicked()
     //            logo="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
     //            file.close();
     //            }
+    QString info;
+    QFile file(reference_info);
+//qDebug() << dir;
+        if(file.open(QIODevice::ReadOnly))
+            {
+            QTextStream in(&file);
+        info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
+        file.close();
+        }
 
-    QMessageBox::about(this,"Referential Actions",reference_info);
+    QMessageBox::about(this,"Referential Actions",info);
 }
 
 void CreateTableConstructor::on_reset_button_2_clicked()
@@ -817,12 +858,11 @@ void CreateTableConstructor::on_reset_button_2_clicked()
 
 void CreateTableConstructor::on_plus_button_2_clicked()
 {
+    set_cursor_to_end_(this->ui->plainTextEdit_2);
 
     if(add_keys(ui->plainTextEdit_2)){
 
         first_key_=false;
-
-
 
     }
 
@@ -890,4 +930,21 @@ void CreateTableConstructor::on_back_button_1_clicked()
 void CreateTableConstructor::on_cancel_0_clicked()
 {
     this->close();
+}
+
+void CreateTableConstructor::on_help_button_1_clicked()
+{
+    QString reference_info=":/txt/references_help_1.txt";
+
+    QString info;
+    QFile file(reference_info);
+
+        if(file.open(QIODevice::ReadOnly))
+            {
+            QTextStream in(&file);
+        info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
+        file.close();
+        }
+
+    QMessageBox::about(this,"Referential Actions",info);
 }

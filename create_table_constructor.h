@@ -12,6 +12,7 @@
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "db_connection.h"
+#include "helping_stuff.h"
 
 namespace Ui {
 class CreateTableConstructor;
@@ -58,6 +59,8 @@ public slots:
 
     void erase();
 
+    void set_warning_flag_(bool condition){_warning_flag_=condition;}
+
 private slots:
     void on_next_0_clicked();
 
@@ -84,6 +87,8 @@ private slots:
     void on_back_button_1_clicked();
 
     void on_cancel_0_clicked();
+
+    void on_help_button_1_clicked();
 
 signals:
 
@@ -113,6 +118,8 @@ private:
     int window_counter_=0;
 
     int attributes_added_=0;
+
+    bool _warning_flag_=true;
 
 };
 
