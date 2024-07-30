@@ -13,6 +13,7 @@
 #include "ui_customqueryresult.h"
 #include "db_connection.h"
 #include "helping_stuff.h"
+#include "multi_connection.h"
 
 namespace Ui {
 class CreateTableConstructor;
@@ -108,6 +109,7 @@ private:
 //    db_connection* non_static_connection_2_;
 
 //    QSqlQueryModel model_;
+    QSqlQueryModel submodel_0_;
     QSqlQueryModel submodel_1_;
     QSqlQueryModel submodel_2_;
 
@@ -120,6 +122,8 @@ private:
     int attributes_added_=0;
 
     bool _warning_flag_=true;
+
+    multi_connection multi_con_;
 
 };
 

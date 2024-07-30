@@ -5,8 +5,9 @@
 
 
 struct multi_connection{
-    multi_connection() :
-        con_name_("")
+    multi_connection() //:
+//        con_name_("")
+
 //      , unique_number_(int(0))
     {}
 
@@ -14,7 +15,8 @@ struct multi_connection{
 
     static QStringList multi_con_names_;
 
-    QString con_name_;
+    QStringList con_list_;
+    //QString con_name_;
 
     static int con_counter_;
     static int unique_number_;

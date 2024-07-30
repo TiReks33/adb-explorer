@@ -1,10 +1,20 @@
 #ifndef AUTH_H
 #define AUTH_H
 #include <QString>
+
+
+
+//enum class default_con_
+//{
+//    default_ = 0,
+//    non_default_ = 1
+//};
+
 struct auth{
     auth() :
         db_server_("QMYSQL")
       , host_("localhost")
+      , con_name_("ADBEXPLORER")
     {}
 //private:
     QString db_server_; //default
@@ -15,6 +25,9 @@ struct auth{
 
     QString db_name_; //tables_window
     QString table_name_;
+
+    QString con_name_;
+
 };
 
 #endif // AUTH_H

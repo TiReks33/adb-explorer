@@ -111,12 +111,15 @@ void createTupleConstructor::on_update_tables_button_clicked()
 ////    multi_con_models_.append(model);
 //    }
 
-    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+    QString _con_name = db_connection::get_unique_con_name(this->metaObject(),&multi_con_);
+
+//    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+    if(!db_connection::open(auth_,_con_name,&multi_con_)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
 
-    db_connection::set_query("SHOW TABLES;", /*multi_con_models_.at(models_cap)*/tables_model_,ui->comboBox,multi_con_.con_name_,1);
+    db_connection::set_query("SHOW TABLES;", /*multi_con_models_.at(models_cap)*/tables_model_,ui->comboBox,_con_name/*multi_con_.con_name_*/,1);
 
     ui->comboBox->setCurrentIndex(-1);
 

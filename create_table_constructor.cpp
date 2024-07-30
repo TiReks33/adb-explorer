@@ -430,68 +430,76 @@ void CreateTableConstructor::onUpdateChecked(int state)
         ui->onUpdate_comboBox_2->setEnabled(true);
 }
 
-void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &current_item_)
+void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &current_DB_/*item*/)
 {
-    {
-    if(non_dflt_conction_names_.isEmpty())non_dflt_conction_names_.append("first");
-    //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
-    //  QSqlDatabase firstDB = QSqlDatabase::database("first");
-        {
-            if(non_dflt_conction_names_.length()>=2){
-                if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
-                    db_connection::close_con(non_dflt_conction_names_.at(1));//<<-- close connection
-            }
+//    {
+//    if(non_dflt_conction_names_.isEmpty())non_dflt_conction_names_.append("first");
+//    //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
+//    //  QSqlDatabase firstDB = QSqlDatabase::database("first");
+//        {
+//            if(non_dflt_conction_names_.length()>=2){
+//                if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
+//                    db_connection::close_con(non_dflt_conction_names_.at(1));//<<-- close connection
+//            }
 
-        }
-    if(QSqlDatabase::database(non_dflt_conction_names_.at(0)).isOpen())
-        db_connection::close_con(non_dflt_conction_names_.at(0));//<<-- close connection
-    }
+//        }
+//    if(QSqlDatabase::database(non_dflt_conction_names_.at(0)).isOpen())
+//        db_connection::close_con(non_dflt_conction_names_.at(0));//<<-- close connection
+//    }
 
-    {
-        QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth_.db_server_,non_dflt_conction_names_.at(0));
+//    {
+//        QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth_.db_server_,non_dflt_conction_names_.at(0));
 
-            db_connection_.setUserName(auth_.login_);
+//            db_connection_.setUserName(auth_.login_);
 
-            db_connection_.setPassword(auth_.passw_);
+//            db_connection_.setPassword(auth_.passw_);
 
-            //db_connection_.setHostName("localhost");//<-remote IP
+//            //db_connection_.setHostName("localhost");//<-remote IP
 
-            db_connection_.setDatabaseName(current_item_);
+//            db_connection_.setDatabaseName(current_item_);
 
-            if(!db_connection_.open()){
-//                qDebug() << ("(x)Error connection to database.");
-                qDebug()<<QSqlDatabase::database(non_dflt_conction_names_.at(0)).lastError();
-                return;
-            }
-            else{
-                qDebug()<<("Database ::"+non_dflt_conction_names_.at(0) +":: succesfull connected.");
-                qDebug()<<non_dflt_conction_names_.at(0);
-                qDebug()<<current_item_;
-                //return;
-            }
-    }
-
-    ui->ref_key_comboBox_2->setCurrentIndex(-1);
-    //QUERY
-
-    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(non_dflt_conction_names_.at(0)));
-
-    qry.prepare("SHOW TABLES;"); //MY_SQL_QUERY
-
-    if(qry.exec()){
-//    non_static_connection_->model_.setQuery(qry);
-
-    submodel_1_.setQuery(qry);
-
-    ui->ref_table_comboBox_2->setModel(&submodel_1_);
-
-    qDebug() << "QUERY TO COMBOBOX SUCCESS";
-    return ;
-    } else
-    {
-        qDebug()<<"111111111111"<<QSqlDatabase::database(non_dflt_conction_names_.at(0)).lastError();
+//            if(!db_connection_.open()){
+////                qDebug() << ("(x)Error connection to database.");
+//                qDebug()<<QSqlDatabase::database(non_dflt_conction_names_.at(0)).lastError();
+//                return;
+//            }
+//            else{
+//                qDebug()<<("Database ::"+non_dflt_conction_names_.at(0) +":: succesfull connected.");
+//                qDebug()<<non_dflt_conction_names_.at(0);
+//                qDebug()<<current_item_;
+//                //return;
+//            }
+//    }
+    auth_.db_name_=current_DB_;
+    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+        qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
+
+    db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,multi_con_.con_name_,1);
+
+    ui->ref_key_comboBox_2->setCurrentIndex(-1); //?
+
+    //SET QUERY-->>
+
+//    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(non_dflt_conction_names_.at(0)));
+
+//    qry.prepare("SHOW TABLES;"); //MY_SQL_QUERY
+
+//    if(qry.exec()){
+////    non_static_connection_->model_.setQuery(qry);
+
+//    submodel_1_.setQuery(qry);
+
+//    ui->ref_table_comboBox_2->setModel(&submodel_1_);
+
+//    qDebug() << "QUERY TO COMBOBOX SUCCESS";
+//    return ;
+//    } else
+//    {
+//        qDebug()<<"111111111111"<<QSqlDatabase::database(non_dflt_conction_names_.at(0)).lastError();
+//        return;
+//    }
 
 }
 
@@ -596,9 +604,12 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
     erase();
     //attributes_.clear();
     ui->foreign_key_combobox_2->clear();
+    ui->foreign_key_checkBox_2->setChecked(false);
 
     ui->tbl_name_line_0->clear();
     ui->statusLine_0->clear();
+
+
 
     event->accept();
 }
@@ -685,7 +696,7 @@ void CreateTableConstructor::on_next_1_clicked()
 {
     if(!first_attribute_){
         ui->plainTextEdit_2->clear();
-        ui->plainTextEdit_2->insertPlainText(ui->plainTextEdit_1->toPlainText());
+        ui->plainTextEdit_2->insertPlainText(ui->plainTextEdit_1->toPlainText()/*+')'*/);
     //    if(!add_attributes(ui->plainTextEdit_2))
     //        return;
 
@@ -698,10 +709,46 @@ void CreateTableConstructor::on_next_1_clicked()
 //            //custom_query_result_window_->show();
 //            new_select_window.custom_query_slot("SHOW DATABASES; ",ui->ref_DB_comboBox_2);
 
-        db_connection::open(auth_);
+        //////////////////////////////////////
+
+//        db_connection::open(auth_); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 
 
-        db_connection::set_query("SHOW DATABASES;",this->non_static_connection_->model_,ui->ref_DB_comboBox_2,1);
+//        db_connection::set_query("SHOW DATABASES;",this->non_static_connection_->model_,ui->ref_DB_comboBox_2,1);
+
+
+        ///////////////////////////////////
+
+        if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+            qDebug() << QString("(x)There is error while update tables (connection is not established).");
+            return;
+        }
+
+        db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,multi_con_.con_name_,1);
+
+
+        /////////////////////////////////////////////
+
+
+
+
+
+        size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
+
+        qDebug() << "NUMBER OF TABLES::" << size_of_list_;
+
+        //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
+        for(size_t i=0;i!=size_of_list_;++i){
+            if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
+                ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
+                break; // return or break?
+            }
+        }
+        //ui->ref_DB_comboBox_2->setCurrentIndex(-1);
+        //}
+
+
+
 
 //        ui->ref_DB_comboBox_2->setCurrentIndex(-1);
 
@@ -715,19 +762,7 @@ void CreateTableConstructor::on_next_1_clicked()
     }
 
 
-    size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
 
-    qDebug() << "NUMBER OF TABLES::" << size_of_list_;
-
-    //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
-    for(size_t i=0;i!=size_of_list_;++i){
-        if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
-            ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
-        return;//break; // return or break?
-        }
-    }
-    //ui->ref_DB_comboBox_2->setCurrentIndex(-1);
-    //}
 }
 
 //void Hints::on_pushButton_2_clicked()
