@@ -24,24 +24,27 @@ struct db_connection{
 
 static bool open(auth&);
 
+static bool reopen_exist(QString const &);
+
 //static bool open(auth&, default_con_); // switch between methods
 
-static bool open(auth&,QString); // main method for open connection(!)
+//static bool open(auth&,QString);
 
-static int open(auth&,QString,int);
+//static int open(auth&,QString,int);
 
-static bool open (auth&,/*QString*/QMetaObject const *,multi_connection*); // Unique name inside
+//static bool open (auth&,/*QString*/QMetaObject const *,multi_connection*); // Unique name inside
 
-static bool open (auth&,QString,multi_connection*); // Unique name OUTside
+//static bool open (auth&,QString,multi_connection*); // Unique name OUTside
 
 
 
-static void close();
+//static void close();
 
-static void close_con(QString const &);
+static void close/*_con*/(QString const &);
 
-static void close(QStringList*);
+static void remove(QString const &);
 
+//static void close(QStringList*);
 
 
 

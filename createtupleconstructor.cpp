@@ -114,7 +114,8 @@ void createTupleConstructor::on_update_tables_button_clicked()
     QString _con_name = db_connection::get_unique_con_name(this->metaObject(),&multi_con_);
 
 //    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
-    if(!db_connection::open(auth_,_con_name,&multi_con_)){
+   // if(!db_connection::open(auth_,_con_name,&multi_con_)){
+    if(!db_connection::open(auth_)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
@@ -216,7 +217,9 @@ void createTupleConstructor::closeEvent(QCloseEvent *event)
 //            --multi_con_.con_counter_;
 //        if(multi_con_.con_counter_==0)
 //            multi_con_.unique_number_=0;
-    multi_con_.delete_sql_connection();
+
+
+//    multi_con_.delete_sql_connection();
         event->accept();
 }
 

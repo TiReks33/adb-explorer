@@ -61,12 +61,13 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
     connect(delete_db_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
 
-    connect(delete_db_window_,SIGNAL(delete_database(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
+    connect(delete_db_window_,SIGNAL(delete_entity/*database*/(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
 }
 
 Databases::~Databases()
 {
-    db_connection::close();
+    db_connection::close(auth::con_name_);
+    db_connection::remove(auth::con_name_);
     delete ui;
     delete tables_window_;
     delete new_db_window_;
@@ -87,11 +88,9 @@ void Databases::create_db_slot(QString query)
     db_connection::open(auth_);
 
 
-    bool query_success=db_connection::set_query(query,model_,ui->tableView,QHeaderView::Stretch);
+    if(db_connection::set_query(query,model_,ui->tableView,QHeaderView::Stretch)){
 
-    if(query_success){
-
-        db_connection::close();
+        db_connection::close(auth::con_name_);
         on_showDB_button_clicked();
         //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
             //select_cells(0,0, ui->tableView);
@@ -118,12 +117,11 @@ void Databases::delete_database_slot(QComboBox *comboBox__)
 {
     db_connection::open(auth_);
 
-    bool query_success=db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",model_,comboBox__);
 
-    if(query_success){
+    if(db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",model_,comboBox__)){
 
-        db_connection::close();
-        on_showDB_button_clicked();
+        db_connection::close(auth::con_name_);
+//        on_showDB_button_clicked();
         //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
         select_cells(0,0, ui->tableView);
 
@@ -149,7 +147,7 @@ void Databases::on_showDB_button_clicked()
 
     db_connection::set_query("SHOW DATABASES;",model_,ui->tableView,QHeaderView::Stretch);
 
-
+qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
     //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
     select_cells(0,0, ui->tableView);
 
@@ -181,7 +179,7 @@ void Databases::on_showTables_button_clicked()
 void Databases::on_tableView_activated(const QModelIndex &index)
 {
 
-
+qDebug()<<"ACTIVATED::index=="<<index;
     QString val=ui->tableView->model()->data(index).toString();
     ui->statusLine->setText("Database activated: "+val);
 }
@@ -196,6 +194,10 @@ void Databases::on_tableView_clicked(const QModelIndex &index)
     //SET CURRENT DB NAME
     //auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
     auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+
+
+////    QSqlDatabase::database(auth::con_name_).addDatabase(auth_.db_name_);
+
 
     //QString val=ui->tableView->model()->data(index).toString();
     //ui->statusLine->setText("Database clicked: "+val);

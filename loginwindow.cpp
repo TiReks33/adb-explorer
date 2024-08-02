@@ -26,7 +26,7 @@ loginWindow::loginWindow(QWidget *parent)
 
     connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
     connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
-
+qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
 }
 
 loginWindow::~loginWindow()

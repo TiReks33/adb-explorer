@@ -11,6 +11,7 @@
 #include <QProgressDialog>
 #include <QCheckBox>
 #include <QMessageBox>
+#include <QStandardItemModel>
 
 #include "auth.h"
 #include "db_connection.h"
@@ -124,6 +125,8 @@ private:
     auth& auth_;
 
     QSqlQueryModel model_;
+
+    QStandardItemModel* stand_item_model_;
 
 ////    Custom_Query* table_query_window_;
 

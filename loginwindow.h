@@ -31,10 +31,10 @@ public:
     void closeEvent(QCloseEvent *event);
 
 
-    QString get_db_name(){return auth_.db_name_;}
-    QString get_host(){return auth_.host_;};
-    QString get_login(){return auth_.login_;}
-    QString get_passw(){return auth_.passw_;}
+//    QString get_db_name(){return auth_.db_name_;}
+//    QString get_host(){return auth_.host_;};
+//    QString get_login(){return auth_.login_;}
+//    QString get_passw(){return auth_.passw_;}
 
 public slots:
 

@@ -471,12 +471,13 @@ void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &cu
 //            }
 //    }
     auth_.db_name_=current_DB_;
-    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+//    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+    if(!db_connection::open(auth_)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
 
-    db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,multi_con_.con_name_,1);
+    db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,/*multi_con_*/auth_.con_name_,1);
 
     ui->ref_key_comboBox_2->setCurrentIndex(-1); //?
 
@@ -512,7 +513,7 @@ void CreateTableConstructor::add_tbl_constructor_table2atribute_slot(const QStri
     //db_connection::set_query("USE "+current_item_+"; " + "SHOW TABLES;",this->non_static_connection_2_->model_,ui->ref_table_comboBox_2,1);
     //  QSqlDatabase firstDB = QSqlDatabase::database("first");
     if(QSqlDatabase::database(non_dflt_conction_names_.at(1)).isOpen())
-        db_connection::close_con(non_dflt_conction_names_.at(1));//<<-- close connection
+        db_connection::close/*_con*/(non_dflt_conction_names_.at(1));//<<-- close connection
     }
 
     {
@@ -595,7 +596,7 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
     size_t con_sum=non_dflt_conction_names_.size();
         for(size_t i=0;i!=con_sum;++i)
         {
-            db_connection::close_con(non_dflt_conction_names_.at(i));
+            db_connection::close/*_con*/(non_dflt_conction_names_.at(i));
         }
         non_dflt_conction_names_.clear();
     }
@@ -719,12 +720,13 @@ void CreateTableConstructor::on_next_1_clicked()
 
         ///////////////////////////////////
 
-        if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+        //if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+        if(!db_connection::open(auth_)){
             qDebug() << QString("(x)There is error while update tables (connection is not established).");
             return;
         }
 
-        db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,multi_con_.con_name_,1);
+        db_connection::set_query("SHOW DATABASES;", submodel_0_,ui->ref_DB_comboBox_2,/*multi_con_*/auth_.con_name_,1);
 
 
         /////////////////////////////////////////////
@@ -926,7 +928,7 @@ new_select_window.custom_query_slot(QString(/*"USE "+ui->ref_DB_comboBox_2->curr
 new_select_window.exec();
 
 
-db_connection::close_con(_con_name/*__auth.db_name_*/);
+db_connection::close/*_con*/(_con_name/*__auth.db_name_*/);
 --window_counter_;
 qDebug() << "COUNTER AFTER::" << window_counter_;
 }

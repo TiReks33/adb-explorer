@@ -45,7 +45,8 @@ void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView)
 void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView,QString db_name__)
 {
     //db_connection non_static_con;
-    db_connection::open(auth_,db_name__);
+//    db_connection::open(auth_,db_name__);
+    db_connection::open(auth_);
 
 qDebug() << "ZAYCHIK";
     non_static_connection_->set_query(query,this->sub_model_,tableView,QHeaderView::Stretch,db_name__);

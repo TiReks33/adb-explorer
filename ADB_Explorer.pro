@@ -18,6 +18,7 @@ SOURCES += \
     databases.cpp \
     db_connection.cpp \
     delete_db.cpp \
+    delete_form.cpp \
     delete_table.cpp \
     helping_stuff.cpp \
     inserttupleconfirm.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     databases.h \
     db_connection.h \
     delete_db.h \
+    delete_form.h \
     delete_table.h \
     helping_stuff.h \
     inserttupleconfirm.h \
@@ -56,7 +58,7 @@ FORMS += \
     customqueryresult.ui \
     customquerysettings.ui \
     databases.ui \
-    delete_db.ui \
+    delete_form.ui \
     inserttupleconfirm.ui \
     loginwindow.ui \
     tables.ui

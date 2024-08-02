@@ -14,7 +14,7 @@ struct auth{
     auth() :
         db_server_("QMYSQL")
       , host_("localhost")
-      , con_name_("ADBEXPLORER")
+      //, con_name_("ADBEXPLORER")
     {}
 //private:
     QString db_server_; //default
@@ -26,7 +26,7 @@ struct auth{
     QString db_name_; //tables_window
     QString table_name_;
 
-    QString con_name_;
+    static QString const con_name_;
 
 };
 

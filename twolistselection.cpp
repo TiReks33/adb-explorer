@@ -27,7 +27,8 @@ QStringList TwoListSelection::selectedItems() {
 
 void TwoListSelection::update_doublelist()
 {
-    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+//    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+      if(!db_connection::open(auth_)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
@@ -39,7 +40,7 @@ void TwoListSelection::update_doublelist()
 //            list_before_changes_ << mInput->takeItem(i)->text();
 //        }
     //db_connection::set_query("SHOW TABLES;", /*multi_con_models_.at(models_cap)*/model,this,multi_con_.con_name_,1);
-    db_connection::set_query("SHOW COLUMNS FROM "+auth_.table_name_+";", this,multi_con_.con_name_);
+    db_connection::set_query("SHOW COLUMNS FROM "+auth_.table_name_+";", this,/*multi_con_*/auth_.con_name_);
 //    QStringList input;
 //    for (int i = 0; i < 10; i++) {
 //      input << QString("item-%1").arg(i);
@@ -51,7 +52,7 @@ void TwoListSelection::update_doublelist()
 
 void TwoListSelection::closeEvent(QCloseEvent *event)
 {
-    multi_con_.delete_sql_connection();
+//    multi_con_.delete_sql_connection();
         event->accept();
 }
 

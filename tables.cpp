@@ -5,6 +5,7 @@
 #include <QLabel>
 //#include <QStackedLayout>
 #include <QGraphicsEffect>
+#include <QElapsedTimer>
 
 #include <customqueryresult.h>
 #include <ui_customqueryresult.h>
@@ -15,6 +16,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 //  , db_server_("QMYSQL")
   , auth_(auth__)
 ////  , table_query_window_(new Custom_Query)
+  , stand_item_model_(new QStandardItemModel)
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
@@ -95,7 +97,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     connect(delete_table_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
 //    connect(delete_table_window_,&delete_table::delete_form_send,this,&Tables::delete_form_send_slot);
 
-    connect(delete_table_window_,SIGNAL(delete_table_sig(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
+    connect(delete_table_window_,SIGNAL(delete_entity(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
 //    connect(delete_table_window_,&delete_table::delete_table_sig,this,&Tables::delete_table_slot);
 
     connect(this,SIGNAL(current_tables_list_signal(QList<QString>)),constructor_,SLOT(current_exist_tables_slot(QList<QString>)));
@@ -127,6 +129,7 @@ Tables::~Tables()
 {
     delete ui;
 ////    delete table_query_window_;
+    delete stand_item_model_;
     delete custom_query_result_window_;
     delete settings_;
     delete delete_table_window_;
@@ -160,22 +163,65 @@ bool Tables::event(QEvent* event)
   return QDialog::event(event);
 }
 
+
+
 void Tables::show_tables()
 {
-    //if(QSqlDatabase::database().databaseName().isNull())
-        db_connection::close(); // if database name in connection is not added
-    // ==> close current and open new connect
+QElapsedTimer timer;
+timer.start();
 
-    db_connection::open(auth_);
+    // ==> close current and open new connect with chosen db
+        db_connection::close(auth::con_name_);
+
+        QSqlDatabase::database(auth::con_name_).setDatabaseName(auth_.db_name_);
+
+    do{
+        if(db_connection::reopen_exist(auth::con_name_)){
+            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successful reopened.");
+            break;
+        } else {
+            db_connection::remove(auth::con_name_);
+        }
+        if(!db_connection::open(auth_)){
+            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to open.");
+            return;
+        }
+    }while(false);
 
 
-    db_connection::set_query("SHOW TABLES;",model_,ui->tableView,QHeaderView::Stretch);
+
+//         QStringList list = QSqlDatabase::database(auth::con_name_) .tables();
+
+//         int capacity = list.length();
+//  ////
+
+//         QStandardItemModel* model = stand_item_model_/*(capacity,1)*/;
+//         //ui->tableView->setModel(&model);
+//         stand_item_model_=new QStandardItemModel;
+//         for( int i = 0 ; i != capacity ; ++i )
+//         {
+//             stand_item_model_->insertRow(i);
+
+//             // First Column
+//             stand_item_model_->setItem( i , 0 , new QStandardItem( list.at(i) ) );
+//         }
+//         ui->tableView->setModel(stand_item_model_);
+//        delete model;
+//        ui->tableView->model()->setHeaderData(0, Qt::Horizontal, "Database ::"+auth_.db_name_+":: tables", Qt::DisplayRole);
+//         ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//qDebug() << "The Standard model operation took" << timer.elapsed() << "milliseconds";
+//qDebug() << "The Standard model operation took" << timer.nsecsElapsed() << "nanoseconds";
 
 
-    select_cells(0,0, ui->tableView);
 
-    auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+    if(db_connection::set_query("SHOW TABLES;",model_,ui->tableView,QHeaderView::Stretch)){
 
+        if((ui->tableView->model())!=nullptr){
+            select_cells(0,0, ui->tableView);
+
+
+            auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+        }
 
         qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
 
@@ -189,6 +235,10 @@ void Tables::show_tables()
             ui->select_from_table_button->setEnabled(true);
             ui->select_from_table_button->setStyleSheet("background: green; color: white;");
         }
+    }
+
+qDebug() << "The Set query model operation took" << timer.elapsed() << "milliseconds";
+qDebug() << "The Set query model operation took" << timer.nsecsElapsed() << "nanoseconds";
 }
 
 void Tables::send_custom_query_slot(QString query__)
@@ -295,21 +345,14 @@ void Tables::delete_table_slot(QComboBox *comboBox__)
 {
     db_connection::open(auth_);
 
-    bool query_success=db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",model_,comboBox__);
-
-    if(query_success){
-
-        db_connection::close();
-        on_showDB_button_clicked();
-        //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
-        select_cells(0,0, ui->tableView);
-
-    } else {
+    if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",model_,comboBox__)){
 
         QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
 
     }
-    on_showDB_button_clicked(); // view tables after deletion
+
+    show_tables();      // view updated tables list after table deletion
+    //select_cells(0,0, ui->tableView);
 }
 
 void Tables::constructor_create_tbl_query_slot(QString query__)
