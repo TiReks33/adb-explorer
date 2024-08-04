@@ -5,7 +5,7 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CustomQueryResult)
   , auth_(auth__)
-  , non_static_connection_(new db_connection)
+  //, non_static_connection_(new db_connection)
 {
     ui->setupUi(this);
 
@@ -22,7 +22,7 @@ void CustomQueryResult::custom_query_slot(QString query)
     db_connection::open(auth_);
 
 
-    db_connection::set_query(query,this->non_static_connection_->model_,ui->tableView,QHeaderView::Stretch);
+    db_connection::set_query(query,&model_,ui->tableView,QHeaderView::Stretch);
 }
 
 //void CustomQueryResult::custom_query_slot(QString query, QTableView * tableview_)
@@ -39,7 +39,7 @@ void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView)
     db_connection::open(auth_);
 
 
-    non_static_connection_->set_query(query,this->non_static_connection_->model_,tableView,QHeaderView::Stretch);
+    db_connection::set_query(query,&model_,tableView,QHeaderView::Stretch);
 }
 
 void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView,QString db_name__)
@@ -49,7 +49,7 @@ void CustomQueryResult::custom_query_slot(QString query,QTableView*tableView,QSt
     db_connection::open(auth_);
 
 qDebug() << "ZAYCHIK";
-    non_static_connection_->set_query(query,this->sub_model_,tableView,QHeaderView::Stretch,db_name__);
+    db_connection::set_query(query,&this->/*sub_*/model_,tableView,QHeaderView::Stretch/*,db_name__*/);
 }
 
 void CustomQueryResult::custom_query_slot(QString query,QComboBox*comboBox)
@@ -58,7 +58,7 @@ void CustomQueryResult::custom_query_slot(QString query,QComboBox*comboBox)
     db_connection::open(auth_);
 
 
-    non_static_connection_->set_query(query,this->non_static_connection_->model_,comboBox,QHeaderView::Stretch);
+    db_connection::set_query(query,&this->model_,comboBox/*,QHeaderView::Stretch*/);
 }
 
 //void CustomQueryResult::custom_query_slot(QString query, QSqlQueryModel model_, QTableView *tableView)
@@ -74,7 +74,7 @@ void CustomQueryResult::custom_query_slot(QString query,QComboBox*comboBox)
 CustomQueryResult::~CustomQueryResult()
 {
     delete ui;
-    delete non_static_connection_;
+  //  delete non_static_connection_;
 }
 
 void CustomQueryResult::on_Cancel_button_clicked()

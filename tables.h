@@ -88,7 +88,7 @@ signals:
 private slots:
 
 
-    void on_showDB_button_clicked();
+    void on_showTable_button_clicked();
 
     void on_tableView_clicked(const QModelIndex &index);
 
@@ -126,7 +126,7 @@ private:
 
     QSqlQueryModel model_;
 
-    QStandardItemModel* stand_item_model_;
+    //QStandardItemModel* stand_item_model_;
 
 ////    Custom_Query* table_query_window_;
 

@@ -15,6 +15,14 @@
 #include "helping_stuff.h"
 #include "multi_connection.h"
 
+
+//enum class safe_close
+//{
+//    no_ = 0,
+//    yes_ = 1
+//};
+
+
 namespace Ui {
 class CreateTableConstructor;
 }
@@ -105,7 +113,7 @@ private:
     auth& auth_;
     auth auth_autonome_;
 
-    db_connection* non_static_connection_;
+////    db_connection* non_static_connection_;
 //    db_connection* non_static_connection_2_;
 
 //    QSqlQueryModel model_;
@@ -124,6 +132,8 @@ private:
     bool _warning_flag_=true;
 
     multi_connection multi_con_;
+
+    QString const test="abc";
 
 };
 

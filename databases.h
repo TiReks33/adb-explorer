@@ -42,7 +42,9 @@ public slots:
 
     void delete_database_slot(QComboBox*);
 
-    void db_show_slot();
+//    void db_show_slot();
+
+    void show_databases();
 
 signals:
     void test_signal();

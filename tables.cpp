@@ -16,7 +16,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 //  , db_server_("QMYSQL")
   , auth_(auth__)
 ////  , table_query_window_(new Custom_Query)
-  , stand_item_model_(new QStandardItemModel)
+  //, stand_item_model_(new QStandardItemModel)
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
@@ -129,7 +129,7 @@ Tables::~Tables()
 {
     delete ui;
 ////    delete table_query_window_;
-    delete stand_item_model_;
+   // delete stand_item_model_;
     delete custom_query_result_window_;
     delete settings_;
     delete delete_table_window_;
@@ -177,13 +177,20 @@ timer.start();
 
     do{
         if(db_connection::reopen_exist(auth::con_name_)){
-            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successful reopened.");
+            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
+            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
             break;
         } else {
+            qDebug() << QString("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
+            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
             db_connection::remove(auth::con_name_);
         }
-        if(!db_connection::open(auth_)){
+        if(db_connection::open(auth_)){
+            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
+            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
+        } else {
             ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to open.");
+            qDebug() << "(x)Connection ::"+auth::con_name_+":: failed to open.";
             return;
         }
     }while(false);
@@ -214,7 +221,7 @@ timer.start();
 
 
 
-    if(db_connection::set_query("SHOW TABLES;",model_,ui->tableView,QHeaderView::Stretch)){
+    if(db_connection::set_query("SHOW TABLES;",&model_,ui->tableView,QHeaderView::Stretch)){
 
         if((ui->tableView->model())!=nullptr){
             select_cells(0,0, ui->tableView);
@@ -256,7 +263,7 @@ void Tables::send_custom_query_slot(QString query__)
     db_connection::open(auth_);
 
 
-    if(db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch))
+    if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch))
         emit close_custom_query_form(); // don't need anymore?
     if(!ui->tableView->model()->columnCount()) {
         show_tables();
@@ -300,7 +307,7 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_quer
     db_connection::open(auth_);
 
 
-    if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),model_,ui->tableView,QHeaderView::Stretch))
+    if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,ui->tableView,QHeaderView::Stretch))
         ////emit close_custom_query_form();
         custom_query_window__->close_window();
     if(!ui->tableView->model()->columnCount()) {
@@ -336,7 +343,7 @@ void Tables::delete_form_send_slot(QComboBox *comboBox__)
     db_connection::open(auth_);
 
 
-    db_connection::set_query("SHOW TABLES;",model_,comboBox__);
+    db_connection::set_query("SHOW TABLES;",&model_,comboBox__);
 
     comboBox__->setCurrentIndex(-1); //for blank cell default
 }
@@ -345,7 +352,7 @@ void Tables::delete_table_slot(QComboBox *comboBox__)
 {
     db_connection::open(auth_);
 
-    if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",model_,comboBox__)){
+    if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",&model_,comboBox__)){
 
         QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
 
@@ -370,7 +377,7 @@ void Tables::constructor_create_tbl_query_slot(QString query__)
 //        //qDebug() << "!!!" << (QSqlQuery(QSqlDatabase::database().connectionName(auth_.db_server_)).lastError());
 
 //    }
-    if(db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch)) //TABLE MAIN WINDOW MODEL
+    if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch)) //TABLE MAIN WINDOW MODEL
         emit constructor_query_success();
     else
         emit constructor_query_fails();
@@ -378,7 +385,7 @@ void Tables::constructor_create_tbl_query_slot(QString query__)
 }
 
 
-void Tables::on_showDB_button_clicked()
+void Tables::on_showTable_button_clicked()
 {
     show_tables();
 }
@@ -400,7 +407,7 @@ void Tables::on_select_from_table_button_clicked()
     db_connection::open(auth_);
 
 
-    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),model_,ui->tableView,QHeaderView::Stretch);
+    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),&model_,ui->tableView,QHeaderView::Stretch);
     }else{
 //        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
         CustomQueryResult new_select_window{auth_};
@@ -485,6 +492,8 @@ void Tables::on_create_table_button_clicked()
 {
 
     if(!constructor_->isVisible()){
+
+    //auth_.backup_db_name();
 
     constructor_->setCurrentIndex(0);
 

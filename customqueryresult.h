@@ -43,11 +43,11 @@ private:
 
     auth& auth_;
 
-    //QSqlQueryModel model_;
+     QSqlQueryModel model_;
 
-    db_connection* non_static_connection_;
+    // db_connection* non_static_connection_;
 
-    QSqlQueryModel sub_model_;
+    // QSqlQueryModel sub_model_;
 };
 
 #endif // CUSTOMQUERYRESULT_H

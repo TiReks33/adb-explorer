@@ -18,78 +18,48 @@
 struct multi_connection; // declarations
 class TwoListSelection;
 
+
+//enum class default_con_{
+//    non_default_ = 0,
+//    default_=1
+//};
+
+
 struct db_connection{
-    // get unique connection name if format: [ class-name + next_number ]
-    static QString get_unique_con_name(QMetaObject const * class_meta_obj__,multi_connection*multi_con__);
+//    // get unique connection name if format: [ class-name + next_number ]
+//    static QString get_unique_con_name(QMetaObject const * class_meta_obj__,multi_connection*multi_con__);
 
-static bool open(auth&);
+static bool open_default(auth&);
 
-static bool reopen_exist(QString const &);
+static bool open(auth&,QString const & = auth::con_name_);
 
-//static bool open(auth&, default_con_); // switch between methods
-
-//static bool open(auth&,QString);
-
-//static int open(auth&,QString,int);
-
-//static bool open (auth&,/*QString*/QMetaObject const *,multi_connection*); // Unique name inside
-
-//static bool open (auth&,QString,multi_connection*); // Unique name OUTside
+static bool reopen_exist(QString const & /*= auth::con_name_*/);
 
 
 
-//static void close();
+static void close/*_con*/(QString const & /*= auth::con_name_*/);
 
-static void close/*_con*/(QString const &);
-
-static void remove(QString const &);
-
-//static void close(QStringList*);
+static void remove(QString const & /*= auth::con_name_*/);
 
 
 
 
 
-// USES NON DEFAULT CONNECTION -->
-static bool set_query(QString, QSqlQueryModel&model__,QTableView*,QHeaderView::ResizeMode scalemode,QString); //NEWNEW
+static bool set_query(QString, QSqlQueryModel&model__,QListWidget*,QString const & = auth::con_name_); //*qlistwidget
 
-static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,QString,int); //NEWNEWNEW
+static bool set_query(QString, /*QSqlQueryModel&model__,*/TwoListSelection*,QString const & = auth::con_name_); //*double-list class
 
-static bool set_query(QString, QSqlQueryModel&model__,QListWidget*,QString,int); //*qlistwidget
+static bool set_query(QString, QSqlQueryModel*model__,QAbstractItemView*, QString const & = auth::con_name_);
 
-static bool set_query(QString, /*QSqlQueryModel&model__,*/TwoListSelection*,QString/*,int*/); //*double-list class
-//<<-
+static bool set_query(QString, QSqlQueryModel*model__,QTableView*,QHeaderView::ResizeMode scalemode=QHeaderView::Stretch,QString const & = auth::con_name_);
 
-
-
-
-
-// USES DEFAULT CONNECTION -->
-static bool set_query(QString, QSqlQueryModel&,QAbstractItemView*);
-
-static bool set_query(QString, QSqlQueryModel&model__,QTableView*,QHeaderView::ResizeMode scalemode);
-
-static bool set_query(QString, QSqlQueryModel&model__,QComboBox*,int);
-
-static bool set_query(QString, QSqlQueryModel*model__,QComboBox*,int);
-
-bool set_query(QString query, QSqlQueryModel&model__, QComboBox *comboBox, QHeaderView::ResizeMode scalemode);
-
-bool set_query(QString, /*QSqlQueryModel&,*/QTableView*,QHeaderView::ResizeMode scalemode/*,int*/);
-
-static bool set_query(QString, QSqlQueryModel&,QComboBox*/*,QHeaderView::ResizeMode scalemode*/);
-//<<-
+static bool set_query(QString, QSqlQueryModel*model__,QComboBox*, QString const & = auth::con_name_);
 
 
 
 
 
 
-
-
-
-
-QSqlQueryModel model_;
 
 };
 
