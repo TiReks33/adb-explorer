@@ -16,27 +16,35 @@ class CustomQueryResult : public QDialog
 
 public:
     explicit CustomQueryResult(auth& auth__,QWidget *parent = nullptr);
+
     ~CustomQueryResult();
 
 public slots:
 
     friend class Tables;
-    friend class CreateTableConstructor;
+    ////friend class CreateTableConstructor;
 
-    void custom_query_slot(QString);
+////    void custom_query_slot(QString);
+
+    void custom_query_slot(/*auth &,*/ QString const & query__, QString const & = auth::con_name_, QHeaderView::ResizeMode = QHeaderView::Stretch);
 
 //    void custom_query_slot(QString,QTableView*);
 
-    void custom_query_slot(QString,QTableView*);
+////    void custom_query_slot(QString,QTableView*);
 
-    void custom_query_slot(QString,QTableView*,QString);
+////    void custom_query_slot(QString,QTableView*,QString);
 
 //    void custom_query_slot(QString,QSqlQueryModel,QTableView*);
 
-    void custom_query_slot(QString,QComboBox*);
+////    void custom_query_slot(QString,QComboBox*);
 
 private slots:
     void on_Cancel_button_clicked();
+
+    void close_window();
+
+//public:
+//    void set_auth
 
 private:
     Ui::CustomQueryResult *ui;

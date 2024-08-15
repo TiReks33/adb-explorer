@@ -8,7 +8,7 @@
 #include "ui_customqueryresult.h"
 #include "twolistselection.h"
 #include "helping_stuff.h"
-
+#include "tables.h"
 
 namespace Ui {
 class createTupleConstructor;
@@ -41,6 +41,8 @@ private slots:
 
     void on_addTupleButton_clicked();
 
+    void on_describeButton_clicked();
+
 public slots:
     void /*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
 
@@ -49,6 +51,8 @@ public slots:
 signals:
 
     void final_query_sig(QString);
+
+    void closed();
 
 private:
     Ui::createTupleConstructor *ui;
@@ -72,6 +76,7 @@ private:
     //<<-
     int tuples_added_=0;
     QStringList tuples_;
+    QPointer<CustomQueryResult> describe_form_;
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H

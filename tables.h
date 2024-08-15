@@ -23,7 +23,7 @@
 #include "delete_db.h"
 #include "delete_table.h"
 #include "create_table_constructor.h"
-#include "createtupleconstructor.h"
+//#include "createtupleconstructor.h"
 
 namespace Ui {
 class Tables;
@@ -55,6 +55,8 @@ public slots:
 
     void constructor_create_tbl_query_slot(QString);
 
+    void show_table_describe_form(QString const & db_name__,QString const&table_name__,QString const & con_name__ = auth::con_name_, QWidget * parent__ = nullptr, Qt::WindowType window_type_flag__ = Qt::Dialog, Qt::WindowModality window_modality_flag__ = Qt::NonModal) const;
+
 //    void insert_into_query_handle(QString);
 
 signals:
@@ -63,9 +65,13 @@ signals:
 
     //void canceled();
 
-    void custom_query(QString);
+    ////void custom_query(QString);
 
-    void custom_query(QString,QTableView*);
+    void custom_query(auth&,QString);
+
+    ////void custom_query(QString,QTableView*);
+
+    void custom_query(auth&, QString,QTableView*);
 
     void custom_query(QString,QSqlQueryModel&,QTableView*);
 
@@ -83,7 +89,7 @@ signals:
 
     void tpl_cnstr_upd_tables();
 
-    void custom_query_windows_close();
+    void custom_query_windows_close(); // 'close/*_stack*/_childs?
 
 private slots:
 
@@ -102,7 +108,7 @@ private slots:
 
     void on_Query_settings_clicked();
 
-    void on_pushButton_clicked();
+    void on_delete_table_button_clicked();
 
     void on_create_table_button_clicked();
 
@@ -111,6 +117,8 @@ private slots:
     void get_custom_query_window_();
 
     void get_custom_query_window_(QString);
+
+    void on_pushButton_2_clicked();
 
 protected:
     bool event(QEvent* event);
@@ -141,6 +149,8 @@ private:
     CreateTableConstructor* constructor_;
 
 //    createTupleConstructor* insert_constructor_;
+
+    QVector<QPointer<CustomQueryResult>> tuples_windows_vector_;
 
 };
 

@@ -33,7 +33,7 @@ struct auth{
 
     static QString const con_name_;
 
-    static QString const default_con_name_;
+//    static QString const default_con_name_;
 
 };
 

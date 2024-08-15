@@ -103,7 +103,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="delete_table_button">
        <property name="styleSheet">
         <string notr="true">background: red;</string>
        </property>

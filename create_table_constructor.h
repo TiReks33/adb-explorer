@@ -14,8 +14,10 @@
 #include "db_connection.h"
 #include "helping_stuff.h"
 #include "multi_connection.h"
+#include "QPointer"
 
-
+//#include "tables.h"
+class Tables;
 //enum class safe_close
 //{
 //    no_ = 0,
@@ -33,7 +35,7 @@ class CreateTableConstructor : public QStackedWidget
 
 public:
 
-    explicit CreateTableConstructor(auth& auth__,QWidget *parent = nullptr);
+    explicit CreateTableConstructor(auth& auth__,/*QWidget*/Tables *parent = nullptr);
     ~CreateTableConstructor();
 
     bool decimal_type_more_or_eq();
@@ -99,9 +101,17 @@ private slots:
 
     void on_help_button_1_clicked();
 
+    void on_reload_con_button_2_clicked();
+
+    void on_cancel_1_clicked();
+
+    void on_pushButton_clicked();
+
 signals:
 
     void send_custom_query(QString);
+
+    void closed();
 
 private:
     Ui::CreateTableConstructor *ui;
@@ -125,7 +135,7 @@ private:
 
     QList<QString> exist_table_names_;
 
-    int window_counter_=0;
+    //int window_counter_=0;
 
     int attributes_added_=0;
 
@@ -133,7 +143,13 @@ private:
 
     multi_connection multi_con_;
 
-    QString const test="abc";
+    //QString const test="abc";
+
+    Tables *parent_;
+
+    //CustomQueryResult* describe_form_;
+    //QScopedPointer<CustomQueryResult> describe_form_;
+    QPointer<CustomQueryResult> describe_form_;
 
 };
 

@@ -220,6 +220,7 @@ void createTupleConstructor::closeEvent(QCloseEvent *event)
 
 
 //    multi_con_.delete_sql_connection();
+    emit closed();
         event->accept();
 }
 
@@ -266,4 +267,55 @@ void createTupleConstructor::on_addTupleButton_clicked()
     tuples_.append(ui->plainTextEdit->toPlainText());
 
     ui->label_amount->setText(QString::number(++tuples_added_));
+}
+
+void createTupleConstructor::on_describeButton_clicked()
+{
+    //Tables* window = qobject_cast<Tables *>(parent());
+    //window->show_table_describe_form(auth_.db_name_,ui->comboBox->currentText(),auth::con_name_,this,Qt::Dialog,Qt::WindowModal);
+
+    if(describe_form_!=nullptr)//{
+    describe_form_->close();
+
+    ////parent_->show_table_describe_form(ui->ref_DB_comboBox_2->currentText(),ui->ref_table_comboBox_2->currentText(),parent_->metaObject()->className(),this,Qt::Dialog,Qt::WindowModal);
+    QString con_name = QString(this->metaObject()->className())+" describe_form";
+    //QString db_name = auth_.db_name_;
+    QString table_name = ui->comboBox->currentText();
+    ////db_connection::close(con_name);
+    //db_connection::remove(con_name__);
+    //auth __auth = auth_;
+    //__auth.db_name_ = db_name;
+
+
+    //QSqlDatabase::database(con_name,false).setDatabaseName(__auth.db_name_); //2
+
+
+    describe_form_ = new CustomQueryResult{auth_};
+
+
+
+    connect(this,&createTupleConstructor::closed,[=](){ describe_form_->close(); });
+
+    Tables* parent_window = qobject_cast<Tables *>(parent());
+
+    connect(describe_form_,&CustomQueryResult::destroyed,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
+    db_connection::close(con_name);
+    });
+
+
+    describe_form_->setWindowTitle(table_name);
+
+
+describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),con_name); //3
+
+
+
+//new_select_window.setParent(parent__);
+//new_select_window.setWindowFlag(window_type_flag__);
+//new_select_window.setWindowModality(window_modality_flag__);
+
+describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
+describe_form_->show();
+
+describe_form_-> exec();
 }

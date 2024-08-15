@@ -66,6 +66,8 @@ void loginWindow::on_pushButton_clicked()
     auth_.passw_=this->ui->Password_Form->text();
     auth_.host_=this->ui->Host_Form->text();
 
+
+
         if(!db_connection::open(auth_))
             ui->statusbar->showMessage("(x)Authorization wrong. Please check your login details.");
         else{

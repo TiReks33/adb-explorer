@@ -10,6 +10,8 @@
 #include <customqueryresult.h>
 #include <ui_customqueryresult.h>
 
+#include "createtupleconstructor.h"
+
 Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Tables)
@@ -20,7 +22,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
-  , constructor_(new CreateTableConstructor{auth_/*,this*/})
+  , constructor_(new CreateTableConstructor{auth_,this})
 //  , insert_constructor_{new createTupleConstructor{auth_}}
 {
     ui->setupUi(this);
@@ -71,7 +73,10 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 //        centralWidget1->show();
 
 
+    constructor_->setWindowFlag(Qt::Dialog);
 
+
+    constructor_->setWindowModality(Qt::WindowModal);
 
 
 
@@ -80,15 +85,11 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
 
     //SIGNALS
-////    connect(table_query_window_,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
 
-    connect(this,SIGNAL(custom_query(QString)),custom_query_result_window_,SLOT(custom_query_slot(QString)));
+        ////connect(this,SIGNAL(custom_query(auth&,QString)),custom_query_result_window_,SLOT(custom_query_slot(auth&,QString)));
 
-    connect(this,SIGNAL(custom_query(QString,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QTableView*)));
+        ////connect(this,SIGNAL(custom_query(auth&,QString,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(auth&,QString,QTableView*)));
 
-//    connect(this,SIGNAL(custom_query(QString,QSqlQueryModel,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(QString,QSqlQueryModel,QTableView*)));
-
-    //connect(this,SIGNAL(custom_query(QString,int)),custom_query_result_window_,SLOT(custom_query_slot(QString,int)));
 
 
     connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
@@ -145,6 +146,9 @@ void Tables::closeEvent(QCloseEvent *event)
     emit custom_query_windows_close();
 
     custom_query_result_window_->close();
+
+    db_connection::close(this->metaObject()->className());
+    db_connection::remove(this->metaObject()->className());
 }
 
 bool Tables::event(QEvent* event)
@@ -171,29 +175,34 @@ QElapsedTimer timer;
 timer.start();
 
     // ==> close current and open new connect with chosen db
-        db_connection::close(auth::con_name_);
+db_connection::close();
 
-        QSqlDatabase::database(auth::con_name_).setDatabaseName(auth_.db_name_);
+        QSqlDatabase::database(auth::con_name_,false).setDatabaseName(auth_.db_name_);
 
-    do{
-        if(db_connection::reopen_exist(auth::con_name_)){
-            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
-            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
-            break;
-        } else {
-            qDebug() << QString("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
-            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
-            db_connection::remove(auth::con_name_);
-        }
-        if(db_connection::open(auth_)){
-            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
-            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
-        } else {
-            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to open.");
-            qDebug() << "(x)Connection ::"+auth::con_name_+":: failed to open.";
-            return;
-        }
-    }while(false);
+
+
+qDebug() << "AFTER CLOSE()::";
+
+        db_connection::try_to_reopen(auth_);
+//    do{
+//        if(db_connection::reopen_exist(auth::con_name_)){
+//            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
+//            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
+//            break;
+//        } else {
+//            qDebug() << QString("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
+//            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
+//            db_connection::remove();
+//        }
+//        if(db_connection::open(auth_)){
+//            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
+//            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
+//        } else {
+//            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to open.");
+//            qDebug() << "(x)Connection ::"+auth::con_name_+":: failed to open.";
+//            return;
+//        }
+//    }while(false);
 
 
 
@@ -275,7 +284,7 @@ void Tables::send_custom_query_slot(QString query__)
         CustomQueryResult new_result_window{auth_};
         //new_result_window.show();
 //    custom_query_result_window_->show();
-    new_result_window.custom_query_slot(query__, /*new_result_window->model_,*/ new_result_window.ui->tableView);
+    new_result_window.custom_query_slot(/*auth_,*/query__/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
     //if(new_result_window.ui->tableView->model()->rowCount()!=0)
     if((new_result_window.ui->tableView->model())!=nullptr) {
 
@@ -320,7 +329,7 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_quer
         CustomQueryResult new_result_window{auth_};
         //new_result_window.show();
 //    custom_query_result_window_->show();
-    new_result_window.custom_query_slot(/*query__*/custom_query_window__->get_text(), /*new_result_window->model_,*/ new_result_window.ui->tableView);
+    new_result_window.custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
     //if(new_result_window.ui->tableView->model()->rowCount()!=0)
     if((new_result_window.ui->tableView->model())!=nullptr) {
 
@@ -385,6 +394,48 @@ void Tables::constructor_create_tbl_query_slot(QString query__)
 }
 
 
+
+void Tables::show_table_describe_form(QString const & db_name__,QString const&table_name__,QString const & con_name__,QWidget * parent__, Qt::WindowType window_type_flag__,Qt::WindowModality window_modality_flag__) const
+{
+    db_connection::close(con_name__);
+    //db_connection::remove(con_name__);
+    auth __auth = auth_;
+    __auth.db_name_=db_name__;//ui->ref_DB_comboBox_2->currentText();
+//qDebug() << "COUNTER BEFORE::" << window_counter_;
+//    ++window_counter_;
+
+    QSqlDatabase::database(con_name__,false).setDatabaseName(__auth.db_name_);
+
+    CustomQueryResult new_select_window{__auth};
+
+    //__auth.db_name_=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
+    ////QString _con_name=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
+
+    new_select_window.setWindowTitle(/*ui->ref_table_comboBox_2->currentText()*/table_name__);
+
+//custom_query_result_window_->show();
+new_select_window.custom_query_slot(/*__auth,*/QString(/*"USE "+ui->ref_DB_comboBox_2->currentText()+';'+' '+*/"DESCRIBE ")+
+                                    /*ui->ref_table_comboBox_2->currentText()*/table_name__+(";")/*,new_select_window->ui->tableView*/,
+                                    /*new_select_window->model_,*//*new_select_window.ui->tableView,*/ /*_con_name*/con_name__/*__auth.db_name_*/);
+//if(model_.rowCount()!=0)
+
+
+new_select_window.setParent(parent__);
+new_select_window.setWindowFlag(window_type_flag__);
+new_select_window.setWindowModality(window_modality_flag__);
+
+new_select_window.show();
+
+new_select_window.exec();
+qDebug()<<"AFTER EXECUTION()";
+                                                                    ////db_connection::close(con_name__);
+////db_connection::close/*_con*/(/*_con_name*/con_name__/*__auth.db_name_*/);
+//--window_counter_;
+//qDebug() << "COUNTER AFTER::" << window_counter_;
+}
+
+
+
 void Tables::on_showTable_button_clicked()
 {
     show_tables();
@@ -411,10 +462,16 @@ void Tables::on_select_from_table_button_clicked()
     }else{
 //        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
         CustomQueryResult new_select_window{auth_};
+
+        // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
+        connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
+
+        new_select_window.setWindowTitle(auth_.table_name_+": table data");
         new_select_window.show();
     //custom_query_result_window_->show();
-    new_select_window.custom_query_slot(QString("SELECT * FROM ")+auth_.table_name_+(";")/*,new_select_window->ui->tableView*/, /*new_select_window->model_,*/new_select_window.ui->tableView);
+    new_select_window.custom_query_slot(/*auth_,*/QString("SELECT * FROM ")+auth_.table_name_+(";")/*,new_select_window->ui->tableView*//*,*/ /*new_select_window->model_,*//*new_select_window.ui->tableView*/);
     //if(model_.rowCount()!=0)
+    qDebug()<<"BEFORE EXECUTION ::";
     new_select_window.exec();
     }
 }
@@ -481,7 +538,7 @@ void Tables::on_Query_settings_clicked()
     settings_->show();
 }
 
-void Tables::on_pushButton_clicked()
+void Tables::on_delete_table_button_clicked()
 {
     delete_table_window_->setModal(true);
     delete_table_window_->show();
@@ -522,12 +579,13 @@ void Tables::on_create_table_button_clicked()
 //    constructor_->move(centerPoint.x() - constructor_->width()/2, centerPoint.y() - constructor_->height()/2);
     window_center_from_another_(this,constructor_);
 
-    constructor_->setParent(this);
+    ////constructor_->setParent(this);
+
 //    constructor_->setWindowFlag(Qt::Window);
-    constructor_->setWindowFlag(Qt::Dialog);
+////    constructor_->setWindowFlag(Qt::Dialog);
 
 
-    constructor_->setWindowModality(Qt::WindowModal);
+////    constructor_->setWindowModality(Qt::WindowModal);
 //    constructor_->setWindowModality(Qt::NonModal);
     constructor_->show();
 
@@ -543,14 +601,43 @@ void Tables::on_insert_inTable_button_clicked()
 {
 
     //insert_constructor_->show();
-    createTupleConstructor constr_window_{auth_};
+    createTupleConstructor constr_window_{auth_,this};
     constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
     //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
 ////    connect(&constr_window_, /*&createTupleConstructor::*/SIGNAL(final_query_sig(QString)), this, SLOT(/*&Tables::*/send_custom_query_slot(QString)));
     connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString)>(&createTupleConstructor::final_query_sig),
             this, static_cast<void (Tables::*) (QString)>(&Tables::get_custom_query_window_));
+    connect(this,&Tables::custom_query_windows_close, &constr_window_, &createTupleConstructor::close);
     //emit tpl_cnstr_upd_tables();
     constr_window_.setModal(false);
     constr_window_.show();
     constr_window_.exec();
+}
+
+void Tables::on_pushButton_2_clicked()
+{
+    ////show_table_describe_form(auth_.db_name_,auth_.table_name_,this->metaObject()->className());
+
+    QString query_text = "DESC "+auth_.table_name_+';';
+
+    if(!settings_->ui->select_checkbox->isChecked()){        
+    db_connection::open(auth_);
+
+
+    db_connection::set_query(query_text,&model_,ui->tableView,QHeaderView::Stretch);
+    }else{
+//        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
+        CustomQueryResult new_select_window{auth_};
+
+        // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
+        connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
+
+        new_select_window.setWindowTitle(auth_.table_name_+": detail table info");
+        new_select_window.show();
+    //custom_query_result_window_->show();
+    new_select_window.custom_query_slot(query_text);
+    //if(model_.rowCount()!=0)
+    qDebug()<<"BEFORE EXECUTION ::";
+    new_select_window.exec();
+    }
 }

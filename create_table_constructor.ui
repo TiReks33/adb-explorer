@@ -32,7 +32,7 @@
    <enum>QFrame::Raised</enum>
   </property>
   <property name="currentIndex">
-   <number>1</number>
+   <number>2</number>
   </property>
   <widget class="QWidget" name="page">
    <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -936,19 +936,31 @@ will be entered or some file opened.&lt;/font&gt;</string>
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="erase_button_1">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QFrame" name="frame_14">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color: red</string>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
          </property>
-         <property name="text">
-          <string>Erase added attributes</string>
-         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QPushButton" name="erase_button_1">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: red</string>
+            </property>
+            <property name="text">
+             <string>Erase added attributes</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -1116,22 +1128,6 @@ will be entered or some file opened.&lt;/font&gt;</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="3">
-             <widget class="QPushButton" name="describe_tbl_button_2">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">background-color: lightblue;</string>
-              </property>
-              <property name="text">
-               <string>Describe table</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="4">
              <widget class="QComboBox" name="ref_table_comboBox_2">
               <property name="enabled">
@@ -1265,6 +1261,29 @@ will be entered or some file opened.&lt;/font&gt;</string>
               <property name="text">
                <string>Reload DB
 connection</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4">
+             <widget class="QPushButton" name="describe_tbl_button_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: lightblue;</string>
+              </property>
+              <property name="text">
+               <string>Describe table</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="5">
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>PushButton</string>
               </property>
              </widget>
             </item>
@@ -1704,19 +1723,31 @@ will be entered or some file opened.&lt;/font&gt;</string>
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="reset_button_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QFrame" name="frame_13">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
-         <property name="styleSheet">
-          <string notr="true">background-color:red;</string>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
          </property>
-         <property name="text">
-          <string>Reset keys</string>
-         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QPushButton" name="reset_button_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color:red;</string>
+            </property>
+            <property name="text">
+             <string>Reset keys</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>

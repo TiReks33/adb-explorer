@@ -1,8 +1,8 @@
 #include "create_table_constructor.h"
 #include "ui_create_table_constructor.h"
+#include "tables.h"
 
-
-CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
+CreateTableConstructor::CreateTableConstructor(auth& auth__,/*QWidget*/Tables *parent) :
     QStackedWidget(parent),
     ui(new Ui::CreateTableConstructor)
   , first_attribute_(true)
@@ -11,9 +11,10 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
   , auth_(auth__)
 ////  , non_static_connection_(new db_connection)
 //  , non_static_connection_2_(new db_connection)
+  , parent_(parent)
+  ////, describe_form_{new CustomQueryResult{auth_}}
 {
     ui->setupUi(this);
-
 
 //    auth_autonome_.host_=auth_.host_;
 //    auth_autonome_.login_=auth_.login_;
@@ -56,17 +57,19 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,QWidget *parent) :
 
     //constructor
 //    connect(ui->ref_DB_comboBox_2,SIGNAL(stateChanged(int)),this, SLOT(add_tbl_constructor_db2table_slot(int)));
-    connect(ui->ref_DB_comboBox_2,SIGNAL(activated(QString const&)),this, SLOT(add_tbl_constructor_db2table_slot(const QString &)),Qt::QueuedConnection);
-    connect(ui->ref_table_comboBox_2,SIGNAL(activated(QString const&)),this, SLOT(add_tbl_constructor_table2atribute_slot(const QString &)),Qt::QueuedConnection);
+    connect(ui->ref_DB_comboBox_2,SIGNAL(currentTextChanged(QString const&)),this, SLOT(add_tbl_constructor_db2table_slot(const QString &)),Qt::QueuedConnection);
+    connect(ui->ref_table_comboBox_2,SIGNAL(currentTextChanged(QString const&)),this, SLOT(add_tbl_constructor_table2atribute_slot(const QString &)),Qt::QueuedConnection);
 
+    //connect(describe_form_, &QObject::destroyed, [this](){ describe_form_ = nullptr;});
 }
 
 CreateTableConstructor::~CreateTableConstructor()
 {
     delete ui;
 ////    delete non_static_connection_;
-    db_connection::close(test);
-    db_connection::remove(test);
+    ////delete describe_form_;
+    db_connection::close(this->metaObject()->className());
+    db_connection::remove(this->metaObject()->className());
 }
 
 bool CreateTableConstructor::decimal_type_more_or_eq()
@@ -473,34 +476,47 @@ void CreateTableConstructor::add_tbl_constructor_db2table_slot(const QString &cu
 //                //return;
 //            }
 //    }
-    db_connection::close(test);
+
+
+    db_connection::close(this->metaObject()->className());
     ////auth_.db_name_=current_DB_; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    QSqlDatabase::database(test).setDatabaseName(current_DB_);
+
+    auth auth_copy=auth_;
+
+    auth_copy.db_name_=current_DB_;
+
+    QSqlDatabase::database(this->metaObject()->className(),false).setDatabaseName(auth_copy.db_name_);
+
+    //QSqlDatabase::database().setDatabaseName(current_DB_);
+
+
+
 //    if(!db_connection::reopen_exist()){
 //        qDebug() << QString("(x)There is error while update tables (connection is not established).");
 //        return;
 //    }
 
-    do{
-        if(db_connection::reopen_exist(test)){
-            qDebug() << QString("(✓)Default connection successfully reopened.");
-            break;
-        } else {
-            qDebug() << QString("(x)Default connection failed to reopen. Trying to remove and re-establish connection to SQL DB.");
-            db_connection::remove(test);
-        }
-        if(db_connection::open(auth_,test)){
-            qDebug() << QString("(✓)Default connection successfully re-established.");
-        } else {
-            qDebug() << "(x)There is error while update tables. Default connection failed to open.";
-            return;
-        }
-    }while(false);
+    db_connection::try_to_reopen(auth_copy,this->metaObject()->className());
+//    do{
+//        if(db_connection::reopen_exist(this->metaObject()->className())){
+//            qDebug() << QString("(✓)Default connection successfully reopened.");
+//            break;
+//        } else {
+//            qDebug() << QString("(x)Default connection failed to reopen. Trying to remove and re-establish connection to SQL DB.");
+//            db_connection::remove(this->metaObject()->className());
+//        }
+//        if(db_connection::open(/*auth_*/auth_copy,this->metaObject()->className())){
+//            qDebug() << QString("(✓)Default connection successfully re-established.");
+//        } else {
+//            qDebug() << "(x)There is error while update tables. Default connection failed to open.";
+//            return;
+//        }
+//    }while(false);
 
 
-    db_connection::set_query("SHOW TABLES;", &submodel_1_,ui->ref_table_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/,test);
+    db_connection::set_query("SHOW TABLES;", &submodel_1_,ui->ref_table_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/,this->metaObject()->className());
 
-    ui->ref_key_comboBox_2->setCurrentIndex(-1); //?
+    ////ui->ref_key_comboBox_2->setCurrentIndex(-1); //?
 
     //SET QUERY-->>
 
@@ -560,16 +576,18 @@ void CreateTableConstructor::add_tbl_constructor_table2atribute_slot(const QStri
 //                //return;
 //            }
 //    }
-    if(!db_connection::open(auth_,test)){
-        qDebug() << QString("(x)There is error while update foreign  attributes (connection is not established).");
-        return;
-    }
+
+
+//    if(!db_connection::open_default(auth_)){
+//        qDebug() << QString("(x)There is error while update foreign  attributes (connection is not established).");
+//        return;
+//    }
 
     //QUERY
 
+    qDebug() << "Current table::"<<current_item_;
 
-
-    db_connection::set_query("SHOW COLUMNS FROM "+current_item_+";", &submodel_2_,ui->ref_key_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/,test);
+    db_connection::set_query("SHOW COLUMNS FROM "+current_item_+";", &submodel_2_,ui->ref_key_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/,this->metaObject()->className());
 
     //ui->ref_ ->setCurrentIndex(-1); //?
 
@@ -618,6 +636,7 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
       }
     }
 
+    emit closed();
 
 //    if(!non_dflt_conction_names_.isEmpty()){
 //    close_con(non_dflt_conction_names_.at(0));
@@ -634,7 +653,7 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
 //        non_dflt_conction_names_.clear();
 //    }
 
-    db_connection::close(test);
+    db_connection::close(this->metaObject()->className());
   //  auth_.reset_db_name_();
 
     //first_attribute_=true;
@@ -757,33 +776,35 @@ void CreateTableConstructor::on_next_1_clicked()
 
 
         ///////////////////////////////////
+//!!
+//        //if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+//        if(!db_connection::open(auth_)){
+//            qDebug() << QString("(x)There is error while update tables (connection is not established).");
+//            return;
+//        }
 
-        //if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
-        if(!db_connection::open(auth_)){
-            qDebug() << QString("(x)There is error while update tables (connection is not established).");
-            return;
-        }
-
-        db_connection::set_query("SHOW DATABASES;", &submodel_0_,ui->ref_DB_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/);
-
-
-        /////////////////////////////////////////////
+//        db_connection::set_query("SHOW DATABASES;", &submodel_0_,ui->ref_DB_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/);
 
 
+//        /////////////////////////////////////////////
 
 
 
-        size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
 
-        qDebug() << "NUMBER OF TABLES::" << size_of_list_;
 
-        //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
-        for(size_t i=0;i!=size_of_list_;++i){
-            if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
-                ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
-                break; // return or break?
-            }
-        }
+//        size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
+
+//        qDebug() << "NUMBER OF TABLES::" << size_of_list_;
+
+//        //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
+//        for(size_t i=0;i!=size_of_list_;++i){
+//            if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
+//                ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
+//                break; // return or break?
+//            }
+//        }
+//!!
+        on_reload_con_button_2_clicked();
         //ui->ref_DB_comboBox_2->setCurrentIndex(-1);
         //}
 
@@ -802,7 +823,7 @@ void CreateTableConstructor::on_next_1_clicked()
     }
 
 
-
+qDebug()<<"END";
 }
 
 //void Hints::on_pushButton_2_clicked()
@@ -946,34 +967,53 @@ void CreateTableConstructor::on_plus_button_2_clicked()
 
 void CreateTableConstructor::on_describe_tbl_button_2_clicked()
 {
+    if(describe_form_!=nullptr)//{
+    describe_form_->close();
+
+    ////parent_->show_table_describe_form(ui->ref_DB_comboBox_2->currentText(),ui->ref_table_comboBox_2->currentText(),parent_->metaObject()->className(),this,Qt::Dialog,Qt::WindowModal);
+    QString con_name = QString(this->metaObject()->className())+" describe_form";
+    QString db_name = ui->ref_DB_comboBox_2->currentText();
+    QString table_name = ui->ref_table_comboBox_2->currentText();
+    db_connection::close(con_name); //1
+    //db_connection::remove(con_name__);
     auth __auth = auth_;
-    __auth.db_name_=ui->ref_DB_comboBox_2->currentText();
-qDebug() << "COUNTER BEFORE::" << window_counter_;
-    ++window_counter_;
-
-    CustomQueryResult new_select_window{__auth};
-
-    //__auth.db_name_=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
-    QString _con_name=ui->ref_DB_comboBox_2->currentText()+QString::number(window_counter_);
-
-    new_select_window.setWindowTitle(ui->ref_table_comboBox_2->currentText());
-    new_select_window.show();
-//custom_query_result_window_->show();
-new_select_window.custom_query_slot(QString(/*"USE "+ui->ref_DB_comboBox_2->currentText()+';'+' '+*/"DESCRIBE ")+
-                                    ui->ref_table_comboBox_2->currentText()+(";")/*,new_select_window->ui->tableView*/,
-                                    /*new_select_window->model_,*/new_select_window.ui->tableView, _con_name/*__auth.db_name_*/);
-//if(model_.rowCount()!=0)
-new_select_window.exec();
+    __auth.db_name_ = db_name;
 
 
-db_connection::close/*_con*/(_con_name/*__auth.db_name_*/);
---window_counter_;
-qDebug() << "COUNTER AFTER::" << window_counter_;
+    QSqlDatabase::database(con_name,false).setDatabaseName(__auth.db_name_); //2
+
+
+    describe_form_ = new CustomQueryResult{__auth};
+
+
+
+    connect(this,&CreateTableConstructor::closed,[=](){ describe_form_->close(); });
+    connect(describe_form_,&CustomQueryResult::destroyed,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
+    db_connection::close(con_name);
+    });
+
+
+    describe_form_->setWindowTitle(table_name);
+
+
+describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),con_name); //3
+
+
+
+//new_select_window.setParent(parent__);
+//new_select_window.setWindowFlag(window_type_flag__);
+//new_select_window.setWindowModality(window_modality_flag__);
+
+describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
+describe_form_->show();
+
+describe_form_-> exec();
+
 }
 
 void CreateTableConstructor::on_cancel_2_clicked()
 {
-
+    close();
 }
 
 void CreateTableConstructor::on_back_button_2_clicked()
@@ -1022,4 +1062,44 @@ void CreateTableConstructor::on_help_button_1_clicked()
         }
 
     QMessageBox::about(this,"Referential Actions",info);
+}
+
+void CreateTableConstructor::on_reload_con_button_2_clicked()
+{
+    //if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
+    if(!db_connection::open(auth_)){
+        qDebug() << QString("(x)There is error while update tables (connection is not established).");
+        return;
+    }
+
+    db_connection::set_query("SHOW DATABASES;", &submodel_0_,ui->ref_DB_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/);
+
+
+    /////////////////////////////////////////////
+
+
+
+
+
+    size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
+
+    qDebug() << "NUMBER OF TABLES::" << size_of_list_;
+
+    //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
+    for(size_t i=0;i!=size_of_list_;++i){
+        if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
+            ui->ref_DB_comboBox_2->setCurrentIndex(i);                                        // IN COMBOBOX
+            break; // return or break?
+        }
+    }
+}
+
+void CreateTableConstructor::on_cancel_1_clicked()
+{
+    close();
+}
+
+void CreateTableConstructor::on_pushButton_clicked()
+{
+    qDebug() << "describe_form_==nullptr?::" <<(describe_form_==nullptr);
 }

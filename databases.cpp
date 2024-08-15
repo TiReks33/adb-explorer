@@ -66,8 +66,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
 Databases::~Databases()
 {
-    db_connection::close(auth::con_name_);
-    db_connection::remove(auth::con_name_);
+    db_connection::close();
+    db_connection::remove();
     delete ui;
     delete tables_window_;
     delete new_db_window_;
@@ -88,7 +88,7 @@ void Databases::create_db_slot(QString query)
     db_connection::open(auth_);
 
 
-    if(db_connection::set_query(query,&model_,ui->tableView,QHeaderView::Stretch,auth::con_name_)){
+    if(db_connection::set_query(query,&model_,ui->tableView,QHeaderView::Stretch)){
 
       ////  db_connection::close(auth::con_name_);
 //        on_showDB_button_clicked();
@@ -108,7 +108,7 @@ void Databases::delete_form_send_slot(QComboBox *comboBox__)
     db_connection::open(auth_);
 
 
-    db_connection::set_query("SHOW DATABASES;",&model_,comboBox__,auth::con_name_);
+    db_connection::set_query("SHOW DATABASES;",&model_,comboBox__);
 
     comboBox__->setCurrentIndex(-1); //for blank cell default
 }
@@ -118,7 +118,7 @@ void Databases::delete_database_slot(QComboBox *comboBox__)
     db_connection::open(auth_);
 
 
-    if(!db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",&model_,comboBox__,auth::con_name_)){
+    if(!db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",&model_,comboBox__)){
 
         QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
 
