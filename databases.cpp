@@ -74,12 +74,19 @@ Databases::~Databases()
     delete delete_db_window_;
 }
 
+void Databases::message_to_status(const QString & message__) const
+{
+    ui->statusLine->clear();
+    ui->statusLine->insert(message__);
+}
+
 
 
 void Databases::message_from_login(QString message)
 {
-    ui->statusLine->clear();
-    ui->statusLine->insert(message);
+//    ui->statusLine->clear();
+//    ui->statusLine->insert(message);
+    message_to_status(message);
     on_showDB_button_clicked();
 }
 
@@ -265,3 +272,131 @@ void Databases::on_delete_db_button_clicked()
 
 //    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
 //}
+
+void Databases::on_mysqldump_button_clicked()
+{
+//    if(auth_.db_server_!="QMYSQL"){
+//        QMessageBox::warning(this,"This database dump currently unavailable","ADB Explorer's dump function"
+//                                    " doesn't support yet this database server (current driver: \""+auth_.db_server_+"\").",
+//                                    QMessageBox::Ok);
+//        qDebug()<<"After QMessageBox";
+//        return;
+//    }
+    QScopedPointer<QDialog> dump_auth_choose{new QDialog{this}};
+
+    dump_auth_choose->setWindowTitle("SQL dump");
+
+    dump_auth_choose->setModal(true);
+
+    dump_auth_choose->setMinimumSize(320,240);
+
+    dump_auth_choose->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+
+    dump_auth_choose -> setLayout(new QVBoxLayout);
+
+    QLabel * label = new QLabel;
+
+    label->setText("Please, choose credential for dumping.");
+
+    dump_auth_choose->layout()->addWidget(label);
+
+    QPushButton * current_credential_button = new QPushButton;
+
+    dump_auth_choose->layout()->addWidget(current_credential_button);
+
+    current_credential_button->setText("current_credential_button");
+
+    connect (current_credential_button, &QPushButton::clicked,[&](){
+
+        QScopedPointer<QDialog> dump_name{new QDialog{this}};
+
+        dump_name->setWindowTitle("Dump name setting");
+
+        dump_name->setModal(true);
+
+        connect(dump_name.get(), &QDialog::destroyed,[=](){ qDebug() << "dump_name button destroyed(~)";});
+
+        dump_name->setMinimumSize(int(dump_auth_choose->width()),int(dump_auth_choose->height()/2));
+
+        dump_name->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+
+        dump_name -> setLayout(new QVBoxLayout);
+
+        QLabel * label = new QLabel;
+
+        label->setText("Set name for dump:");
+
+        dump_name->layout()->addWidget(label);
+
+        QLineEdit * line_edit = new QLineEdit(this);
+
+        dump_name->layout()->addWidget(line_edit);
+
+        line_edit->setPlaceholderText("example.sql");
+
+        QDialogButtonBox * button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+        connect(button_box, &QDialogButtonBox::rejected,[&](){ dump_name->close(); });
+
+        dump_name->layout()->addWidget(button_box);
+
+        connect(button_box, &QDialogButtonBox::accepted,[&](){
+                QProcess dumpProcess(this);
+                QStringList args;
+                args << QString("-u"+auth_.login_) << QString("-p"+auth_.passw_) << "aatest1";
+                dumpProcess.setStandardOutputFile("Qtaatest1.sql");
+
+                qDebug() << "signal accepted emited";
+
+//                QObject::connect(&dumpProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
+                  QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
+                    qDebug() << "signal QProcess::finished emited";
+                    QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
+                    if(exitStatus==QProcess::NormalExit){
+                        QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
+                    qDebug() << status_message;
+                    dump_name->close();
+
+                    //QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
+                    if(grand_parent) grand_parent->message_to_status(status_message) ;
+
+                    dump_auth_choose->close();
+                    } else {
+                        QString const status_message =  "(x) Dumping process failed. Exit code: " + QString::number(exitCode) ;
+                        QMessageBox::warning(this,"Dumping process failed",status_message);
+                        if(grand_parent) grand_parent->message_to_status(status_message) ;
+                    }
+
+                });
+
+
+                  dumpProcess.start("mysqldump", args);
+                  dumpProcess.waitForFinished();
+
+        });
+
+        dump_name->show();
+        dump_name->exec();
+    });
+
+    QPushButton * another_credential_button = new QPushButton;
+
+    dump_auth_choose->layout()->addWidget(another_credential_button);
+
+    QPushButton * exit_button = new QPushButton;
+
+    connect(exit_button,&QPushButton::clicked,[&](){dump_auth_choose->close();});
+
+    exit_button->setText("Cancel");
+
+    dump_auth_choose->layout()->addWidget(exit_button);
+
+    dump_auth_choose->show();
+    dump_auth_choose->exec();
+
+//    QProcess dumpProcess(this);
+//    QStringList args;
+//    args << "-uroot" << "-pmysql" << "test";
+//    dumpProcess.setStandardOutputFile("test.sql");
+//    dumpProcess.start("mysqldump", args);
+}

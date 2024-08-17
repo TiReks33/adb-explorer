@@ -151,6 +151,8 @@ private:
     //QScopedPointer<CustomQueryResult> describe_form_;
     QPointer<CustomQueryResult> describe_form_;
 
+    QString subconnection_name_ = "CreateTableConstructor_subconnection";
+
 };
 
 #endif // CREATE_TABLE_CONSTRUCTOR_H

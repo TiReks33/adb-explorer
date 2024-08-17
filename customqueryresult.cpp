@@ -86,6 +86,7 @@ void CustomQueryResult::custom_query_slot(/*auth & auth__,*/ QString const & que
 
 CustomQueryResult::~CustomQueryResult()
 {
+    qDebug()<<"~CustomQueryResult activated";
     delete ui;
   //  delete non_static_connection_;
 }

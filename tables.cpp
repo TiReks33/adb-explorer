@@ -140,6 +140,17 @@ Tables::~Tables()
 
 void Tables::closeEvent(QCloseEvent *event)
 {
+    QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to close all windows related to current database and return to DB list?",
+                                                             QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::No) {
+        qDebug() << "Tables window close:: cancel closing";
+        event->ignore();
+        return;
+      } else {
+        qDebug() << "Tables window close:: closing accepted";
+      }
+
+
     emit db_show();
     event->accept();
 ////    table_query_window_->close();
@@ -599,19 +610,35 @@ void Tables::on_create_table_button_clicked()
 
 void Tables::on_insert_inTable_button_clicked()
 {
-
     //insert_constructor_->show();
-    createTupleConstructor constr_window_{auth_,this};
+    createTupleConstructor constr_window_{auth_/*,this*/};
+    ++tuples_windows_counter_;
+    qDebug() << "tuples constructor counter incremented; counter =="+QString::number(tuples_windows_counter_);
     constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
     //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
 ////    connect(&constr_window_, /*&createTupleConstructor::*/SIGNAL(final_query_sig(QString)), this, SLOT(/*&Tables::*/send_custom_query_slot(QString)));
     connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString)>(&createTupleConstructor::final_query_sig),
             this, static_cast<void (Tables::*) (QString)>(&Tables::get_custom_query_window_));
     connect(this,&Tables::custom_query_windows_close, &constr_window_, &createTupleConstructor::close);
+
+    connect(&constr_window_,static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::closed),[=](QString const & con_name_/*that_mustBclosed*/){
+
+                        if(this->tuples_windows_counter_>0){
+                            --this->tuples_windows_counter_;
+                            qDebug() << "tuples counter decremented; counter =="+QString::number(tuples_windows_counter_);
+                        }
+                        if(this->tuples_windows_counter_==0){
+                            db_connection::close(con_name_);
+                                    qDebug() << "tuples counter ==0 -> connection ::"+con_name_+":: closed";
+                        }
+                ;});
+
     //emit tpl_cnstr_upd_tables();
+    //constr_window_. setWindowFlag(Qt::Window);
     constr_window_.setModal(false);
     constr_window_.show();
     constr_window_.exec();
+    qDebug()<<"TupleConstructor window after exec() before out of scope";
 }
 
 void Tables::on_pushButton_2_clicked()

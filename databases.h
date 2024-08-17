@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QComboBox>
+#include <QProcess>
 
 
 #include "tables.h"
@@ -34,6 +35,9 @@ public:
 
 
 public slots:
+    /*8/16*/
+        void message_to_status(QString const &) const;
+
     void message_from_login(QString);
 
     void create_db_slot(QString);
@@ -84,6 +88,8 @@ private slots:
 
 //    void on_comboBox_test_button_clicked();
 
+    void on_mysqldump_button_clicked();
+
 private:
     Ui::Databases *ui;
 
@@ -99,6 +105,8 @@ private:
     create_db_name* new_db_window_;
 
     delete_db* delete_db_window_;
+
+//    QProcess dumpProcess;
 
 };
 

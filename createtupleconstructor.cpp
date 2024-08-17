@@ -29,6 +29,8 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
 qDebug() << "window counter::"<< multi_con_.con_counter_;
     //on_update_tables_button_clicked();
 
+
+
 }
 
 createTupleConstructor::~createTupleConstructor()
@@ -220,7 +222,8 @@ void createTupleConstructor::closeEvent(QCloseEvent *event)
 
 
 //    multi_con_.delete_sql_connection();
-    emit closed();
+    if(describe_form_)describe_form_->close();
+    emit closed(subconnection_name_);
         event->accept();
 }
 
@@ -278,7 +281,7 @@ void createTupleConstructor::on_describeButton_clicked()
     describe_form_->close();
 
     ////parent_->show_table_describe_form(ui->ref_DB_comboBox_2->currentText(),ui->ref_table_comboBox_2->currentText(),parent_->metaObject()->className(),this,Qt::Dialog,Qt::WindowModal);
-    QString con_name = QString(this->metaObject()->className())+" describe_form";
+    //QString con_name = QString(this->metaObject()->className())+" describe_form";
     //QString db_name = auth_.db_name_;
     QString table_name = ui->comboBox->currentText();
     ////db_connection::close(con_name);
@@ -293,20 +296,25 @@ void createTupleConstructor::on_describeButton_clicked()
     describe_form_ = new CustomQueryResult{auth_};
 
 
+    describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
 
-    connect(this,&createTupleConstructor::closed,[=](){ describe_form_->close(); });
 
-    Tables* parent_window = qobject_cast<Tables *>(parent());
+//    connect(this,static_cast<void (createTupleConstructor::*)()>(&createTupleConstructor::closed),[=](){
+//        if(describe_form_)describe_form_->close();
+//        emit closed(subconnection_name_);
+//    });
 
-    connect(describe_form_,&CustomQueryResult::destroyed,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
-    db_connection::close(con_name);
-    });
+    //Tables* parent_window = qobject_cast<Tables *>(parent());
+
+//    connect(this,&createTupleConstructor::destroyed,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
+//    emit closed(con_name);
+//    });
 
 
     describe_form_->setWindowTitle(table_name);
 
 
-describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),con_name); //3
+describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),subconnection_name_); //3
 
 
 
@@ -314,7 +322,7 @@ describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),con_name); //3
 //new_select_window.setWindowFlag(window_type_flag__);
 //new_select_window.setWindowModality(window_modality_flag__);
 
-describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
+////
 describe_form_->show();
 
 describe_form_-> exec();

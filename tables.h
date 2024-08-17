@@ -150,7 +150,9 @@ private:
 
 //    createTupleConstructor* insert_constructor_;
 
-    QVector<QPointer<CustomQueryResult>> tuples_windows_vector_;
+    //QVector<QPointer<CustomQueryResult>> tuples_windows_vector_;
+
+    int tuples_windows_counter_=0;
 
 };
 

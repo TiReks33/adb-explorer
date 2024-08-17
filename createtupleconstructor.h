@@ -54,6 +54,8 @@ signals:
 
     void closed();
 
+    void closed(QString const &con_name_that_mustBclosed);
+
 private:
     Ui::createTupleConstructor *ui;
     auth& auth_;
@@ -77,6 +79,8 @@ private:
     int tuples_added_=0;
     QStringList tuples_;
     QPointer<CustomQueryResult> describe_form_;
+
+    QString subconnection_name_ = "createTupleConstructor_subconnection";
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H
