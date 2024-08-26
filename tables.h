@@ -49,27 +49,24 @@ public slots:
 
     void send_custom_query_slot(/*QString,*/Custom_Query*);
 
-    void delete_form_send_slot(QComboBox*);
+
 
     void delete_table_slot(QComboBox*);
 
-    void constructor_create_tbl_query_slot(QString);
 
     void show_table_describe_form(QString const & db_name__,QString const&table_name__,QString const & con_name__ = auth::con_name_, QWidget * parent__ = nullptr, Qt::WindowType window_type_flag__ = Qt::Dialog, Qt::WindowModality window_modality_flag__ = Qt::NonModal) const;
 
-//    void insert_into_query_handle(QString);
+
 
 signals:
 
     void db_show();
 
-    //void canceled();
 
-    ////void custom_query(QString);
 
     void custom_query(auth&,QString);
 
-    ////void custom_query(QString,QTableView*);
+
 
     void custom_query(auth&, QString,QTableView*);
 
@@ -77,7 +74,7 @@ signals:
 
     void delete_form_request();
 
-//    void tbl_delete_form_request();
+
 
     void current_tables_list_signal(QList<QString>);
 
@@ -100,11 +97,10 @@ private slots:
 
     void on_select_from_table_button_clicked();
 
-//    void on_pushButton_clicked();
+
 
     void on_Custom_Query_Button_clicked();
 
-    //void cancel_slot();
 
     void on_Query_settings_clicked();
 
@@ -126,19 +122,16 @@ protected:
 private:
     Ui::Tables *ui;
 
-//    QString db_server_;
-//    QString db_login_;
-//    QString db_passw_;
-//    QString db_host_;
+    void init_connections();
+
+
     auth& auth_;
 
     QSqlQueryModel model_;
 
-    //QStandardItemModel* stand_item_model_;
 
-////    Custom_Query* table_query_window_;
 
-    //QCheckBox* checkbox_;
+
 
     CustomQueryResult* custom_query_result_window_;
 
@@ -148,9 +141,7 @@ private:
 
     CreateTableConstructor* constructor_;
 
-//    createTupleConstructor* insert_constructor_;
 
-    //QVector<QPointer<CustomQueryResult>> tuples_windows_vector_;
 
     int tuples_windows_counter_=0;
 

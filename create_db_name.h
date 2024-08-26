@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QString>
 
+#include "helping_stuff.h"
+
 namespace Ui {
 class create_db_name;
 }
@@ -13,14 +15,13 @@ class create_db_name : public QDialog
     Q_OBJECT
 signals:
 
-    void create_db_signal(QString);
+    void create_db_signal(QString const&);
 
 public:
     explicit create_db_name(QWidget *parent = nullptr);
     ~create_db_name();
 
-private slots:
-    void on_buttonBox_accepted();
+
 
 private:
     Ui::create_db_name *ui;

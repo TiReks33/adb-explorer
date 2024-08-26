@@ -15,62 +15,27 @@
 Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Tables)
-//  , db_server_("QMYSQL")
+
   , auth_(auth__)
-////  , table_query_window_(new Custom_Query)
-  //, stand_item_model_(new QStandardItemModel)
+
+
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
   , delete_table_window_(new delete_table)
   , constructor_(new CreateTableConstructor{auth_,this})
-//  , insert_constructor_{new createTupleConstructor{auth_}}
+
 {
     ui->setupUi(this);
-//constructor_->setWindowFlag(Qt::Dialog);
+
     ui->statusLine->setReadOnly(true);
 
-    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
-                                | Qt::WindowMinimizeButtonHint
-                                | Qt::WindowMaximizeButtonHint
-                                | Qt::WindowCloseButtonHint;
+    Qt::WindowFlags flags = Qt::Window  | Qt::WindowSystemMenuHint
+                                        | Qt::WindowMinimizeButtonHint
+                                        | Qt::WindowMaximizeButtonHint
+                                        | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
     delete_table_window_->setWindowTitle("Remove table dialog");
-
-    //QCheckBox* checkbox = new QCheckBox(ui->select_from_table_button);
-//        checkbox_ = new QCheckBox(ui->select_from_table_button);
-//        checkbox_->setText("123");
-//        checkbox_->move(ui->select_from_table_button->size().width(),0);
-
-//                                QVBoxLayout* select_button_layout = new QVBoxLayout(ui->select_from_table_button);
-//                                //ui->select_from_table_button->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-//                                QLabel* select_button_text = new QLabel{};
-//                                select_button_text->setText("Select button meh meh");
-//                            //    select_button_text->setMinimumHeight(ui->select_from_table_button->size().height());
-//                            //    select_button_text->setMinimumWidth(ui->select_from_table_button->size().width());
-//                                //select_button_text->move(0,0);
-//                                select_button_layout->addWidget(select_button_text);
-
-
-//                                checkbox_ = new QCheckBox(ui->select_from_table_button);
-//                                checkbox_->setText("123");
-//                                //checkbox_->setStyleSheet("background: green;");
-//                                select_button_layout->addWidget(checkbox_);
-
-//                            //    int w = ui->select_from_table_button->size().width();
-//                                int h = ui->select_from_table_button->size().height();
-//                                ui->select_from_table_button->setMinimumHeight(h*1.7);
-
-
-
-//        QHBoxLayout * layout1 = new QHBoxLayout(centralWidget1);
-//        centralWidget1->setMinimumSize(640,480);
-//        centralWidget1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//        layout1->addWidget(mte);
-//        layout1->addWidget(ui->search_button);
-//        setCentralWidget(centralWidget1);
-//        centralWidget1->show();
 
 
     constructor_->setWindowFlag(Qt::Dialog);
@@ -79,63 +44,22 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     constructor_->setWindowModality(Qt::WindowModal);
 
 
-
-
-
-
-
     //SIGNALS
 
-        ////connect(this,SIGNAL(custom_query(auth&,QString)),custom_query_result_window_,SLOT(custom_query_slot(auth&,QString)));
 
-        ////connect(this,SIGNAL(custom_query(auth&,QString,QTableView*)),custom_query_result_window_,SLOT(custom_query_slot(auth&,QString,QTableView*)));
-
-
-
-    connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
-//    connect(this,&Tables::delete_form_request,  delete_table_window_,&delete_table::delete_form_request_slot);
-
-    connect(delete_table_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
-//    connect(delete_table_window_,&delete_table::delete_form_send,this,&Tables::delete_form_send_slot);
-
-    connect(delete_table_window_,SIGNAL(delete_entity(QComboBox*)),this,SLOT(delete_table_slot(QComboBox*)));
-//    connect(delete_table_window_,&delete_table::delete_table_sig,this,&Tables::delete_table_slot);
-
-    connect(this,SIGNAL(current_tables_list_signal(QList<QString>)),constructor_,SLOT(current_exist_tables_slot(QList<QString>)));
-
-    //CUSTOM CREATE TABLE CONSTRUCTOR
-    connect(constructor_,SIGNAL(send_custom_query(QString)),this,SLOT(constructor_create_tbl_query_slot(QString)));
-
-////    connect(this,SIGNAL(close_custom_query_form()),table_query_window_,SLOT(close_window()));
-
-    connect(this,&Tables::constructor_query_success, [=] () {
-        constructor_->set_warning_flag_(false);
-        constructor_->close();
-        constructor_->set_warning_flag_(true);
-        qDebug() << "(✓)Table constructor query successful completed.";
-    });
-
-    connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
-
-    connect(this,&Tables::constructor_query_fails, [=] () {
-        qDebug() << "(x)Table constructor query fails.";
-    });
-
-//    connect(this,&Tables::tpl_cnstr_upd_tables, insert_constructor_, &createTupleConstructor::update_tables_handler);
-
+    init_connections();
 
 }
 
 Tables::~Tables()
 {
     delete ui;
-////    delete table_query_window_;
-   // delete stand_item_model_;
+
     delete custom_query_result_window_;
     delete settings_;
     delete delete_table_window_;
     delete constructor_;
-//    delete insert_constructor_;
+
 }
 
 void Tables::closeEvent(QCloseEvent *event)
@@ -179,11 +103,70 @@ bool Tables::event(QEvent* event)
 }
 
 
+void Tables::init_connections()
+{
+    connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
+
+    connect(delete_table_window_,&delete_table::delete_form_send,[=](QComboBox* comboBox__){
+        db_connection::open(auth_);
+
+        db_connection::set_query("SHOW TABLES;",&model_,comboBox__);
+
+        comboBox__->setCurrentIndex(-1); //for blank cell default
+    });
+
+    connect(delete_table_window_,&delete_table::delete_entity,[=](QComboBox*comboBox__){
+        db_connection::open(auth_);
+
+        if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",&model_,comboBox__)){
+
+            QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
+
+        }
+
+        show_tables();      // view updated tables list after table deletion
+        //select_cells(0,0, ui->tableView);
+    });
+
+    //QStringList?-->
+    connect(this,SIGNAL(current_tables_list_signal(QList<QString>)),constructor_,SLOT(current_exist_tables_slot(QList<QString>)));
+
+    //CUSTOM CREATE TABLE CONSTRUCTOR
+    connect(constructor_,&CreateTableConstructor::send_custom_query,[=](QString const&query__){
+        db_connection::open(auth_);
+
+        if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch)) //TABLE MAIN WINDOW MODEL
+            emit constructor_query_success();
+        else
+            emit constructor_query_fails();
+        show_tables();
+    });
+
+
+    connect(this,&Tables::constructor_query_success, [=] () {
+        constructor_->set_warning_flag_(false);
+        constructor_->close();
+        constructor_->set_warning_flag_(true);
+        qDebug() << "(✓)Table constructor query successful completed.";
+    });
+
+    connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
+
+    connect(this,&Tables::constructor_query_fails, [=] () {
+        qDebug() << "(x)Table constructor query fails.";
+    });
+
+    connect(ui->showTable_button,&QPushButton::clicked,[=]{
+        show_tables();
+    });
+
+}
+
 
 void Tables::show_tables()
 {
-QElapsedTimer timer;
-timer.start();
+//QElapsedTimer timer;
+//timer.start();
 
     // ==> close current and open new connect with chosen db
 db_connection::close();
@@ -195,49 +178,7 @@ db_connection::close();
 qDebug() << "AFTER CLOSE()::";
 
         db_connection::try_to_reopen(auth_);
-//    do{
-//        if(db_connection::reopen_exist(auth::con_name_)){
-//            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
-//            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully reopened.");
-//            break;
-//        } else {
-//            qDebug() << QString("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
-//            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
-//            db_connection::remove();
-//        }
-//        if(db_connection::open(auth_)){
-//            qDebug() << QString("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
-//            ui->statusLine->setText("(✓)Connection ::"+auth::con_name_+":: successfully re-established.");
-//        } else {
-//            ui->statusLine->setText("(x)Connection ::"+auth::con_name_+":: failed to open.");
-//            qDebug() << "(x)Connection ::"+auth::con_name_+":: failed to open.";
-//            return;
-//        }
-//    }while(false);
 
-
-
-//         QStringList list = QSqlDatabase::database(auth::con_name_) .tables();
-
-//         int capacity = list.length();
-//  ////
-
-//         QStandardItemModel* model = stand_item_model_/*(capacity,1)*/;
-//         //ui->tableView->setModel(&model);
-//         stand_item_model_=new QStandardItemModel;
-//         for( int i = 0 ; i != capacity ; ++i )
-//         {
-//             stand_item_model_->insertRow(i);
-
-//             // First Column
-//             stand_item_model_->setItem( i , 0 , new QStandardItem( list.at(i) ) );
-//         }
-//         ui->tableView->setModel(stand_item_model_);
-//        delete model;
-//        ui->tableView->model()->setHeaderData(0, Qt::Horizontal, "Database ::"+auth_.db_name_+":: tables", Qt::DisplayRole);
-//         ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-//qDebug() << "The Standard model operation took" << timer.elapsed() << "milliseconds";
-//qDebug() << "The Standard model operation took" << timer.nsecsElapsed() << "nanoseconds";
 
 
 
@@ -252,11 +193,6 @@ qDebug() << "AFTER CLOSE()::";
 
         qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
 
-        //ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-        //ui->tableView->selectionModel()->select( ui->tableView->model()->index(0,0), QItemSelectionModel::ClearAndSelect );
-        //ui->tableView->selectionModel()->select(ui->tableView->model()->index(0,0), QItemSelectionModel::Select);
-        //ui->tableView->setCurrentIndex(ui->tableView->model()->index(0,0));
-        //ui->tableView->selectionModel()->select(ui->tableView->model()->index(0,0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
         if(!auth_.table_name_.isNull()){
             ui->select_from_table_button->setEnabled(true);
@@ -264,8 +200,8 @@ qDebug() << "AFTER CLOSE()::";
         }
     }
 
-qDebug() << "The Set query model operation took" << timer.elapsed() << "milliseconds";
-qDebug() << "The Set query model operation took" << timer.nsecsElapsed() << "nanoseconds";
+//qDebug() << "The Set query model operation took" << timer.elapsed() << "milliseconds";
+//qDebug() << "The Set query model operation took" << timer.nsecsElapsed() << "nanoseconds";
 }
 
 void Tables::send_custom_query_slot(QString query__)
@@ -358,51 +294,9 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_quer
 }
 
 
-void Tables::delete_form_send_slot(QComboBox *comboBox__)
-{
-    db_connection::open(auth_);
 
 
-    db_connection::set_query("SHOW TABLES;",&model_,comboBox__);
 
-    comboBox__->setCurrentIndex(-1); //for blank cell default
-}
-
-void Tables::delete_table_slot(QComboBox *comboBox__)
-{
-    db_connection::open(auth_);
-
-    if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",&model_,comboBox__)){
-
-        QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
-
-    }
-
-    show_tables();      // view updated tables list after table deletion
-    //select_cells(0,0, ui->tableView);
-}
-
-void Tables::constructor_create_tbl_query_slot(QString query__)
-{
-    db_connection::open(auth_);
-
-
-//    if(!db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch))//;
-//    {
-//        QSqlQuery qry = QSqlQuery(QSqlDatabase::database().connectionName());
-//        QSqlError err_=qry.lastError(); //<<-- THIS NOT WORKING, ERROR IS EMPTY BUT IT MUSTN'T
-//        ui->statusLine->setText(err_.nativeErrorCode());
-//        //qDebug() << QSqlDatabase::database().lastError();
-//        qDebug() << err_.text();
-//        //qDebug() << "!!!" << (QSqlQuery(QSqlDatabase::database().connectionName(auth_.db_server_)).lastError());
-
-//    }
-    if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch)) //TABLE MAIN WINDOW MODEL
-        emit constructor_query_success();
-    else
-        emit constructor_query_fails();
-    show_tables();
-}
 
 
 

@@ -105,11 +105,11 @@ private slots:
 
     void on_cancel_1_clicked();
 
-    void on_pushButton_clicked();
+//    void on_pushButton_clicked();
 
 signals:
 
-    void send_custom_query(QString);
+    void send_custom_query(QString const&);
 
     void closed();
 

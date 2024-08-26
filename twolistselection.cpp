@@ -28,7 +28,8 @@ QStringList TwoListSelection::selectedItems() {
 void TwoListSelection::update_doublelist()
 {
 //    if(!db_connection::open(auth_,this->metaObject(),&multi_con_)){
-      if(!db_connection::open(auth_)){
+      ////if(!db_connection::open(auth_)){
+        if(!db_connection::try_to_reopen(auth_)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }

@@ -1,14 +1,15 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
 
+
+
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::loginWindow)
     , db_window_(new Databases(auth_))
-    //, db_server_("QMYSQL")
 {
     ui->setupUi(this);
-    this->setFixedSize(QSize(450, 225));
+    this->setFixedSize(QSize(600, 325));
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
@@ -24,38 +25,17 @@ loginWindow::loginWindow(QWidget *parent)
     ui->cc_label->setToolTipDuration(60000);
 
 
-    connect(this,SIGNAL(message_to_database(QString)),db_window_,SLOT(message_from_login(QString)));
-    connect(db_window_,SIGNAL(test_signal()),this,SLOT(test_slot()));
-qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
+
+    connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_from_login(QString const&)));
+
+
+
 }
 
 loginWindow::~loginWindow()
 {
     delete ui;
     delete db_window_;
-}
-
-void loginWindow::closeEvent(QCloseEvent *event)
-{
-
-        event->accept();
-}
-
-
-
-void loginWindow::test_slot()
-{
-    emit message_to_database(ui->Password_Form->text());
-}
-
-void loginWindow::receive_login_(QString&login_ref)
-{
-    login_ref=ui->Login_Form->text();
-}
-
-void loginWindow::receive_passw_(QString&passw_ref)
-{
-    passw_ref=ui->Password_Form->text();
 }
 
 
@@ -75,20 +55,13 @@ void loginWindow::on_pushButton_clicked()
             ui->statusbar->showMessage("(✓)Successful authorization");
             db_window_->setModal(true);
             db_window_->show();
-            emit message_to_database("Database succesfull connected.");
+            emit message_to_database_window("Database succesfull connected.");
 
             this->hide();
 
-//            this->ui->Login_Form->setReadOnly(true);
-//            this->ui->Password_Form->setReadOnly(true);
-//            this->ui->pushButton->setEnabled(false);
-//            this->ui->checkBox->setChecked(true);
-//            this->ui->checkBox->setEnabled(false);
-//            this->ui->Host_Form->setEnabled(false);
 
-            //emit message_to_database(QString::number(db_connection_.isValid()));
         }
-//qDebug() << this->metaObject()->className();
+
 }
 
 
@@ -102,10 +75,4 @@ void loginWindow::on_checkBox_stateChanged(int arg1)
 }
 
 
-//void loginWindow::on_login_testButton_clicked()
-//{
-//    //emit message_to_database("test from login");
-//    QSqlDatabase qs=QSqlDatabase::addDatabase("QMYSQL");
-//    qDebug() << qs.isValid();
-//}
 

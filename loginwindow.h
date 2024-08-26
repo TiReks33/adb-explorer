@@ -28,45 +28,26 @@ public:
     ~loginWindow();
 
     // close-event override for save/db closing connection-purpose after app closing
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event){event->accept();};
 
 
-//    QString get_db_name(){return auth_.db_name_;}
-//    QString get_host(){return auth_.host_;};
-//    QString get_login(){return auth_.login_;}
-//    QString get_passw(){return auth_.passw_;}
-
-public slots:
-
-    void test_slot();
-
-    void receive_login_(QString&);
-    void receive_passw_(QString&);
 
 signals:
-    void message_to_database(QString);
+    void message_to_database_window(QString const&);
 
-    void request_login_(QString&);
-    void request_passw_(QString&);
-
-    void send_auth(auth&);
 
 private slots:
     void on_pushButton_clicked();
 
     void on_checkBox_stateChanged(int arg1);
 
-//    void on_login_testButton_clicked();
-
 private:
     Ui::loginWindow *ui;
-    //QSqlDatabase db_connection_;
-    Databases* db_window_;
 
+    Databases* db_window_;
 
     auth auth_;
 
-    //Tables* tables_window_;
 
 };
 #endif // LOGINWINDOW_H

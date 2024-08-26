@@ -713,23 +713,34 @@ void CreateTableConstructor::on_next_0_clicked()
         ui->statusLine_0->setText("Table name must not be empty.");
         return;
     } else {
-        QRegularExpression re(".*[a-zA-Z].*");
-        QRegularExpressionValidator v(re, 0);
+        QString const en_lit = "[a-zA-Z]";
+        QString const ru_lit = "[ЁёА-я]";
+        QString const ukr_lit = "[А-ЩЬЮЯҐЄІЇа-щьюяґєії]";
+        QRegularExpression en(".*"+en_lit+".*");//(".*[a-zA-Z].*");
+        QRegularExpression ru(".*"+ru_lit+".*");//(".*[ЁёА-я].*");
+        QRegularExpression ukr(".*"+ukr_lit+".*");//(".*[А-ЩЬЮЯҐЄІЇа-щьюяґєії'].*");//(".*[А-ЩЬЮЯҐЄІЇа-щьюяґєії'`’ʼ].*");
+        ////^[А-ЩЬЮЯҐЄІЇ][а-щьюяґєії']*$ //!!!!
+        QRegularExpressionValidator v_en(en, 0);
+        QRegularExpressionValidator v_ru(ru,0);
+        QRegularExpressionValidator v_ukr(ukr,0);
         QString str = ui->tbl_name_line_0->text();
         int pos=0;
-        if(v.validate(str, pos)!=QValidator::Acceptable)
+        if(v_en.validate(str, pos)!=QValidator::Acceptable && v_ru.validate(str, pos)!=QValidator::Acceptable && v_ukr.validate(str, pos)!=QValidator::Acceptable )
         {
             ui->statusLine_0->setText("Name must consist at least 1 alphabetic character(lower or APPER case).");
             return;
         } else{
             //"^[a-zA-Z0-9_.-]*$" -- ok
-            QRegularExpression re("^[a-zA-Z0-9_]*$");
-            QRegularExpressionValidator v(re, 0);
+            ////QRegularExpression re("^[a-zA-Z0-9_]*$");
+            QString const digits_lit = "[0-9]";
+            QString const spec_chars_lit = "[_$]";
+            QRegularExpression fi_v("^"+en_lit+ru_lit+ukr_lit+digits_lit+spec_chars_lit+"*$");
+            QRegularExpressionValidator v(fi_v, 0);
             QString str = ui->tbl_name_line_0->text();
             int pos=0;
             if(v.validate(str, pos)!=QValidator::Acceptable)
             {
-                ui->statusLine_0->setText("Incorrect symbols in table's name. Please use low and upper letters, digits or '_'");
+                ui->statusLine_0->setText("Incorrect symbols in table's name. Please use low and upper letters, digits or special characters "+spec_chars_lit);
                 return;
             }
 
@@ -1100,7 +1111,7 @@ void CreateTableConstructor::on_cancel_1_clicked()
     close();
 }
 
-void CreateTableConstructor::on_pushButton_clicked()
-{
-    qDebug() << "describe_form_==nullptr?::" <<(describe_form_==nullptr);
-}
+//void CreateTableConstructor::on_pushButton_clicked()
+//{
+//    qDebug() << "describe_form_==nullptr?::" <<(describe_form_==nullptr);
+//}

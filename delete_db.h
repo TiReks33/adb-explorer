@@ -19,24 +19,12 @@ class delete_db : public delete_form
 
 public:
     explicit delete_db(QWidget *parent = nullptr);
-//    virtual ~delete_db();
-
-//signals:
-//    void delete_form_send(QComboBox*);
-
-//    void delete_database(QComboBox*);
 
 
-//public slots:
-////    void delete_form_request_slot();
-
-//private slots:
 protected slots:
     void on_buttonBox_accepted();
 
-////private:
-//protected:
-//    Ui::delete_db *ui;
+
 };
 
 #endif // DELETE_DB_H

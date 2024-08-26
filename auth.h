@@ -12,7 +12,7 @@
 
 struct auth{
     auth() :
-        db_server_(/*"QMYSQL"*/"QMARIADB")
+        db_server_("QMYSQL"/*"QMARIADB"*//*"QMYSQL3"*/)
       , host_("localhost")
 //      , con_name_("ADBEXPLORER")
     {}

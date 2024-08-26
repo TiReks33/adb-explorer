@@ -6,70 +6,11 @@
 
 QString const auth::con_name_="ADBEXPLORER";
 
-//QString const auth::default_con_name_=QSqlDatabase::database(QSqlDatabase::database().connectionName()).connectionName();
-
 
 
 //QString db_connection::get_unique_con_name(const QMetaObject *class_meta_obj__, multi_connection *multi_con__)
 //{
 //    return QString(class_meta_obj__->className()+QString::number(multi_con__->unique_number_));
-//}
-
-//bool db_connection::open_default(auth& auth__)
-//{
-////    qDebug()<<"TEST IS OPEN::"<<QSqlDatabase::database("QPSQL").isOpen();
-//    if(!QSqlDatabase::database(QSqlDatabase::database().connectionName()).isOpen()){
-////    if(!QSqlDatabase::database(auth__.db_server_).isOpen()){
-//    QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth__.db_server_);
-
-//        db_connection_.setUserName(auth__.login_);
-
-//        db_connection_.setPassword(auth__.passw_);
-
-//        //db_connection_.setHostName("localhost");//<-remote IP
-
-//        db_connection_.setDatabaseName(auth__.db_name_);
-
-//        if(!db_connection_.open()){
-//            qDebug() << ("(x)Error connection to database.");
-//            return false;
-//        }
-//        else{
-//            qDebug()<<("Database succesfull connected.");
-//            return true;
-//        }
-//    }
-//        qDebug()<<("Server ::"+auth__.db_server_+":: from connection ::"+auth::default_con_name_+":: already connected.");
-//        return true;
-//}
-
-
-//bool db_connection::open(auth &auth__, const QString &con_name__)
-//{
-//    //    qDebug()<<"TEST IS OPEN::"<<QSqlDatabase::database("QPSQL").isOpen();
-//        if(!QSqlDatabase::database(QSqlDatabase::database(con_name__).connectionName()).isOpen()){
-//    //    if(!QSqlDatabase::database(auth__.db_server_).isOpen()){
-//        QSqlDatabase db_connection_=QSqlDatabase::addDatabase(auth__.db_server_,con_name__);
-
-//            db_connection_.setUserName(auth__.login_);
-
-//            db_connection_.setPassword(auth__.passw_);
-
-//            //db_connection_.setHostName("localhost");//<-remote IP
-
-//            db_connection_.setDatabaseName(auth__.db_name_);
-
-//            if(!db_connection_.open()){
-//                qDebug() << ("(x)Error connection to database.");
-//                return false;
-//            }
-//            else{
-//                qDebug()<<("Database succesfull connected.");
-//                return true;
-//            }
-//        }
-//            qDebug()<<("Server ::"+auth__.db_server_+":: from connection ::"+con_name__+":: already connected.");
-//            return true;
 //}
 
 
@@ -127,42 +68,6 @@ bool db_connection::try_to_reopen(auth &auth__,const QString & con_name__)
 
 
 
-//bool db_connection::open(auth& auth__, QSqlDatabase const &db__)
-//{
-//    QString connectionName = db__.connectionName();
-//qDebug() << "ConnectionName=="<<connectionName;
-//    if(!db__.isOpen()){
-
-//    QSqlDatabase db_connection_;
-
-//        if(connectionName==QSqlDatabase::database().connectionName())
-//            db_connection_=QSqlDatabase::addDatabase(auth__.db_server_);
-//        else
-//            db_connection_=QSqlDatabase::addDatabase(auth__.db_server_,connectionName);
-
-
-//        db_connection_.setUserName(auth__.login_);
-
-//        db_connection_.setPassword(auth__.passw_);
-
-//        //db_connection_.setHostName("localhost");//<-remote IP
-
-//        db_connection_.setDatabaseName(auth__.db_name_);
-
-//        if(!db_connection_.open()){
-//            qDebug() << ("(x)Error connection to database.");
-//            return false;
-//        }
-//        else{
-//            qDebug()<<("Database by connection ::"+connectionName +"::succesfull connected.");
-//            return true;
-//        }
-//    }
-//        qDebug()<<("Server ::"+auth__.db_server_+":: from connection ::"+connectionName+":: already connected.");
-//        return true;
-//}
-
-
 /*private*/bool db_connection::reopen_exist(const QString &con_name_)
 {
     if(QSqlDatabase::contains(con_name_)){
@@ -191,27 +96,6 @@ bool db_connection::try_to_reopen(auth &auth__,const QString & con_name__)
 }
 
 
-//bool db_connection::reopen_exist(QSqlDatabase const &db__)
-//{
-//    QSqlDatabase database = QSqlDatabase(db__);
-//    qDebug() << "NAME OF REOPENED DB=="<<db__.connectionName()<<db__.connectionNames();
-//    if(QSqlDatabase::contains(database.connectionName())){
-//        qDebug() << "(✓)Connection ::"+database.connectionName()+":: exist in QSqlDatabase list.";
-
-//        if(database.open()){
-//            qDebug()<<"(✓)Connection ::"+database.connectionName()+":: successful reopened.";
-//            return true;
-//        } else {
-//            qDebug()<<"(x)Connection ::"+database.connectionName()+":: failed to reopen.";
-//            return false;
-//        }
-
-
-//    } else {
-//        qDebug() << "(x)Connection ::"+database.connectionName()+":: is not exist in QSqlDatabase list.";
-//    }
-//    return false;
-//}
 
 void db_connection::close/*_con*/(const QString &con_name_)
 {
@@ -234,20 +118,6 @@ void db_connection::close/*_con*/(const QString &con_name_)
 
 
 
-//void db_connection::close/*_con*/(QSqlDatabase const &db__)
-//{
-//    QSqlDatabase db = QSqlDatabase(db__);
-//    if(QSqlDatabase::contains(db.connectionName())){
-////    {
-//        //QSqlDatabase db = db__;
-//        if(db.isOpen()){db.close(); qDebug() << db.connectionName()+" connection was closed.";}
-////    }
-////    QSqlDatabase::removeDatabase( con_/*QSqlDatabase::database().connectionName()*/ );
-//      }  else {
-//                qDebug() << db.connectionName()+" connection is not exist in QSql connections list. Nothing to close.";
-//            }
-//}
-
 void db_connection::remove(const QString &con_name_)
 {
     if(QSqlDatabase::contains(con_name_)){
@@ -258,15 +128,6 @@ void db_connection::remove(const QString &con_name_)
     }
 }
 
-//void db_connection::remove(QSqlDatabase const &db__)
-//{
-//    if(QSqlDatabase::contains(db__.connectionName())){
-//        QSqlDatabase::removeDatabase ( db__.connectionName() );
-//        qDebug() << db__.connectionName()+" connection was removed from the QSql connections list.";
-//    } else {
-//        qDebug() << db__.connectionName()+" connection is not exist in QSql connections list. May be it was removed from it earlier.";
-//    }
-//}
 
 
 
@@ -274,7 +135,8 @@ void db_connection::remove(const QString &con_name_)
 
 
 
-bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QListWidget*list, QString const & con_name__/*QSqlDatabase const &db__*/) //QListWidget
+
+bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, QListWidget*list, QString const & con_name__/*QSqlDatabase const &db__*/) //QListWidget
 {
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
@@ -305,7 +167,7 @@ bool db_connection::set_query(QString query__, QSqlQueryModel &model__, QListWid
     return false;
 }
 
-bool db_connection::set_query(QString query__, /*QSqlQueryModel &model__,*/ TwoListSelection*double_list, QString const & con_name__/*QSqlDatabase const &db__*/) //double-list class
+bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,*/ TwoListSelection*double_list, QString const & con_name__/*QSqlDatabase const &db__*/) //double-list class
 {
 //    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
@@ -342,7 +204,7 @@ bool db_connection::set_query(QString query__, /*QSqlQueryModel &model__,*/ TwoL
 }
 
 
-/*static*/bool db_connection::set_query(QString query, QSqlQueryModel*model__, QAbstractItemView* itemView, QString const & con_name__/*QSqlDatabase const &db__*/)
+/*static*/bool db_connection::set_query(QString const& query, QSqlQueryModel*model__, QAbstractItemView* itemView, QString const & con_name__/*QSqlDatabase const &db__*/)
 {
 //    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
@@ -373,7 +235,7 @@ bool db_connection::set_query(QString query__, /*QSqlQueryModel &model__,*/ TwoL
 
 
 
-/*static*/bool db_connection::set_query(QString query, QSqlQueryModel*model__, QTableView *tableView, QHeaderView::ResizeMode scalemode, QString const & con_name__/*QSqlDatabase const &db__*/)
+/*static*/bool db_connection::set_query(QString const& query, QSqlQueryModel*model__, QTableView *tableView, QHeaderView::ResizeMode scalemode, QString const & con_name__/*QSqlDatabase const &db__*/)
 {
 //    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
 
@@ -408,16 +270,18 @@ bool db_connection::set_query(QString query__, /*QSqlQueryModel &model__,*/ TwoL
 
 
 
-bool db_connection::set_query(QString query, QSqlQueryModel *model__, QComboBox *comboBox, QString const & con_name__/*QSqlDatabase const &db__*/)
+bool db_connection::set_query(QString const& query__, QSqlQueryModel *model__, QComboBox *comboBox, QString const & con_name__/*QSqlDatabase const &db__*/)
 {
 //    QSqlQuery qry = QSqlQuery(QSqlDatabase::database(con_name__));
+    ////query__.replace("'","\'");//.replace("’","\\ʼ").replace("’","\\ʼ").replace("ʼ","\\ʼ");
+    ////qDebug() << "query__::" << query__;
 
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
     QSqlQuery qry = QSqlQuery(database);
 //    QSqlQuery qry = QSqlQuery(db__);
 
-    if(qry.prepare(query)){ //MY_SQL_QUERY
+    if(qry.prepare(query__)){ //MY_SQL_QUERY
         qDebug() << "(✓) QSqlQuery prepare successful.";
         if(qry.exec()){
             qDebug() << "(✓) QSqlQuery execution successful.";

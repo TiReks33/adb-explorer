@@ -7,9 +7,11 @@ delete_form::delete_form(QWidget *parent,QString const &entity_name__) :
 {
     ui->setupUi(this);
     ui->comboBox->setCurrentIndex(-1);
+
     connect(ui->comboBox,&QComboBox::textActivated,[=](const QString & cur_text__){
         qDebug() <<QString("%0 to delete:: %1").arg(entity_name_).arg(cur_text__);
     });
+
 }
 
 delete_form::~delete_form()

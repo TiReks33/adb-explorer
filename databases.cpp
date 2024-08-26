@@ -1,29 +1,7 @@
 #include "databases.h"
 #include "ui_databases.h"
 
-//Databases::Databases(QWidget *parent) :
-//    QDialog(parent),
-//    ui(new Ui::Databases)
-//  , db_server_("QMYSQL")
-//  , auth_()
-//{
-//    ui->setupUi(this);
 
-//    //status_bar_ = new QStatusBar(this);
-//    //ui->statusBarLayout->addWidget(status_bar_);
-//    //status_bar_->showMessage("status bar");
-//    ui->statusLine->setReadOnly(true);
-
-//    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
-//                                | Qt::WindowMinimizeButtonHint
-//                                | Qt::WindowMaximizeButtonHint
-//                                | Qt::WindowCloseButtonHint;
-//    this->setWindowFlags(flags);
-
-//    //SIGNALS
-
-
-//}
 
 Databases::Databases(auth& auth__, QWidget *parent) :
     QDialog(parent),
@@ -46,22 +24,11 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
     delete_db_window_->setWindowTitle("Remove database dialog");
 
-    //SIGNALs
-//    connect(this,SIGNAL(select_cells_signal(const QModelIndex &,const QModelIndex &)),
-//            this,SLOT(select_cells(const QModelIndex &,const QModelIndex &)),Qt::QueuedConnection);
-    connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
+    //SIGNALS
 
-    connect(tables_window_,SIGNAL(db_show()),this,SLOT(on_showDB_button_clicked()));
+    init_signals();
 
-    connect(tables_window_,&Tables::db_show, [=]{ this->show();});
 
-    connect(new_db_window_,SIGNAL(create_db_signal(QString)),this,SLOT(create_db_slot(QString)));
-
-    connect(this,SIGNAL(delete_form_request()),delete_db_window_,SLOT(delete_form_request_slot()));
-
-    connect(delete_db_window_,SIGNAL(delete_form_send(QComboBox*)),this,SLOT(delete_form_send_slot(QComboBox*)));
-
-    connect(delete_db_window_,SIGNAL(delete_entity/*database*/(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
 }
 
 Databases::~Databases()
@@ -74,6 +41,95 @@ Databases::~Databases()
     delete delete_db_window_;
 }
 
+
+void Databases::init_signals()
+{
+
+    connect(ui->showDB_button,&QPushButton::clicked,[=]{
+        show_databases();
+    });
+
+
+
+    connect(ui->create_db_button,&QPushButton::clicked,[=]{
+        new_db_window_->setModal(true);
+        new_db_window_->show();
+    });
+
+    //connect(new_db_window_,SIGNAL(create_db_signal(QString const&)),this,SLOT(create_db_slot(QString const&)));
+    connect(new_db_window_,&create_db_name::create_db_signal,[=](QString const & query__){
+
+        db_connection::open(auth_);
+
+        if(!db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch)){
+
+            QMessageBox::warning(this,"Warning","Database is not created. Please check name and try again.");
+
+        }
+
+        show_databases();
+    });
+
+
+
+
+    connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
+
+    connect(tables_window_,&Tables::db_show,[=]{
+        show_databases();
+        this->show();
+    });
+
+
+
+    connect(this,SIGNAL(delete_form_request()),delete_db_window_,SLOT(delete_form_request_slot()));
+
+
+    connect(delete_db_window_,&delete_db::delete_form_send,this,[=](QComboBox* comboBox__){
+        db_connection::open(auth_);
+
+        db_connection::set_query("SHOW DATABASES;",&model_,comboBox__);
+
+        comboBox__->setCurrentIndex(-1); //for blank cell default
+
+    });
+
+
+    connect(delete_db_window_,SIGNAL(delete_entity/*database*/(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
+
+    connect(ui->showTables_button,&QPushButton::clicked,[=]{
+        tables_window_->show();
+        emit show_tables_signal();
+        this->hide();
+    });
+
+    connect(ui->tableView,&QTableView::activated,[=](const QModelIndex &index){
+
+        qDebug()<<"ACTIVATED::index=="<<index;
+
+        QString val=ui->tableView->model()->data(index).toString();
+
+        ui->statusLine->setText("Database activated: "+val);
+    });
+
+    connect(ui->tableView,&QTableView::clicked,[=](const QModelIndex &index){
+
+        ui->tableView->setCurrentIndex(index);
+
+        auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+
+        qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.db_name_;
+    });
+
+    connect(ui->delete_db_button,&QPushButton::clicked,[=]{
+        delete_db_window_->setModal(true);
+        delete_db_window_->show();
+        emit delete_form_request();
+    });
+
+}
+
+
 void Databases::message_to_status(const QString & message__) const
 {
     ui->statusLine->clear();
@@ -81,58 +137,35 @@ void Databases::message_to_status(const QString & message__) const
 }
 
 
-
-void Databases::message_from_login(QString message)
+void Databases::message_from_login(QString const& message)
 {
-//    ui->statusLine->clear();
-//    ui->statusLine->insert(message);
     message_to_status(message);
-    on_showDB_button_clicked();
+    show_databases();
 }
 
-void Databases::create_db_slot(QString query)
-{
-    db_connection::open(auth_);
 
-
-    if(db_connection::set_query(query,&model_,ui->tableView,QHeaderView::Stretch)){
-
-      ////  db_connection::close(auth::con_name_);
-//        on_showDB_button_clicked();
-        //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
-            //select_cells(0,0, ui->tableView);
-
-    } else {
-
-        QMessageBox::warning(this,"Warning","Database is not created. Please check name and try again.");
-
-    }
- on_showDB_button_clicked();
-}
-
-void Databases::delete_form_send_slot(QComboBox *comboBox__)
-{
-    db_connection::open(auth_);
-
-
-    db_connection::set_query("SHOW DATABASES;",&model_,comboBox__);
-
-    comboBox__->setCurrentIndex(-1); //for blank cell default
-}
 
 void Databases::delete_database_slot(QComboBox *comboBox__)
 {
     db_connection::open(auth_);
 
 
-    if(!db_connection::set_query("DROP DATABASE "+comboBox__->currentText()+";",&model_,comboBox__)){
+    QString const chosen_db = comboBox__->currentText();
+
+    QString const query_text = QString("DROP DATABASE `%1`").arg(QString(escape_sql_backticks(chosen_db)));
+
+
+    if(!db_connection::set_query(query_text,&model_,comboBox__)){
 
         QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
 
-    }
+    } else qDebug() << "Database `"+chosen_db+"` successfully deleted.";
 
-    on_showDB_button_clicked(); // view database after deletion
+
+    show_databases(); // view database after deletion
 }
+
+
 
 void Databases::show_databases()
 {
@@ -141,8 +174,8 @@ void Databases::show_databases()
 
     db_connection::set_query("SHOW DATABASES;",&model_,ui->tableView,QHeaderView::Stretch);
 
-qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
-    //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
+    qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
+
     select_cells(0,0, ui->tableView);
 
     auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
@@ -157,121 +190,7 @@ qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
     }
 }
 
-//void Databases::db_show_slot()
-//{
-//    this->show();
-//}
 
-
-void Databases::on_showDB_button_clicked()
-{
-
-//    db_connection::open(auth_);
-
-
-//    db_connection::set_query("SHOW DATABASES;",model_,ui->tableView,QHeaderView::Stretch);
-
-//qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
-//    //select_cells(ui->tableView->model()->index(0, 0, QModelIndex()));
-//    select_cells(0,0, ui->tableView);
-
-//    auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-
-//    qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
-
-//    qDebug() << "current auth_.dB_name_ index::" << auth_.db_name_;
-
-//    if(!auth_.db_name_.isNull()){
-//        ui->showTables_button->setEnabled(true);
-//        ui->showTables_button->setStyleSheet("background: green; color: white;");
-//    }
-    show_databases();
-}
-
-
-
-
-
-void Databases::on_showTables_button_clicked()
-{
-    //tables_window_->setModal(true);
-    tables_window_->show();
-    emit show_tables_signal();
-    this->hide();
-}
-
-
-void Databases::on_tableView_activated(const QModelIndex &index)
-{
-
-qDebug()<<"ACTIVATED::index=="<<index;
-    QString val=ui->tableView->model()->data(index).toString();
-    ui->statusLine->setText("Database activated: "+val);
-}
-
-void Databases::on_tableView_clicked(const QModelIndex &index)
-{
-    ////SETUP CURRENT INDEX POSITION (first 'a' index)
-    //ui->tableView->setCurrentIndex(ui->tableView->model()->index(index.row(),index.column()));
-    ui->tableView->setCurrentIndex(index);
-    //ui->tableView->model()->data(index);
-
-    //SET CURRENT DB NAME
-    //auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-    auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-
-
-////    QSqlDatabase::database(auth::con_name_).addDatabase(auth_.db_name_);
-
-
-    //QString val=ui->tableView->model()->data(index).toString();
-    //ui->statusLine->setText("Database clicked: "+val);
-    qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.db_name_;
-
-
-}
-
-
-
-//void Databases::on_pushButton_clicked()
-//{
-
-//}
-
-//void Databases::test()
-//{
-
-
-//}
-
-void Databases::on_create_db_button_clicked()
-{
-    new_db_window_->setModal(true);
-    new_db_window_->show();
-}
-
-void Databases::on_delete_db_button_clicked()
-{
-    delete_db_window_->setModal(true);
-    delete_db_window_->show();
-    emit delete_form_request();
-}
-
-//void Databases::on_comboBox_activated(const QString &arg1)
-//{
-////    db_connection::open(auth_);
-
-
-////    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
-//}
-
-//void Databases::on_comboBox_test_button_clicked()
-//{
-//    db_connection::open(auth_);
-
-
-//    db_connection::set_query("SHOW DATABASES;",model_,ui->comboBox);
-//}
 
 void Databases::on_mysqldump_button_clicked()
 {
@@ -332,7 +251,7 @@ void Databases::on_mysqldump_button_clicked()
 
         dump_name->layout()->addWidget(line_edit);
 
-        line_edit->setPlaceholderText("example.sql");
+        line_edit->setPlaceholderText("dump.sql");
 
         QDialogButtonBox * button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
@@ -343,8 +262,12 @@ void Databases::on_mysqldump_button_clicked()
         connect(button_box, &QDialogButtonBox::accepted,[&](){
                 QProcess dumpProcess(this);
                 QStringList args;
-                args << QString("-u"+auth_.login_) << QString("-p"+auth_.passw_) << "aatest1";
-                dumpProcess.setStandardOutputFile("Qtaatest1.sql");
+                args << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << "--databases" << "aatest1" << "abitura";
+                qDebug() << "args StringList->>" << args << "<<-args StringList";
+                QString output_filename = line_edit->text().isEmpty() ? "dump.sql" : (line_edit->text().right(4)==".sql") ? line_edit->text() : line_edit->text()+".sql" ;
+                qDebug() << "right 4==" << line_edit->text().right(4);
+
+                dumpProcess.setStandardOutputFile(/*"Qtaatest1.sql"*/output_filename);
 
                 qDebug() << "signal accepted emited";
 
@@ -352,7 +275,7 @@ void Databases::on_mysqldump_button_clicked()
                   QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
                     qDebug() << "signal QProcess::finished emited";
                     QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
-                    if(exitStatus==QProcess::NormalExit){
+                    if(exitStatus==QProcess::NormalExit && exitCode == 0){
                         QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
                     qDebug() << status_message;
                     dump_name->close();
@@ -362,13 +285,34 @@ void Databases::on_mysqldump_button_clicked()
 
                     dump_auth_choose->close();
                     } else {
-                        QString const status_message =  "(x) Dumping process failed. Exit code: " + QString::number(exitCode) ;
-                        QMessageBox::warning(this,"Dumping process failed",status_message);
-                        if(grand_parent) grand_parent->message_to_status(status_message) ;
-                    }
+                        QString const status_message =  "(x) Dumping process failed. Exit code: " + QString::number(exitCode)+". ";
+                        QString const detailed_err_desc ="Detailed error description: ";
+                        QString const stderr_text = dumpProcess.readAllStandardError() ;
+                        QString const full_err_message = status_message+detailed_err_desc+stderr_text;
+                        //QMessageBox::warning(this,"Dumping process failed",status_message);
+                        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Warning,"Dumping process failed",status_message+detailed_err_desc+"<FONT COLOR='#ff0000'>"+'\"'+stderr_text+'\"'+"</FONT>"+'.',
+                                                                          QMessageBox::Ok,this)};
 
+                        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+                        messageBox->show();
+                        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+
+                        if(grand_parent) grand_parent->message_to_status(full_err_message) ;
+                        qCritical()<< "Error string: "<<dumpProcess.errorString();
+
+                        qWarning()<<"ReadAllStandardError::"<<stderr_text;
+                    }
+                    qDebug()<<"readAllStandardOutput::"<<dumpProcess.readAllStandardOutput();
                 });
 
+                  connect(&dumpProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
+                  {
+                      qWarning() << "Occured error: " << error ;
+                  });
+
+                  dumpProcess.setReadChannel(QProcess::StandardOutput);
+
+                  connect(&dumpProcess, &QProcess::readyReadStandardError,[=](){});
 
                   dumpProcess.start("mysqldump", args);
                   dumpProcess.waitForFinished();

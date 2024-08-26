@@ -10,6 +10,8 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QProcess>
+#include <QVariant>
+#include <QElapsedTimer>
 
 
 #include "tables.h"
@@ -18,6 +20,8 @@
 #include "db_connection.h"
 #include "create_db_name.h"
 #include "delete_db.h"
+
+#include "helping_stuff.h"
 
 namespace Ui {
 class Databases;
@@ -35,23 +39,16 @@ public:
 
 
 public slots:
-    /*8/16*/
-        void message_to_status(QString const &) const;
 
-    void message_from_login(QString);
+    void message_to_status(QString const &) const;
 
-    void create_db_slot(QString);
-
-    void delete_form_send_slot(QComboBox*);
+    void message_from_login(QString const&);
 
     void delete_database_slot(QComboBox*);
-
-//    void db_show_slot();
 
     void show_databases();
 
 signals:
-    void test_signal();
 
     void select_cells_signal(const QModelIndex &,const QModelIndex &);
 
@@ -60,39 +57,13 @@ signals:
     void delete_form_request();
 
 private slots:
-    void on_showDB_button_clicked();
-
-
-//    void select_cells(const QModelIndex &);
-
-//    void select_cells(int,int);
-
-//    void select_cells(const QModelIndex &,const QModelIndex &);
-
-//    void select_cells(int,int,int,int);
-
-
-    void on_tableView_activated(const QModelIndex &index);
-
-    void on_tableView_clicked(const QModelIndex &index);
-
-    void on_showTables_button_clicked();
-
-//    void on_pushButton_clicked();
-
-    void on_create_db_button_clicked();
-
-    void on_delete_db_button_clicked();
-
-//    void on_comboBox_activated(const QString &arg1);
-
-//    void on_comboBox_test_button_clicked();
 
     void on_mysqldump_button_clicked();
 
 private:
     Ui::Databases *ui;
 
+    void init_signals();
 
     auth& auth_;
 
@@ -100,13 +71,10 @@ private:
 
     QSqlQueryModel model_;
 
-//    void test();
-
     create_db_name* new_db_window_;
 
     delete_db* delete_db_window_;
 
-//    QProcess dumpProcess;
 
 };
 
