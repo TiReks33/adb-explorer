@@ -15,10 +15,11 @@ public:
     explicit CustomQuerySettings(QWidget *parent = nullptr);
     ~CustomQuerySettings();
 
-private slots:
-    void on_Close_button_clicked();
+
 
     friend class Tables;
+
+
 
 private:
     Ui::CustomQuerySettings *ui;

@@ -285,10 +285,11 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel *model__, Q
         qDebug() << "(✓) QSqlQuery prepare successful.";
         if(qry.exec()){
             qDebug() << "(✓) QSqlQuery execution successful.";
+            qDebug()<<"1";
         model__->setQuery(qry);
-
+            qDebug()<<"2";
         comboBox->setModel(model__);
-
+            qDebug()<<"3";
 //    comboBox->horizontalHeader()->setSectionResizeMode(scalemode);
 qDebug() << "ZVEZDOCHKI ( I SEE A STARS )";
 
@@ -310,8 +311,8 @@ qDebug() << "ZVEZDOCHKI ( I SEE A STARS )";
 
 
 
-int multi_connection::con_counter_ = 0;
-int multi_connection::unique_number_ = 0;
-QStringList multi_connection::multi_con_names_;
+//int multi_connection::con_counter_ = 0;
+//int multi_connection::unique_number_ = 0;
+//QStringList multi_connection::multi_con_names_;
 
 //#endif // DB_CONNECTION_CPP

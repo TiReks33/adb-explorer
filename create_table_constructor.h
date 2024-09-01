@@ -50,18 +50,6 @@ public slots:
 
     void foreignkeychecked(int);
 
-    void onDeleteChecked(int);
-
-    void onUpdateChecked(int);
-
-//    void add_tbl_constructor_db2table_slot(int);
-
-    void add_tbl_constructor_db2table_slot(QString const&);
-
-    void add_tbl_constructor_table2atribute_slot(QString const&);
-
-//    void close_con(QString const &);
-
     void closeEvent(QCloseEvent *event);
 
     void current_exist_tables_slot(QList<QString>);
@@ -75,37 +63,9 @@ public slots:
 private slots:
     void on_next_0_clicked();
 
-    void on_next_1_clicked();
-
-    void on_send_button_clicked();
-
-    void on_plus_button_1_clicked();
-
-    void on_erase_button_1_clicked();
-
-    void on_help_button_2_clicked();
-
-    void on_reset_button_2_clicked();
-
-    void on_plus_button_2_clicked();
-
     void on_describe_tbl_button_2_clicked();
 
-    void on_cancel_2_clicked();
-
-    void on_back_button_2_clicked();
-
-    void on_back_button_1_clicked();
-
-    void on_cancel_0_clicked();
-
-    void on_help_button_1_clicked();
-
     void on_reload_con_button_2_clicked();
-
-    void on_cancel_1_clicked();
-
-//    void on_pushButton_clicked();
 
 signals:
 
@@ -115,6 +75,9 @@ signals:
 
 private:
     Ui::CreateTableConstructor *ui;
+
+    void signals_init();
+
     bool first_attribute_;
     QString sql_query_;
     bool first_key_;
@@ -123,10 +86,7 @@ private:
     auth& auth_;
     auth auth_autonome_;
 
-////    db_connection* non_static_connection_;
-//    db_connection* non_static_connection_2_;
 
-//    QSqlQueryModel model_;
     QSqlQueryModel submodel_0_;
     QSqlQueryModel submodel_1_;
     QSqlQueryModel submodel_2_;
@@ -135,23 +95,28 @@ private:
 
     QList<QString> exist_table_names_;
 
-    //int window_counter_=0;
+
 
     int attributes_added_=0;
 
     bool _warning_flag_=true;
 
-    multi_connection multi_con_;
 
-    //QString const test="abc";
 
     Tables *parent_;
 
-    //CustomQueryResult* describe_form_;
-    //QScopedPointer<CustomQueryResult> describe_form_;
+
     QPointer<CustomQueryResult> describe_form_;
 
     QString subconnection_name_ = "CreateTableConstructor_subconnection";
+
+    QString subconnection_name_2_ = "CreateTableConstructor_subconnection2";
+
+    QString const en_lit = "a-zA-Z";
+
+    QString const digits_lit = "0-9";
+
+    QString const spec_chars_lit = "_$";
 
 };
 

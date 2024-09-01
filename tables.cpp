@@ -1,14 +1,5 @@
-#include <tables.h>
+#include "tables.h"
 #include "ui_tables.h"
-
-#include <QCheckBox>
-#include <QLabel>
-//#include <QStackedLayout>
-#include <QGraphicsEffect>
-#include <QElapsedTimer>
-
-#include <customqueryresult.h>
-#include <ui_customqueryresult.h>
 
 #include "createtupleconstructor.h"
 
@@ -46,7 +37,6 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 
     //SIGNALS
 
-
     init_connections();
 
 }
@@ -77,30 +67,30 @@ void Tables::closeEvent(QCloseEvent *event)
 
     emit db_show();
     event->accept();
-////    table_query_window_->close();
+
     emit custom_query_windows_close();
 
     custom_query_result_window_->close();
 
-    db_connection::close(this->metaObject()->className());
-    db_connection::remove(this->metaObject()->className());
+ //   db_connection::close(this->metaObject()->className());
+  //  db_connection::remove(this->metaObject()->className());
 }
 
-bool Tables::event(QEvent* event)
-{
-  QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+//bool Tables::event(QEvent* event)
+//{
+//  QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
 
-  // if ESC key pressed-->
-  if(keyEvent && keyEvent->key() == Qt::Key_Escape)
-  {
-      this->hide();
-      emit db_show();
-    keyEvent->accept();
-    return true;
-  }
-  // otherwise call non-override parent-->
-  return QDialog::event(event);
-}
+//  // if ESC key pressed-->
+//  if(keyEvent && keyEvent->key() == Qt::Key_Escape)
+//  {
+//      this->hide();
+//      emit db_show();
+//    keyEvent->accept();
+//    return true;
+//  }
+//  // otherwise call non-override parent-->
+//  return QDialog::event(event);
+//}
 
 
 void Tables::init_connections()
@@ -118,11 +108,15 @@ void Tables::init_connections()
     connect(delete_table_window_,&delete_table::delete_entity,[=](QComboBox*comboBox__){
         db_connection::open(auth_);
 
-        if(!db_connection::set_query("DROP TABLE "+comboBox__->currentText()+";",&model_,comboBox__)){
+        QString const chosen_table = comboBox__->currentText();
+        QString const query_text = QString("DROP TABLE `%1`").arg(QString(escape_sql_backticks(chosen_table)));
 
-            QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
+        if(!db_connection::set_query(query_text,&model_,comboBox__))
+        {
 
-        }
+//            QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
+
+        }   else qDebug() << "Database `"+chosen_table+"` successfully deleted.";
 
         show_tables();      // view updated tables list after table deletion
         //select_cells(0,0, ui->tableView);
@@ -159,6 +153,40 @@ void Tables::init_connections()
     connect(ui->showTable_button,&QPushButton::clicked,[=]{
         show_tables();
     });
+
+    connect(ui->tableView,&QTableView::clicked,[=](const QModelIndex & index){
+        ////SETUP CURRENT INDEX POSITION (first 'a' index)
+        ui->tableView->setCurrentIndex(index);
+
+        auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+
+        qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.table_name_;
+    });
+
+    connect(ui->select_from_table_button,&QPushButton::clicked,this,&Tables::show_table_content);
+
+
+    connect(ui->Custom_Query_Button,&QPushButton::clicked, this, static_cast<void (Tables::*)()>(&Tables::get_custom_query_window_));
+
+
+    connect(ui->Query_settings,&QPushButton::clicked,[=]{
+        settings_->show();
+    });
+
+    connect(ui->delete_table_button,&QPushButton::clicked,[=]{
+        delete_table_window_->setModal(true);
+        delete_table_window_->show();
+        emit delete_form_request();
+    });
+
+    connect(ui->create_table_button,&QPushButton::clicked, this, &Tables::get_table_constructor);
+
+    connect(ui->insert_inTable_button,&QPushButton::clicked,this, &Tables::get_tuple_constructor_instance);
+
+
+    connect(ui->DescribeButton,&QPushButton::clicked,this,&Tables::get_describe_table_instance);
+
+
 
 }
 
@@ -204,16 +232,9 @@ qDebug() << "AFTER CLOSE()::";
 //qDebug() << "The Set query model operation took" << timer.nsecsElapsed() << "nanoseconds";
 }
 
-void Tables::send_custom_query_slot(QString query__)
+void Tables::send_custom_query_slot(QString const& query__)
 {
-//    //qDebug()<<"test";
-//    db_connection::open(auth_);
 
-
-//    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
-
-//                                                                custom_query_result_window_->show();
-//                                                                emit custom_query(query__);
 
     if(!settings_->ui->custom_checkbox->isChecked()){
     db_connection::open(auth_);
@@ -229,10 +250,9 @@ void Tables::send_custom_query_slot(QString query__)
     }else{
 
         CustomQueryResult new_result_window{auth_};
-        //new_result_window.show();
-//    custom_query_result_window_->show();
-    new_result_window.custom_query_slot(/*auth_,*/query__/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
-    //if(new_result_window.ui->tableView->model()->rowCount()!=0)
+
+    new_result_window.custom_query_slot(query__);
+
     if((new_result_window.ui->tableView->model())!=nullptr) {
 
         qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
@@ -248,16 +268,9 @@ void Tables::send_custom_query_slot(QString query__)
 }
 
 
-void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_query_window__)
+void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_query_window__)
 {
-//    //qDebug()<<"test";
-//    db_connection::open(auth_);
 
-
-//    db_connection::set_query(query__,model_,ui->tableView,QHeaderView::Stretch);
-
-//                                                                custom_query_result_window_->show();
-//                                                                emit custom_query(query__);
 
     if(!settings_->ui->custom_checkbox->isChecked()){
     db_connection::open(auth_);
@@ -274,10 +287,9 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_quer
     }else{
 
         CustomQueryResult new_result_window{auth_};
-        //new_result_window.show();
-//    custom_query_result_window_->show();
+
     new_result_window.custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
-    //if(new_result_window.ui->tableView->model()->rowCount()!=0)
+
     if((new_result_window.ui->tableView->model())!=nullptr) {
 
         qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
@@ -292,11 +304,6 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query*custom_quer
     qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
     }
 }
-
-
-
-
-
 
 
 
@@ -341,45 +348,8 @@ qDebug()<<"AFTER EXECUTION()";
 
 
 
-void Tables::on_showTable_button_clicked()
-{
-    show_tables();
-}
-
-void Tables::on_tableView_clicked(const QModelIndex &index)
-{
-    ////SETUP CURRENT INDEX POSITION (first 'a' index)
-    ui->tableView->setCurrentIndex(index);
-
-    auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-
-    qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.table_name_;
-}
-
-void Tables::on_select_from_table_button_clicked()
-{
-//    if(!ui->checkBox->isChecked()){
-    if(!settings_->ui->select_checkbox->isChecked()){
-    db_connection::open(auth_);
 
 
-    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),&model_,ui->tableView,QHeaderView::Stretch);
-    }else{
-//        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
-        CustomQueryResult new_select_window{auth_};
-
-        // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
-        connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
-
-        new_select_window.setWindowTitle(auth_.table_name_+": table data");
-        new_select_window.show();
-    //custom_query_result_window_->show();
-    new_select_window.custom_query_slot(/*auth_,*/QString("SELECT * FROM ")+auth_.table_name_+(";")/*,new_select_window->ui->tableView*//*,*/ /*new_select_window->model_,*//*new_select_window.ui->tableView*/);
-    //if(model_.rowCount()!=0)
-    qDebug()<<"BEFORE EXECUTION ::";
-    new_select_window.exec();
-    }
-}
 
 void Tables::get_custom_query_window_()
 {
@@ -388,8 +358,8 @@ void Tables::get_custom_query_window_()
         Custom_Query custom_query_window;
 
     ////    connect(&custom_query_window,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
-            connect(&custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query*)>(&Custom_Query::send_custom_query),
-                    this,static_cast<void(Tables::*)(/*QString,*/Custom_Query*)>(&Tables::send_custom_query_slot));
+            connect(&custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),
+                    this,static_cast<void(Tables::*)(/*QString,*/Custom_Query *)>(&Tables::send_custom_query_slot));
     ////    connect(this,&Tables::close_custom_query_form,[&](){ custom_query_window.close_window();});
 
         connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
@@ -400,7 +370,7 @@ void Tables::get_custom_query_window_()
         //emit show_tables_signal();
 }
 
-void Tables::get_custom_query_window_(QString __pre_query)
+void Tables::get_custom_query_window_(QString const& __pre_query)
 {
         Custom_Query custom_query_window;
 
@@ -416,46 +386,33 @@ void Tables::get_custom_query_window_(QString __pre_query)
         custom_query_window.exec();
 }
 
-void Tables::on_Custom_Query_Button_clicked()
+void Tables::show_table_content()
 {
-////    table_query_window_->setModal(true);
-//////    table_query_window_->show();
-//    Custom_Query custom_query_window;
+    if(!settings_->ui->select_checkbox->isChecked()){
+    db_connection::open(auth_);
 
-//////    connect(&custom_query_window,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
-//        connect(&custom_query_window,static_cast<void(Custom_Query::*)(QString,Custom_Query*)>(&Custom_Query::send_custom_query),
-//                this,static_cast<void(Tables::*)(QString,Custom_Query*)>(&Tables::send_custom_query_slot));
-//////    connect(this,&Tables::close_custom_query_form,[&](){ custom_query_window.close_window();});
 
-//    connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
+    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),&model_,ui->tableView,QHeaderView::Stretch);
+    }else{
 
-//    custom_query_window.setModal(false);
-//    custom_query_window.show();
-//    custom_query_window.exec();
-//    //emit show_tables_signal();
-    get_custom_query_window_();
+        CustomQueryResult new_select_window{auth_};
+
+        // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
+        connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
+
+        new_select_window.setWindowTitle(auth_.table_name_+": table data");
+        new_select_window.show();
+
+    new_select_window.custom_query_slot(QString("SELECT * FROM ")+auth_.table_name_+(";"));
+
+    qDebug()<<"BEFORE EXECUTION ::";
+    new_select_window.exec();
+    }
 }
 
-
-
-void Tables::on_Query_settings_clicked()
+void Tables::get_table_constructor()
 {
-    settings_->show();
-}
-
-void Tables::on_delete_table_button_clicked()
-{
-    delete_table_window_->setModal(true);
-    delete_table_window_->show();
-    emit delete_form_request();
-}
-
-void Tables::on_create_table_button_clicked()
-{
-
     if(!constructor_->isVisible()){
-
-    //auth_.backup_db_name();
 
     constructor_->setCurrentIndex(0);
 
@@ -473,25 +430,20 @@ void Tables::on_create_table_button_clicked()
 
     emit current_tables_list_signal(list_to_send);
 
-    //emit default_db()
 
-//CONSTRUCTOR WINDOW AT THE CENTER OF TABLE WINDOW
-    //constructor_->move(this->geometry().center());
 
-//    QPoint centerPoint = this->geometry().center();
-
-//    constructor_->adjustSize();
-//    constructor_->move(centerPoint.x() - constructor_->width()/2, centerPoint.y() - constructor_->height()/2);
+    //CONSTRUCTOR WINDOW AT THE CENTER OF TABLE WINDOW
     window_center_from_another_(this,constructor_);
 
     ////constructor_->setParent(this);
 
-//    constructor_->setWindowFlag(Qt::Window);
-////    constructor_->setWindowFlag(Qt::Dialog);
+    //    constructor_->setWindowFlag(Qt::Window);
+        constructor_->setWindowFlag(Qt::Dialog);
 
 
-////    constructor_->setWindowModality(Qt::WindowModal);
-//    constructor_->setWindowModality(Qt::NonModal);
+    ////    constructor_->setWindowModality(Qt::WindowModal);
+    //    constructor_->setWindowModality(Qt::NonModal);
+
     constructor_->show();
 
     } else {
@@ -499,55 +451,63 @@ void Tables::on_create_table_button_clicked()
         constructor_->raise();
 
     }
-
 }
 
-void Tables::on_insert_inTable_button_clicked()
+void Tables::get_tuple_constructor_instance()
 {
-    //insert_constructor_->show();
-    createTupleConstructor constr_window_{auth_/*,this*/};
-    ++tuples_windows_counter_;
-    qDebug() << "tuples constructor counter incremented; counter =="+QString::number(tuples_windows_counter_);
-    constr_window_./*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
-    //connect(this,&Tables::tpl_cnstr_upd_tables, &constr_window_/*insert_constructor_*/, &createTupleConstructor::update_tables_handler);
-////    connect(&constr_window_, /*&createTupleConstructor::*/SIGNAL(final_query_sig(QString)), this, SLOT(/*&Tables::*/send_custom_query_slot(QString)));
-    connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString)>(&createTupleConstructor::final_query_sig),
-            this, static_cast<void (Tables::*) (QString)>(&Tables::get_custom_query_window_));
-    connect(this,&Tables::custom_query_windows_close, &constr_window_, &createTupleConstructor::close);
+    if(!ui->tableView->model()->rowCount())
+    {
+        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current database is empty",
+                                                          "Current database is empty. You must create at least 1 table to insert data,"
+                                                            " or choose another DB.",
+                                                          QMessageBox::Ok,this/*0*/)};
 
-    connect(&constr_window_,static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::closed),[=](QString const & con_name_/*that_mustBclosed*/){
+        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+        //messageBox->setModal(false);
+        messageBox->show();
+        return;
+    }
+        createTupleConstructor constr_window_{auth_/*,this*/};
+        ++tuples_windows_counter_;
+        qDebug() << "tuples constructor counter incremented; counter =="+QString::number(tuples_windows_counter_);
 
-                        if(this->tuples_windows_counter_>0){
-                            --this->tuples_windows_counter_;
-                            qDebug() << "tuples counter decremented; counter =="+QString::number(tuples_windows_counter_);
-                        }
-                        if(this->tuples_windows_counter_==0){
-                            db_connection::close(con_name_);
-                                    qDebug() << "tuples counter ==0 -> connection ::"+con_name_+":: closed";
-                        }
-                ;});
+        connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::final_query_sig),
+                this, static_cast<void (Tables::*) (QString const &)>(&Tables::get_custom_query_window_));
+        connect(this,&Tables::custom_query_windows_close, &constr_window_, &createTupleConstructor::close);
 
-    //emit tpl_cnstr_upd_tables();
-    //constr_window_. setWindowFlag(Qt::Window);
-    constr_window_.setModal(false);
-    constr_window_.show();
-    constr_window_.exec();
-    qDebug()<<"TupleConstructor window after exec() before out of scope";
+        connect(&constr_window_,static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::closed),[=](QString const & con_name_/*that_mustBclosed*/){
+
+                            if(this->tuples_windows_counter_>0){
+                                --this->tuples_windows_counter_;
+                                qDebug() << "tuples counter decremented; counter =="+QString::number(tuples_windows_counter_);
+                            }
+                            if(this->tuples_windows_counter_==0){
+                                db_connection::close(con_name_);
+                                        qDebug() << "tuples counter ==0 -> connection ::"+con_name_+":: closed";
+                            }
+                    ;});
+
+
+        constr_window_.setModal(false);
+        constr_window_.show();
+        constr_window_.exec();
+        qDebug()<<"TupleConstructor window after exec() before out of scope";
 }
 
-void Tables::on_pushButton_2_clicked()
+void Tables::get_describe_table_instance()
 {
-    ////show_table_describe_form(auth_.db_name_,auth_.table_name_,this->metaObject()->className());
-
     QString query_text = "DESC "+auth_.table_name_+';';
 
-    if(!settings_->ui->select_checkbox->isChecked()){        
-    db_connection::open(auth_);
+    if(!settings_->ui->select_checkbox->isChecked()){
+
+        db_connection::open(auth_);
 
 
-    db_connection::set_query(query_text,&model_,ui->tableView,QHeaderView::Stretch);
+        db_connection::set_query(query_text,&model_,ui->tableView,QHeaderView::Stretch);
+
     }else{
-//        CustomQueryResult* new_select_window = new CustomQueryResult{auth_};
+
         CustomQueryResult new_select_window{auth_};
 
         // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
@@ -555,10 +515,13 @@ void Tables::on_pushButton_2_clicked()
 
         new_select_window.setWindowTitle(auth_.table_name_+": detail table info");
         new_select_window.show();
-    //custom_query_result_window_->show();
-    new_select_window.custom_query_slot(query_text);
-    //if(model_.rowCount()!=0)
-    qDebug()<<"BEFORE EXECUTION ::";
-    new_select_window.exec();
+
+        new_select_window.custom_query_slot(query_text);
+
+        qDebug()<<"BEFORE EXECUTION ::";
+        new_select_window.exec();
     }
 }
+
+
+

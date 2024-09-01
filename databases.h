@@ -44,8 +44,6 @@ public slots:
 
     void message_from_login(QString const&);
 
-    void delete_database_slot(QComboBox*);
-
     void show_databases();
 
 signals:

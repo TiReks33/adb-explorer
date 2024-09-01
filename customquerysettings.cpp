@@ -6,6 +6,10 @@ CustomQuerySettings::CustomQuerySettings(QWidget *parent) :
     ui(new Ui::CustomQuerySettings)
 {
     ui->setupUi(this);
+
+    connect(ui->Close_button,&QPushButton::clicked,[=]{
+        this->close();
+    });
 }
 
 CustomQuerySettings::~CustomQuerySettings()
@@ -13,7 +17,3 @@ CustomQuerySettings::~CustomQuerySettings()
     delete ui;
 }
 
-void CustomQuerySettings::on_Close_button_clicked()
-{
-    this->close();
-}

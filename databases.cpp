@@ -16,10 +16,10 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
     ui->statusLine->setReadOnly(true);
 
-    Qt::WindowFlags flags = Qt::Window | Qt::WindowSystemMenuHint
-                                | Qt::WindowMinimizeButtonHint
-                                | Qt::WindowMaximizeButtonHint
-                                | Qt::WindowCloseButtonHint;
+    Qt::WindowFlags flags = Qt::Window  | Qt::WindowSystemMenuHint
+                                        | Qt::WindowMinimizeButtonHint
+                                        | Qt::WindowMaximizeButtonHint
+                                        | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
     delete_db_window_->setWindowTitle("Remove database dialog");
@@ -95,7 +95,26 @@ void Databases::init_signals()
     });
 
 
-    connect(delete_db_window_,SIGNAL(delete_entity/*database*/(QComboBox*)),this,SLOT(delete_database_slot(QComboBox*)));
+
+    connect(delete_db_window_,&delete_db::delete_entity,[=](QComboBox*comboBox__){
+            db_connection::open(auth_);
+
+
+            QString const chosen_db = comboBox__->currentText();
+
+            QString const query_text = QString("DROP DATABASE `%1`").arg(QString(escape_sql_backticks(chosen_db)));
+
+
+            if(!db_connection::set_query(query_text,&model_,comboBox__)){
+
+                //QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
+
+            } else qDebug() << "Database `"+chosen_db+"` successfully deleted.";
+
+
+            show_databases(); // view database after deletion
+    });
+
 
     connect(ui->showTables_button,&QPushButton::clicked,[=]{
         tables_window_->show();
@@ -141,28 +160,6 @@ void Databases::message_from_login(QString const& message)
 {
     message_to_status(message);
     show_databases();
-}
-
-
-
-void Databases::delete_database_slot(QComboBox *comboBox__)
-{
-    db_connection::open(auth_);
-
-
-    QString const chosen_db = comboBox__->currentText();
-
-    QString const query_text = QString("DROP DATABASE `%1`").arg(QString(escape_sql_backticks(chosen_db)));
-
-
-    if(!db_connection::set_query(query_text,&model_,comboBox__)){
-
-        QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
-
-    } else qDebug() << "Database `"+chosen_db+"` successfully deleted.";
-
-
-    show_databases(); // view database after deletion
 }
 
 
@@ -294,8 +291,9 @@ void Databases::on_mysqldump_button_clicked()
                                                                           QMessageBox::Ok,this)};
 
                         connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-                        messageBox->show();
                         messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+                        messageBox->show();
+                        ////messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
 
                         if(grand_parent) grand_parent->message_to_status(full_err_message) ;
                         qCritical()<< "Error string: "<<dumpProcess.errorString();

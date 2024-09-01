@@ -22,29 +22,17 @@ public:
 public slots:
 
     friend class Tables;
-    ////friend class CreateTableConstructor;
 
-////    void custom_query_slot(QString);
 
-    void custom_query_slot(/*auth &,*/ QString const & query__, QString const & = auth::con_name_, QHeaderView::ResizeMode = QHeaderView::Stretch);
+    void custom_query_slot(QString const & query__, QString const & = auth::con_name_, QHeaderView::ResizeMode = QHeaderView::Stretch);
 
-//    void custom_query_slot(QString,QTableView*);
 
-////    void custom_query_slot(QString,QTableView*);
-
-////    void custom_query_slot(QString,QTableView*,QString);
-
-//    void custom_query_slot(QString,QSqlQueryModel,QTableView*);
-
-////    void custom_query_slot(QString,QComboBox*);
 
 private slots:
-    void on_Cancel_button_clicked();
 
     void close_window();
 
-//public:
-//    void set_auth
+
 
 private:
     Ui::CustomQueryResult *ui;
@@ -53,9 +41,7 @@ private:
 
      QSqlQueryModel model_;
 
-    // db_connection* non_static_connection_;
 
-    // QSqlQueryModel sub_model_;
 };
 
 #endif // CUSTOMQUERYRESULT_H

@@ -24,18 +24,17 @@ public:
 
     void reset();
 
+    void show();
+
 private slots:
-    void on_okButton_clicked();
 
-    void on_update_tables_button_clicked();
+    void update_tables_list();
 
-    void on_reset_button_clicked();
+//    void on_reset_button_clicked();
 
-    void table_changed_handler(QString const&);
+//    void columns_selected_handler();
 
-    void columns_selected_handler();
-
-    void on_addColsButton_clicked();
+//    void on_addColsButton_clicked();
 
     void closeEvent(QCloseEvent *event);
 
@@ -43,14 +42,13 @@ private slots:
 
     void on_describeButton_clicked();
 
-public slots:
-    void /*update_tables_handler*/sql_connection_initialize(); // because qt meta-object method restriction in constructor
+//public slots:
 
-    void import_list(QStringList);
+//    void import_list(QStringList);
 
 signals:
 
-    void final_query_sig(QString);
+    void final_query_sig(QString const&);
 
     void closed();
 
@@ -58,24 +56,15 @@ signals:
 
 private:
     Ui::createTupleConstructor *ui;
+
+    void signals_init();
+
     auth& auth_;
-    ////insertTupleConfirm* confirm_window_;
 
-//    db_connection* non_static_connection_;
 
-                                                    //TwoListSelection* list_selection_window_;
-
-    // connection-query solution to multiply signals-->
-//    static QStringList multi_con_names_;
-
-//    static QList<QSqlQueryModel*> multi_con_models_;
     QSqlQueryModel tables_model_;
-//    QString con_name_;
-    multi_connection multi_con_;
-//    static int con_counter_;
-//    static int unique_number_;
-//    inline static int con_counter_ = 1;
-    //<<-
+
+
     int tuples_added_=0;
     QStringList tuples_;
     QPointer<CustomQueryResult> describe_form_;

@@ -1,4 +1,4 @@
-#ifndef TABLES_H
+﻿#ifndef TABLES_H
 #define TABLES_H
 
 #include <QDialog>
@@ -12,6 +12,10 @@
 #include <QCheckBox>
 #include <QMessageBox>
 #include <QStandardItemModel>
+#include <QCheckBox>
+#include <QLabel>
+#include <QGraphicsEffect>
+#include <QElapsedTimer>
 
 #include "auth.h"
 #include "db_connection.h"
@@ -23,7 +27,10 @@
 #include "delete_db.h"
 #include "delete_table.h"
 #include "create_table_constructor.h"
-//#include "createtupleconstructor.h"
+#include <customqueryresult.h>
+#include <ui_customqueryresult.h>
+
+
 
 namespace Ui {
 class Tables;
@@ -45,16 +52,19 @@ public slots:
 
     void show_tables();
 
-    void send_custom_query_slot(QString);
+    void send_custom_query_slot(QString const&);
 
-    void send_custom_query_slot(/*QString,*/Custom_Query*);
-
-
-
-    void delete_table_slot(QComboBox*);
+    void send_custom_query_slot(/*QString,*/Custom_Query *);
 
 
-    void show_table_describe_form(QString const & db_name__,QString const&table_name__,QString const & con_name__ = auth::con_name_, QWidget * parent__ = nullptr, Qt::WindowType window_type_flag__ = Qt::Dialog, Qt::WindowModality window_modality_flag__ = Qt::NonModal) const;
+    void show_table_describe_form(
+            QString const & db_name__,
+            QString const&table_name__,
+            QString const & con_name__ = auth::con_name_,
+            QWidget * parent__ = nullptr,
+            Qt::WindowType window_type_flag__ = Qt::Dialog,
+            Qt::WindowModality window_modality_flag__ = Qt::NonModal
+            ) const;
 
 
 
@@ -64,13 +74,13 @@ signals:
 
 
 
-    void custom_query(auth&,QString);
+    void custom_query(auth&,QString const&);
 
 
 
-    void custom_query(auth&, QString,QTableView*);
+    void custom_query(auth&, QString const&,QTableView*);
 
-    void custom_query(QString,QSqlQueryModel&,QTableView*);
+    void custom_query(QString const&,QSqlQueryModel&,QTableView*);
 
     void delete_form_request();
 
@@ -90,34 +100,20 @@ signals:
 
 private slots:
 
-
-    void on_showTable_button_clicked();
-
-    void on_tableView_clicked(const QModelIndex &index);
-
-    void on_select_from_table_button_clicked();
-
-
-
-    void on_Custom_Query_Button_clicked();
-
-
-    void on_Query_settings_clicked();
-
-    void on_delete_table_button_clicked();
-
-    void on_create_table_button_clicked();
-
-    void on_insert_inTable_button_clicked();
-
     void get_custom_query_window_();
 
-    void get_custom_query_window_(QString);
+    void get_custom_query_window_(QString const&);
 
-    void on_pushButton_2_clicked();
+    void show_table_content();
+
+    void get_table_constructor();
+
+    void get_tuple_constructor_instance();
+
+    void get_describe_table_instance();
 
 protected:
-    bool event(QEvent* event);
+//    bool event(QEvent* event);
 
 private:
     Ui::Tables *ui;

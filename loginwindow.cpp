@@ -28,8 +28,6 @@ loginWindow::loginWindow(QWidget *parent)
 
     connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_from_login(QString const&)));
 
-
-
 }
 
 loginWindow::~loginWindow()

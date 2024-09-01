@@ -11,7 +11,8 @@
 
 #include "auth.h"
 
-#include "multi_connection.h"
+//#include "multi_connection.h"
+#include "helping_stuff.h"
 
 class TwoListSelection : public QDialog {
   Q_OBJECT
@@ -25,16 +26,6 @@ public:
   void clear(){ mOutput->clear();mInput->clear();list_before_changes_.clear();}
 
   void update_doublelist();
-
-private slots:
-
-//  void reset_handler();
-
-//  void cancel_handler(){this->close(); }
-
-//  void ok_handler();
-
-  void closeEvent(QCloseEvent *event);
 
 public slots:
 
@@ -70,7 +61,7 @@ private:
   QPushButton *reset_button_;
 
   auth& auth_;
-  multi_connection multi_con_;
+  //multi_connection multi_con_;
 };
 
 #endif // TWOLISTSELECTION_H

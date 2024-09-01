@@ -26,6 +26,6 @@ void replace_all( std::string& s, std::string const& toReplace, std::string cons
 //QString
 void replace_all(QString& s,QString const& toReplace,QString const& replaceWith);
 QString replace_all(QString const& s,QString const& toReplace /*= "`"*/,QString const& replaceWith /*= "``"*/);
-QString escape_sql_backticks(QString const&);
+QString escape_sql_backticks(QString const&); // escaping SQL 'Grave Accent' apostrophes
 
 #endif // HELPING_STUFF_H
