@@ -63,7 +63,7 @@ public slots:
 private slots:
     void on_next_0_clicked();
 
-    void on_describe_tbl_button_2_clicked();
+    void describe_table();
 
     void on_reload_con_button_2_clicked();
 
@@ -106,7 +106,8 @@ private:
     Tables *parent_;
 
 
-    QPointer<CustomQueryResult> describe_form_;
+    //QPointer<CustomQueryResult> describe_form_;
+    QScopedPointer<CustomQueryResult> describe_form_;
 
     QString subconnection_name_ = "CreateTableConstructor_subconnection";
 
@@ -117,6 +118,8 @@ private:
     QString const digits_lit = "0-9";
 
     QString const spec_chars_lit = "_$";
+
+    //auth* __auth;
 
 };
 

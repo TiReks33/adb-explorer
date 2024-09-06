@@ -106,11 +106,14 @@ void Databases::init_signals()
 
 
             if(!db_connection::set_query(query_text,&model_,comboBox__)){
-
+                ui->statusLine->setText(QString("(x)Database `%1` is not dropped.").arg(chosen_db));
+                qDebug()<< QString("(x)Database `%1` is not dropped.").arg(chosen_db);
                 //QMessageBox::warning(this,"Warning","Database is not deleted. May be it was been deleted earlier.");
 
-            } else qDebug() << "Database `"+chosen_db+"` successfully deleted.";
-
+            } else {
+                qDebug() << QString("(✓)Database `%1` successfully deleted.").arg(chosen_db);
+                ui->statusLine->setText(QString("(✓)Database `%1` successfully deleted.").arg(chosen_db));
+            }
 
             show_databases(); // view database after deletion
     });

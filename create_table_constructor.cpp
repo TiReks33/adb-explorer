@@ -2,6 +2,14 @@
 #include "ui_create_table_constructor.h"
 #include "tables.h"
 
+QDebug operator<<(QDebug stream__, auth const &auth__){
+    stream__ << "db_server::" << auth__.db_server_
+             << "host::" << auth__.host_
+             << "db_name::" << auth__.db_name_
+             << "table_name::" << auth__.table_name_;
+    return stream__;
+}
+
 CreateTableConstructor::CreateTableConstructor(auth& auth__,/*QWidget*/Tables *parent) :
     QStackedWidget(parent),
     ui(new Ui::CreateTableConstructor)
@@ -84,6 +92,7 @@ void CreateTableConstructor::signals_init()
 
             //submodel_2_.clear();
 
+        ui->ref_DB_comboBox_2->setToolTip(current_DB_name__);
 
             db_connection::close(subconnection_name_);
 
@@ -104,6 +113,10 @@ void CreateTableConstructor::signals_init()
                 {
                     submodel_2_.clear();
                     qDebug()<<"submodel_2_ cleared;;";
+
+                    ui->ref_table_comboBox_2->setToolTip("*empty table*");
+                    ui->ref_key_comboBox_2->setToolTip("*no corteges (empty table)*");
+
                 }
             }
     },Qt::QueuedConnection);
@@ -114,11 +127,15 @@ void CreateTableConstructor::signals_init()
             qDebug() << "Current table::"<<current_table_name__;
 
             db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(current_table_name__))), &submodel_2_,ui->ref_key_comboBox_2,subconnection_name_);
-            ui->ref_key_comboBox_2->setToolTip(ui->ref_key_comboBox_2->currentText());
+
+            ui->ref_table_comboBox_2->setToolTip(current_table_name__);
 
     },Qt::QueuedConnection);
 
 
+    connect(ui->ref_key_comboBox_2,&QComboBox::currentTextChanged,this,[=](QString const&current_key_name__){
+       ui->ref_key_comboBox_2->setToolTip(current_key_name__);
+    },Qt::QueuedConnection);
 
 
 
@@ -295,6 +312,9 @@ void CreateTableConstructor::signals_init()
     connect(ui->cancel_1,&QPushButton::clicked,[=]{
         this->close();
     });
+
+
+    connect(ui->describe_tbl_button_2,&QPushButton::clicked,this,&CreateTableConstructor::describe_table, Qt::QueuedConnection);
 
 
 }
@@ -678,6 +698,7 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
     ui->tbl_name_line_0->clear();
     ui->statusLine_0->clear();
 
+    //parent_->show();
 
     event->accept();
 }
@@ -775,54 +796,87 @@ void CreateTableConstructor::on_next_0_clicked()
 
 
 
-void CreateTableConstructor::on_describe_tbl_button_2_clicked()
+
+void CreateTableConstructor::describe_table()
 {
+    qDebug() << "describe form == nullptr::" <<(describe_form_==nullptr);
     if(describe_form_!=nullptr)//{
-    describe_form_->close();
-
-    ////parent_->show_table_describe_form(ui->ref_DB_comboBox_2->currentText(),ui->ref_table_comboBox_2->currentText(),parent_->metaObject()->className(),this,Qt::Dialog,Qt::WindowModal);
-    //QString con_name = QString(subconnection_name_)+" describe_form";
-    QString db_name = ui->ref_DB_comboBox_2->currentText();
-    QString table_name = ui->ref_table_comboBox_2->currentText();
-    db_connection::close(subconnection_name_2_); //1
-    //db_connection::remove(con_name__);
-    auth __auth = auth_;
-    __auth.db_name_ = db_name;
-
-
-    QSqlDatabase::database(subconnection_name_2_,false).setDatabaseName(__auth.db_name_); //2
-
-
-    describe_form_ = new CustomQueryResult{__auth,/*this*/0};
-
-
-    connect(this,&CreateTableConstructor::closed,[=](){
-        qDebug() << "Before closing describe_form";
-        if(describe_form_!=nullptr)
         describe_form_->close();
+
+
+    QString const db_name = ui->ref_DB_comboBox_2->currentText();
+    QString const table_name = ui->ref_table_comboBox_2->currentText();
+    db_connection::close(subconnection_name_2_); //1
+
+    auth* __auth {new auth{auth_}}; // not static obj because 'customqueryresult' gets reference (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
+
+    __auth->db_name_ = db_name;
+
+
+    QSqlDatabase::database(subconnection_name_2_,false).setDatabaseName(db_name); //2
+
+
+    describe_form_.reset(new CustomQueryResult{{*__auth}/*,this*//*0*/});
+    //describe_form_ = new CustomQueryResult{__auth,/*this*//*0*/nullptr};
+    //describe_form_ = new CustomQueryResult{__auth,/*this*//*0*//*nullptr*/qobject_cast<Tables *>(this->parent())};
+    //describe_form_ = new CustomQueryResult{__auth,/*this*//*0*//*nullptr*/parent_};
+    //QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
+
+
+    auto con1 = connect(this,&CreateTableConstructor::closed,this,[=](){
+        qDebug() << "Before closing describe_form";
+        if(describe_form_!=nullptr){
+
+            describe_form_->close();
+
+        }
+
         qDebug() << "After closing describe_form";
+    },Qt::QueuedConnection);
+
+
+    auto con2 = connect(ui->pushButton,&QPushButton::clicked,[=]{
+
+        if(describe_form_!=nullptr) qDebug()<<describe_form_->auth_;
+
     });
-    connect(describe_form_,&CustomQueryResult::destroyed,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
+
+
+//    connect(describe_form_.data(),&CustomQueryResult::destroyed,this,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
+//        db_connection::close(subconnection_name_2_);
+
+//        disconnect(con1);
+//        disconnect(con2);
+//        //delete __auth;
+//    });
+
+
+    connect(describe_form_.data(),&CustomQueryResult::closed_,[=]{
+        delete __auth;
+        describe_form_.reset();
+
         db_connection::close(subconnection_name_2_);
+
+        disconnect(con1);
+        disconnect(con2);
     });
 
 
-    describe_form_->setWindowTitle(table_name);
-
+describe_form_->setWindowTitle(table_name);
 
 describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(escape_sql_backticks(table_name))),subconnection_name_2_); //3
 
-
 describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
+
 describe_form_->setModal(false);
-describe_form_->setWindowFlag(Qt::Window);
-//describe_form_->setWindowModality(Qt::NonModal);
+
 describe_form_->show();
 
-describe_form_-> exec();
+
+//describe_form_-> exec(); // preventing the 'auth__' stack temporary object out-of-scope destroyed (crashing the app because 'CustomQueryResult' holds its reference)
+
 
 }
-
 
 
 void CreateTableConstructor::on_reload_con_button_2_clicked()

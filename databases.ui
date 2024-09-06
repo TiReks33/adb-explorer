@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Choose DB</string>
+   <string>Databases</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -45,8 +45,7 @@
      <item>
       <widget class="QPushButton" name="showDB_button">
        <property name="text">
-        <string>Show all existing databases on server
-(reload databases list)</string>
+        <string>Reload databases list</string>
        </property>
       </widget>
      </item>
@@ -151,7 +150,11 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLineEdit" name="statusLine"/>
+      <widget class="QLineEdit" name="statusLine">
+       <property name="placeholderText">
+        <string>Status information</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

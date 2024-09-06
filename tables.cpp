@@ -113,11 +113,13 @@ void Tables::init_connections()
 
         if(!db_connection::set_query(query_text,&model_,comboBox__))
         {
-
-//            QMessageBox::warning(this,"Warning","Table is not droped. May be it was been droped earlier?");
-
-        }   else qDebug() << "Database `"+chosen_table+"` successfully deleted.";
-
+//            QMessageBox::warning(this,"Warning","Table is not dropped. May be it was been droped earlier?");
+            ui->statusLine->setText(QString("(x)Table `%1` is not dropped.").arg(chosen_table));
+            qDebug() << QString("(x)Table `%1` is not dropped.").arg(chosen_table);
+        } else {
+                qDebug() << QString("Table `%1` successfully deleted.").arg(chosen_table);
+                ui->statusLine->setText(QString("(✓)Table `%1` successfully deleted.").arg(chosen_table));
+        }
         show_tables();      // view updated tables list after table deletion
         //select_cells(0,0, ui->tableView);
     });
@@ -445,6 +447,8 @@ void Tables::get_table_constructor()
     //    constructor_->setWindowModality(Qt::NonModal);
 
     constructor_->show();
+
+    //this->hide();
 
     } else {
 

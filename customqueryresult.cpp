@@ -18,6 +18,12 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent) :
     connect(ui->Cancel_button,&QPushButton::clicked,[=]{
         this->close();
     });
+
+    connect(ui->pushButton,&QPushButton::clicked,[=]{
+        qDebug()<< "auth::" << auth_.db_name_;
+        qDebug()<< "auth::" << auth_.db_server_;
+        qDebug()<< "auth::" << auth_.host_;
+    });
 }
 
 

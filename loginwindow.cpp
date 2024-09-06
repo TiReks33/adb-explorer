@@ -28,6 +28,15 @@ loginWindow::loginWindow(QWidget *parent)
 
     connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_from_login(QString const&)));
 
+    int r = 5;
+    auto tr = QSharedPointer<int>::create(r);
+    std::shared_ptr<int> irt = std::make_shared<int>(r);
+    qDebug() << (*irt);
+    qDebug() << (*tr);
+
+//    QPointer<auth> ty = new auth{};
+//    ty.data()->db_name_ = "123";
+//    qDebug() << ty.data()->db_name_ << ty.data()->db_server_;
 }
 
 loginWindow::~loginWindow()

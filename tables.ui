@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Database queries</string>
+   <string>Tables</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -21,9 +21,14 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="showTable_button">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>Show all tables in current database
-(reload tables list)</string>
+        <string>Reload tables list</string>
        </property>
       </widget>
      </item>
@@ -137,7 +142,10 @@
    <item>
     <widget class="QLineEdit" name="statusLine">
      <property name="text">
-      <string>THIS IS A 'TABLES' WIDGET</string>
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>Status information</string>
      </property>
     </widget>
    </item>

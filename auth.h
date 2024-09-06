@@ -1,6 +1,7 @@
 #ifndef AUTH_H
 #define AUTH_H
 #include <QString>
+#include <QDebug>
 
 
 
@@ -16,6 +17,13 @@ struct auth{
       , host_("localhost")
 //      , con_name_("ADBEXPLORER")
     {}
+
+
+    ~auth(){
+        qDebug() << "~auth destructor called";
+    }
+
+
 //private:
     /*static*/ QString db_server_; //default
     /*static*/ QString host_;
@@ -35,7 +43,25 @@ struct auth{
 
 //    static QString const default_con_name_;
 
+
+    friend QDebug operator<<(QDebug stream__, auth const &auth__);
+
+    auth& copy_(auth const& auth__)
+    {
+        if(this!=&auth__){
+            db_server_=auth__.db_server_;
+            host_=auth__.host_;
+            login_=auth__.login_;
+            passw_=auth__.passw_;
+            db_name_=auth__.db_name_;
+            table_name_=auth__.table_name_;
+        }
+        return *this;
+    }
+
 };
+
+
 
 #endif // AUTH_H
 
