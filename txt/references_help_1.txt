@@ -1,1 +1,39 @@
-Test test 123 
+SQL Types
+
+[[NUMERIC]]
+
+[INT]
+In SQL Server, for storing integer or numeric values in a table column the INT data type is used. The INT data type can store whole numbers, which can be positive or negative. The value range of the INT data type is from -2,147,483,648 to 2,147,483,647. The memory storage size of the INT data type for a column is 4 bytes.
+The INT data type is used for any columns with numerical data like ID, Integer Values, or Currency values without decimals. The INT data type is also used to create a column with a Primary Key in a table.
+INT is a medium integer. Signed range is from -2147483648 to 2147483647. Unsigned range is from 0 to 4294967295. The size parameter specifies the maximum display width (which is 255).
+
+[DECIMAL]
+In SQL Server, when you need numbers to be super precise, like in financial calculations, you use the DECIMAL data type. It’s like a special box for storing exact numbers and no rounding off!
+In simpler terms, decimal is SQL Server’s way of saying, “I don’t mess around with numbers.” It’s the go-to choice when you need to count every penny in your financial database or measure the exact ingredients for your best recipe.
+DECIMAL is an exact fixed-point number. The total number of digits is specified in size. The number of digits after the decimal point is specified in the d parameter. The maximum number for size is 65. The maximum number for d is 30. The default value for size is 10. The default value for d is 0.
+
+
+[[TEXT]]
+
+[VARCHAR]
+Varchar is a datatype in SQL that holds characters of variable length. This data type stores character strings of up to 255 bytes in a variable-length field.
+VARCHAR is a VARIABLE length string (can contain letters, numbers, and special characters). The size parameter specifies the maximum string length in characters - can be from 0 to 65535
+
+[TEXT]
+TEXT is a variable-length data type that can store long character strings. TEXT can hold up to 2,147,483,647 bytes of data. The actual storage used depends on the length of the character string.
+TEXT holds a string with a maximum length of 65,535 bytes
+
+
+[[Date and Time Data Types]]
+
+[DATE]
+DATE type -- is a date. Format: YYYY-MM-DD. The supported range is from '1000-01-01' to '9999-12-31'
+
+[TIME]
+TIME(fsp) -- is a time. Format: hh:mm:ss. The supported range is from '-838:59:59' to '838:59:59'
+
+[DATETIME]
+DATETIME(fsp) -- is a date and time combination. Format: YYYY-MM-DD hh:mm:ss. The supported range is from '1000-01-01 00:00:00' to '9999-12-31 23:59:59'. Adding DEFAULT and ON UPDATE in the column definition to get automatic initialization and updating to the current date and time
+
+[YEAR]
+YEAR type -- is a year in four-digit format. Values allowed in four-digit format: 1901 to 2155, and 0000. [MySQL 8.0 does not support year in two-digit format.]

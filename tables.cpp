@@ -472,7 +472,7 @@ void Tables::get_tuple_constructor_instance()
         messageBox->show();
         return;
     }
-        createTupleConstructor constr_window_{auth_/*,this*/};
+        createTupleConstructor constr_window_{auth_,this};
         ++tuples_windows_counter_;
         qDebug() << "tuples constructor counter incremented; counter =="+QString::number(tuples_windows_counter_);
 
@@ -493,7 +493,8 @@ void Tables::get_tuple_constructor_instance()
                     ;});
 
 
-        constr_window_.setModal(false);
+//        constr_window_.setModal(false);
+        constr_window_.setWindowModality(Qt::NonModal);
         constr_window_.show();
         constr_window_.exec();
         qDebug()<<"TupleConstructor window after exec() before out of scope";

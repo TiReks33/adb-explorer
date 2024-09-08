@@ -28,7 +28,7 @@ public:
     ~loginWindow();
 
     // close-event override for save/db closing connection-purpose after app closing
-    void closeEvent(QCloseEvent *event){event->accept();};
+//    void closeEvent(QCloseEvent *event){event->accept();};
 
 
 

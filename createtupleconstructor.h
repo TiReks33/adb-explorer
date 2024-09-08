@@ -69,7 +69,7 @@ private:
     QStringList tuples_;
     QPointer<CustomQueryResult> describe_form_;
 
-    QString subconnection_name_ = "createTupleConstructor_subconnection";
+//    QString subconnection_name_ = "createTupleConstructor_subconnection";
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H

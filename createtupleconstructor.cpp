@@ -207,7 +207,7 @@ void createTupleConstructor::update_tables_list()
 void createTupleConstructor::closeEvent(QCloseEvent *event)
 {
     if(describe_form_)describe_form_->close();
-    emit closed(this->subconnection_name_);
+    //emit closed(this->subconnection_name_);
         event->accept();
 }
 
@@ -258,7 +258,7 @@ void createTupleConstructor::on_describeButton_clicked()
     QString table_name = ui->comboBox->currentText();
 
 
-    describe_form_ = new CustomQueryResult{auth_};
+    describe_form_ = new CustomQueryResult{auth_,this};
 
 
     describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
@@ -268,9 +268,11 @@ void createTupleConstructor::on_describeButton_clicked()
 
 
 //describe_form_->custom_query_slot("DESCRIBE "+table_name+(";"),subconnection_name_); //3
-    describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(escape_sql_backticks(table_name))),subconnection_name_);
+    describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(escape_sql_backticks(table_name)))/*,subconnection_name_*/);
+
+    describe_form_->setModal(false);
 
 describe_form_->show();
 
-describe_form_-> exec();
+//describe_form_-> exec();
 }

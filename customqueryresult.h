@@ -39,7 +39,7 @@ private slots:
 
 private:
     Ui::CustomQueryResult *ui;
-public:
+//public:
     auth& auth_;
 
     QSqlQueryModel model_;

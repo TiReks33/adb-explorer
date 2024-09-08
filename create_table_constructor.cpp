@@ -159,7 +159,7 @@ void CreateTableConstructor::signals_init()
             ui->foreign_key_combobox_2->setCurrentIndex(-1);
 
 
-            on_reload_con_button_2_clicked();
+            //on_reload_con_button_2_clicked();
 
 
             this->setCurrentIndex(2);
@@ -207,6 +207,11 @@ void CreateTableConstructor::signals_init()
 
 
     connect(ui->help_button_2,&QPushButton::clicked,[=]{
+
+        static QPointer <QDialog> check_ref;
+
+        if(!check_ref){
+
         QString reference_info=":/txt/references_help_2.txt";
 
         QString info;
@@ -219,7 +224,11 @@ void CreateTableConstructor::signals_init()
             file.close();
             }
 
-        QMessageBox::about(this,"Referential Actions",info);
+        //QMessageBox::about(this,"Referential Actions",info);
+            get_help_window(check_ref,"Referential Actions",info);
+        } else {
+            if(check_ref)check_ref->raise();
+        }
     });
 
 
@@ -293,8 +302,12 @@ void CreateTableConstructor::signals_init()
 
 
     connect(ui->help_button_1,&QPushButton::clicked,[=]{
+        //static bool win_open = false;
+        static QPointer <QDialog> check_ref;
+        if(!/*win_open*/check_ref){
         QString reference_info=":/txt/references_help_1.txt";
-
+//static int i=3;
+//qDebug() << &i;
         QString info;
         QFile file(reference_info);
 
@@ -305,7 +318,15 @@ void CreateTableConstructor::signals_init()
             file.close();
             }
 
-        QMessageBox::about(this,"Referential Actions",info);
+        //QMessageBox::about(this,"Data types",info);
+
+
+        get_help_window(check_ref,"Data types",info);
+        //win_open = true;
+        } else {
+            if(check_ref)check_ref->raise();
+        }
+
     });
 
 
@@ -649,6 +670,8 @@ void CreateTableConstructor::foreignkeychecked(int state)
         ui->plus_button_2->setEnabled(false);
     } else {
 
+        on_reload_con_button_2_clicked();
+
         ui->foreign_key_combobox_2->setEnabled(true);
         ui->ref_DB_comboBox_2->setEnabled(true);
         ui->ref_table_comboBox_2->setEnabled(true);
@@ -835,11 +858,11 @@ void CreateTableConstructor::describe_table()
     },Qt::QueuedConnection);
 
 
-    auto con2 = connect(ui->pushButton,&QPushButton::clicked,[=]{
+//    auto con2 = connect(ui->pushButton,&QPushButton::clicked,[=]{
 
-        if(describe_form_!=nullptr) qDebug()<<describe_form_->auth_;
+//        if(describe_form_!=nullptr) qDebug()<<describe_form_->auth_;
 
-    });
+//    });
 
 
 //    connect(describe_form_.data(),&CustomQueryResult::destroyed,this,[=](){ /*describe_form_ = nullptr;qDebug()<<"OBJISNULLED!1";*/
@@ -858,7 +881,7 @@ void CreateTableConstructor::describe_table()
         db_connection::close(subconnection_name_2_);
 
         disconnect(con1);
-        disconnect(con2);
+//        disconnect(con2);
     });
 
 
@@ -900,6 +923,104 @@ void CreateTableConstructor::on_reload_con_button_2_clicked()
             break; // return or break?
         }
     }
+}
+
+
+void CreateTableConstructor::get_help_window(QString const & header_title__,const QString & info__,QWidget*parent__)
+{
+    //QMessageBox::about(this,"Data types",info);
+    //static QPointer <QDialog> dialog;
+
+////static bool win_open = false;
+////    if(!win_open){
+    QPointer <QDialog> dialog = new QDialog{parent__};
+    dialog->setWindowTitle(header_title__);
+
+    auto layout = new QVBoxLayout;
+
+    auto label = new QLabel;
+    label->setText(info__);
+    label->setWordWrap(true);
+
+    auto scroller = new QScrollArea;
+    scroller->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scroller->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scroller->setWidgetResizable(true);
+    scroller->setWidget(label);
+
+
+
+    auto buttonBox = new QDialogButtonBox{QDialogButtonBox::Ok};
+    connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+buttonBox->setCenterButtons(true);
+    dialog->setLayout(layout);
+
+
+    layout->addWidget(scroller);
+
+    layout->addWidget(buttonBox);
+
+    connect(dialog,&QDialog::destroyed,[&](){
+        qDebug() << "~help dialog activated (destroyed).";
+////        win_open=false;
+    });
+    dialog->setAttribute( Qt::WA_DeleteOnClose, true );
+    dialog->show();
+    //return dialog;
+////    win_open=true;
+////    } else {
+////        if(dialog)dialog->raise();
+////    }
+}
+
+
+void/*QDialog **/ CreateTableConstructor::get_help_window(QPointer<QDialog>&window_pointer,QString const & header_title__,const QString & info__,QWidget*parent__)
+{
+    //QMessageBox::about(this,"Data types",info);
+    //static QPointer <QDialog> dialog;
+
+////static bool win_open = false;
+////    if(!win_open){
+    /*QPointer <QDialog> dialog*/window_pointer = new QDialog{parent__};
+    window_pointer->setWindowTitle(header_title__);
+
+    auto layout = new QVBoxLayout;
+
+    auto label = new QLabel;
+    label->setText(info__);
+    label->setWordWrap(true);
+
+    auto scroller = new QScrollArea;
+    scroller->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scroller->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scroller->setWidgetResizable(true);
+    scroller->setWidget(label);
+
+
+
+    auto buttonBox = new QDialogButtonBox{QDialogButtonBox::Ok};
+    connect(buttonBox, &QDialogButtonBox::accepted, window_pointer, &QDialog::accept);
+buttonBox->setCenterButtons(true);
+    window_pointer->setLayout(layout);
+
+
+    layout->addWidget(scroller);
+
+    layout->addWidget(buttonBox);
+
+    connect(window_pointer,&QDialog::destroyed,[&](){
+        qDebug() << "~help dialog activated (destroyed).";
+////        win_open=false;
+    });
+    window_pointer->setAttribute( Qt::WA_DeleteOnClose, true );
+    window_pointer->show();
+    //return dialog;
+////    win_open=true;
+////    } else {
+////        if(dialog)dialog->raise();
+////    }
+
+
 }
 
 

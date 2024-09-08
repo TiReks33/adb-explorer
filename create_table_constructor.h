@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QList>
 #include <QSqlError>
+#include <QScrollArea>
 
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
@@ -66,6 +67,10 @@ private slots:
     void describe_table();
 
     void on_reload_con_button_2_clicked();
+
+    void get_help_window(QString const&,QString const&,QWidget* = nullptr);
+
+    void /*QDialog **/ get_help_window(QPointer<QDialog>&,QString const&,QString const&,QWidget* = nullptr);
 
 signals:
 

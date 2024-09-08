@@ -33,8 +33,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
 Databases::~Databases()
 {
-    db_connection::close();
-    db_connection::remove();
+    db_connection::close();   // close SQL-connection 'auth::con_name_'
+    db_connection::remove(); // remove SQL-connection 'auth::con_name_'
     delete ui;
     delete tables_window_;
     delete new_db_window_;
