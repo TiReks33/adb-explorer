@@ -132,3 +132,15 @@ QString escape_sql_backticks(const QString &str__)
     replace_all(copy_str,"`","``");
     return copy_str;
 }
+
+QStringList escape_sql_backticks(const QStringList list__)
+{
+    QStringList new_list_with_esc;
+
+    for( const auto& i : list__)
+    {
+        new_list_with_esc.append(escape_sql_backticks(i));
+    }
+
+    return new_list_with_esc;
+}

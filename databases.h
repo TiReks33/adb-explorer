@@ -13,6 +13,7 @@
 #include <QVariant>
 #include <QElapsedTimer>
 
+//#include <QEventLoop>
 
 #include "tables.h"
 #include "auth.h"
@@ -22,6 +23,8 @@
 #include "delete_db.h"
 
 #include "helping_stuff.h"
+
+#include "sqldump.h"
 
 namespace Ui {
 class Databases;

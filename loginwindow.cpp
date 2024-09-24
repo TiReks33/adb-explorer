@@ -37,6 +37,55 @@ loginWindow::loginWindow(QWidget *parent)
 //    QPointer<auth> ty = new auth{};
 //    ty.data()->db_name_ = "123";
 //    qDebug() << ty.data()->db_name_ << ty.data()->db_server_;
+
+////    QStringList list; list << "aba``"<<"baba```re" << "abc";
+////    qDebug() << escape_sql_backticks(list);
+
+//    SqlDump_db_choose db_choose{auth_};
+
+//    db_choose.show();
+//    db_choose.exec();
+
+//QDialog dialog;
+
+//QLabel* label = new QLabel;
+
+//QVBoxLayout*layout = new QVBoxLayout;
+//dialog.setLayout(layout);
+
+//QPushButton* button = new QPushButton;
+
+//button->setText("ABCDEF");
+
+//QHBoxLayout* sublay = new QHBoxLayout;
+
+////sublay->setSizeConstraint(QLayout::SetMinimumSize);
+
+//dialog.layout()->addWidget(label);
+//layout->addLayout(sublay);
+
+//QComboBox* comboBox = new QComboBox;
+
+//sublay->addWidget(comboBox);
+
+//QPushButton *button1 = new QPushButton;
+
+//QVBoxLayout* but_lay = new QVBoxLayout;
+
+//but_lay->setSizeConstraint(QLayout::SetMinimumSize);
+
+//button1->setLayout(but_lay);
+
+//QLabel* but_label = new QLabel("ABCDEF");
+
+//but_label->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
+//but_lay->addWidget(but_label);
+
+//sublay->addWidget(button1);
+
+//dialog.show();
+//dialog.exec();
 }
 
 loginWindow::~loginWindow()

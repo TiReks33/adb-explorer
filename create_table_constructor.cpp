@@ -831,7 +831,10 @@ void CreateTableConstructor::describe_table()
     QString const table_name = ui->ref_table_comboBox_2->currentText();
     db_connection::close(subconnection_name_2_); //1
 
-    auth* __auth {new auth{auth_}}; // not static obj because 'customqueryresult' gets reference (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
+    auth* __auth {nullptr}; // not static obj because 'customqueryresult' gets reference of auth, not value (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
+qDebug() << (__auth==nullptr);
+    __auth = new auth{auth_};
+
 
     __auth->db_name_ = db_name;
 

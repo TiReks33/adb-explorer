@@ -11,6 +11,8 @@
 
 #include "auth.h"
 
+#include "select_cells.hpp"
+
 //#include "multi_connection.h"
 #include "helping_stuff.h"
 
@@ -18,6 +20,7 @@ class TwoListSelection : public QDialog {
   Q_OBJECT
 public:
   explicit TwoListSelection(auth& auth__,QDialog *parent = nullptr);
+    virtual ~TwoListSelection();
 
   void addAvailableItems(const QStringList &items);
 
@@ -25,7 +28,8 @@ public:
 
   void clear(){ mOutput->clear();mInput->clear();list_before_changes_.clear();}
 
-  void update_doublelist();
+//  void update_doublelist();
+  void update_doublelist(QString const&,QString const& = auth::con_name_);
 
 public slots:
 

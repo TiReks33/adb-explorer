@@ -201,6 +201,25 @@ void Databases::on_mysqldump_button_clicked()
 //        qDebug()<<"After QMessageBox";
 //        return;
 //    }
+
+    QScopedPointer<SqlDump_credentials> dump{new SqlDump_credentials{auth_,this}};
+//dump->setAttribute(Qt::WA_DeleteOnClose,true);
+    dump->show();
+
+    connect(dump.get(),&SqlDump_credentials::message,[&](QString const& message__){
+        this->ui->statusLine->setText(message__);
+        qDebug()<<message__;
+        dump->close();
+    });
+
+    dump->exec();
+
+//    QEventLoop loop;
+//        connect(dump, &SqlDump_credentials::closed, & loop, &QEventLoop::quit);
+//        loop.exec();
+
+    return;
+
     QScopedPointer<QDialog> dump_auth_choose{new QDialog{this}};
 
     dump_auth_choose->setWindowTitle("SQL dump");
@@ -225,6 +244,7 @@ void Databases::on_mysqldump_button_clicked()
 
     current_credential_button->setText("current_credential_button");
 
+
     connect (current_credential_button, &QPushButton::clicked,[&](){
 
         QScopedPointer<QDialog> dump_name{new QDialog{this}};
@@ -232,6 +252,7 @@ void Databases::on_mysqldump_button_clicked()
         dump_name->setWindowTitle("Dump name setting");
 
         dump_name->setModal(true);
+
 
         connect(dump_name.get(), &QDialog::destroyed,[=](){ qDebug() << "dump_name button destroyed(~)";});
 
@@ -255,14 +276,18 @@ void Databases::on_mysqldump_button_clicked()
 
         QDialogButtonBox * button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
-        connect(button_box, &QDialogButtonBox::rejected,[&](){ dump_name->close(); });
+
+        connect(button_box, &QDialogButtonBox::rejected,[&](){
+            dump_name->close();
+        });
 
         dump_name->layout()->addWidget(button_box);
+
 
         connect(button_box, &QDialogButtonBox::accepted,[&](){
                 QProcess dumpProcess(this);
                 QStringList args;
-                args << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << "--databases" << "aatest1" << "abitura";
+                args << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << "--all-databases" /*<< "aatest1" << "abitura"*/;
                 qDebug() << "args StringList->>" << args << "<<-args StringList";
                 QString output_filename = line_edit->text().isEmpty() ? "dump.sql" : (line_edit->text().right(4)==".sql") ? line_edit->text() : line_edit->text()+".sql" ;
                 qDebug() << "right 4==" << line_edit->text().right(4);
@@ -273,7 +298,8 @@ void Databases::on_mysqldump_button_clicked()
 
 //                QObject::connect(&dumpProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
                   QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
-                    qDebug() << "signal QProcess::finished emited";
+
+                      qDebug() << "signal QProcess::finished emited";
                     QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
                     if(exitStatus==QProcess::NormalExit && exitCode == 0){
                         QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
@@ -324,17 +350,19 @@ void Databases::on_mysqldump_button_clicked()
         dump_name->exec();
     });
 
-    QPushButton * another_credential_button = new QPushButton;
+//    QPushButton * another_credential_button = new QPushButton;
 
-    dump_auth_choose->layout()->addWidget(another_credential_button);
+//    dump_auth_choose->layout()->addWidget(another_credential_button);
 
-    QPushButton * exit_button = new QPushButton;
+//    QPushButton * exit_button = new QPushButton;
 
-    connect(exit_button,&QPushButton::clicked,[&](){dump_auth_choose->close();});
+//    connect(exit_button,&QPushButton::clicked,[&](){
+//        dump_auth_choose->close();
+//    });
 
-    exit_button->setText("Cancel");
+//    exit_button->setText("Cancel");
 
-    dump_auth_choose->layout()->addWidget(exit_button);
+//    dump_auth_choose->layout()->addWidget(exit_button);
 
     dump_auth_choose->show();
     dump_auth_choose->exec();

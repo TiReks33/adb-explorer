@@ -14,7 +14,7 @@ namespace Ui {
 class createTupleConstructor;
 }
 
-class createTupleConstructor : public QDialog
+class createTupleConstructor : public QWidget/*QDialog*/
 {
     Q_OBJECT
 

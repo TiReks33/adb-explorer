@@ -472,15 +472,15 @@ void Tables::get_tuple_constructor_instance()
         messageBox->show();
         return;
     }
-        createTupleConstructor constr_window_{auth_,this};
+        QPointer<createTupleConstructor> constr_window_{new createTupleConstructor{auth_/*,this*/}};
         ++tuples_windows_counter_;
         qDebug() << "tuples constructor counter incremented; counter =="+QString::number(tuples_windows_counter_);
 
-        connect(&constr_window_, static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::final_query_sig),
+        connect(constr_window_, static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::final_query_sig),
                 this, static_cast<void (Tables::*) (QString const &)>(&Tables::get_custom_query_window_));
-        connect(this,&Tables::custom_query_windows_close, &constr_window_, &createTupleConstructor::close);
+        connect(this,&Tables::custom_query_windows_close, constr_window_, &createTupleConstructor::close);
 
-        connect(&constr_window_,static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::closed),[=](QString const & con_name_/*that_mustBclosed*/){
+        connect(constr_window_,static_cast<void (createTupleConstructor::*) (QString const &)>(&createTupleConstructor::closed),[=](QString const & con_name_/*that_mustBclosed*/){
 
                             if(this->tuples_windows_counter_>0){
                                 --this->tuples_windows_counter_;
@@ -492,11 +492,15 @@ void Tables::get_tuple_constructor_instance()
                             }
                     ;});
 
+        constr_window_->setAttribute( Qt::WA_DeleteOnClose, true );
 
-//        constr_window_.setModal(false);
-        constr_window_.setWindowModality(Qt::NonModal);
-        constr_window_.show();
-        constr_window_.exec();
+        //constr_window_->setWindowFlag(Qt::Window);
+        //constr_window_->setModal(false);
+
+        //constr_window_->setWindowModality(Qt::NonModal);
+        constr_window_->show();
+        //constr_window_->setVisible(true);
+//        constr_window_.exec();
         qDebug()<<"TupleConstructor window after exec() before out of scope";
 }
 

@@ -26,6 +26,7 @@ SOURCES += \
     loginwindow.cpp \
     multi_connection.cpp \
     select_cells.cpp \
+    sqldump.cpp \
     tables.cpp \
     twolistselection.cpp
 
@@ -47,6 +48,7 @@ HEADERS += \
     loginwindow.h \
     multi_connection.h \
     select_cells.hpp \
+    sqldump.h \
     tables.h \
     twolistselection.h
 
@@ -54,6 +56,7 @@ FORMS += \
     create_db_name.ui \
     create_table_constructor.ui \
     createtupleconstructor.ui \
+    createtupleconstructor1.ui \
     custom_query.ui \
     customqueryresult.ui \
     customquerysettings.ui \

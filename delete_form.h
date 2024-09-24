@@ -17,7 +17,7 @@ class delete_form : public QDialog
 
 public:
     explicit delete_form(QWidget *parent = nullptr,QString const & = "entity");
-    virtual ~delete_form();;
+    virtual ~delete_form();
 
 signals:
     void delete_form_send(QComboBox*);

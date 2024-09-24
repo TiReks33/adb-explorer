@@ -10,6 +10,11 @@ TwoListSelection::TwoListSelection(auth& auth__,QDialog *parent) :
     connections();
 }
 
+TwoListSelection::~TwoListSelection()
+{
+    qDebug() << "~TwoListSelection";
+}
+
 void TwoListSelection::addAvailableItems(const QStringList &items) {
     for( QString s : items)
         list_before_changes_.append(s);
@@ -25,14 +30,15 @@ QStringList TwoListSelection::selectedItems() {
     return selected;
 }
 
-void TwoListSelection::update_doublelist()
+void TwoListSelection::update_doublelist(QString const& query__,QString const& connection_name__)
 {
-    if(!db_connection::try_to_reopen(auth_)){
+    if(!db_connection::try_to_reopen(auth_,connection_name__)){
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
-//    db_connection::set_query("SHOW COLUMNS FROM "+auth_.table_name_+";", this);
-    db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(auth_.table_name_))), this);
+//    db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(auth_.table_name_))), this);
+    if(db_connection::set_query(query__, this, connection_name__))
+        select_cells(0,0,mInput);
 
 }
 
@@ -175,11 +181,12 @@ void TwoListSelection::connections() {
             mOutput->clear();
             mInput->clear();
             mInput->addItems(list_before_changes_);
+            select_cells(0,0,mInput);
         });
 
     connect(cancel_button_,&QPushButton::clicked, [=]() {
             this->close();
-});
+    });
 
     connect(ok_button_,&QPushButton::clicked, [=]() {
 

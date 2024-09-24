@@ -4,7 +4,7 @@
 
 
 createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
-    QDialog(parent),
+    QWidget/*QDialog*/(parent),
     ui(new Ui::createTupleConstructor)
   , auth_(auth__)
 
@@ -109,7 +109,8 @@ void createTupleConstructor::signals_init()
             qDebug() << "List from double list::" << list__;
             ui->plainTextEdit_2->setPlainText(pack_(list__));
         });
-        doublelist.update_doublelist();
+        QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(auth_.table_name_)));
+        doublelist.update_doublelist(query);
         doublelist.setModal(true);
         doublelist/*list_selection_window_->*/.show();
         doublelist.exec();
@@ -138,9 +139,10 @@ void createTupleConstructor::reset()
 
 void createTupleConstructor::show()
 {
-    QDialog::show();
+    QWidget::show();
+    //QDialog::show();
     update_tables_list();
-    qDebug() << "createTupleConstructor's 'QDialog::Show()' overloaded method called.";
+    qDebug() << "createTupleConstructor's 'QWidget::Show()' overloaded method called.";
 }
 
 void createTupleConstructor::update_tables_list()
