@@ -5,7 +5,7 @@ delete_db::delete_db(QWidget *parent) :
 
 {
 
-    ui->label->setText("Choose database to <font style=\"color: black;background: red;\">delete</font>");
+    ////ui->label->setText("Choose database to <font style=\"color: black;background: red;\">delete</font>");
 
 }
 

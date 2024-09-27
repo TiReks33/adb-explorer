@@ -22,12 +22,11 @@ Databases::Databases(auth& auth__, QWidget *parent) :
                                         | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
-    delete_db_window_->setWindowTitle("Remove database dialog");
+    ////delete_db_window_->setWindowTitle("Remove database dialog");
 
     //SIGNALS
 
     init_signals();
-
 
 }
 
@@ -73,7 +72,12 @@ void Databases::init_signals()
 
 
 
-    connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
+    ////connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
+    connect(this,&Databases::show_tables_signal,[=]{
+        db_connection::close();
+        QSqlDatabase::database(auth::con_name_,false).setDatabaseName(auth_.db_name_);
+        tables_window_->show_tables();
+    });
 
     connect(tables_window_,&Tables::db_show,[=]{
         show_databases();
@@ -121,8 +125,9 @@ void Databases::init_signals()
 
     connect(ui->showTables_button,&QPushButton::clicked,[=]{
         tables_window_->show();
-        emit show_tables_signal();
         this->hide();
+        emit show_tables_signal();
+
     });
 
     connect(ui->tableView,&QTableView::activated,[=](const QModelIndex &index){
@@ -159,35 +164,46 @@ void Databases::message_to_status(const QString & message__) const
 }
 
 
-void Databases::message_from_login(QString const& message)
+//void Databases::message_from_login(QString const& message)
+//{
+//    message_to_status(message);
+//    show_databases();
+//}
+
+
+
+/*void*/bool Databases::show_databases()
 {
-    message_to_status(message);
-    show_databases();
-}
 
+//    db_connection::close();
+//    QSqlDatabase::database(auth_.con_name_,false).setDatabaseName("blank_db");
+//auth_.db_name_="blank_db";
+    if(db_connection::open(auth_)){
 
+        if(db_connection::set_query("SHOW DATABASES;",&model_,ui->tableView,QHeaderView::Stretch)){
 
-void Databases::show_databases()
-{
-    db_connection::open(auth_);
+//if(db_connection::set_query("SHOW TABLES;",&model_,ui->tableView,QHeaderView::Stretch)){
 
+            qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
 
-    db_connection::set_query("SHOW DATABASES;",&model_,ui->tableView,QHeaderView::Stretch);
+            select_cells(0,0, ui->tableView);
 
-    qDebug() << "Contains?:"<<QSqlDatabase::contains(auth::con_name_);
+            auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
 
-    select_cells(0,0, ui->tableView);
+            qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
 
-    auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+            qDebug() << "current auth_.dB_name_ index::" << auth_.db_name_;
 
-    qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
+            if(!auth_.db_name_.isEmpty()){
+                ui->showTables_button->setEnabled(true);
+                ui->showTables_button->setStyleSheet("background: green; color: white;");
+            }
 
-    qDebug() << "current auth_.dB_name_ index::" << auth_.db_name_;
-
-    if(!auth_.db_name_.isNull()){
-        ui->showTables_button->setEnabled(true);
-        ui->showTables_button->setStyleSheet("background: green; color: white;");
+            return true;
+        }
     }
+
+    return false;
 }
 
 

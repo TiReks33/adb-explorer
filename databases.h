@@ -45,9 +45,9 @@ public slots:
 
     void message_to_status(QString const &) const;
 
-    void message_from_login(QString const&);
+//    void message_from_login(QString const&);
 
-    void show_databases();
+    /*void*/bool show_databases();
 
 signals:
 

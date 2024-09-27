@@ -33,7 +33,7 @@ bool db_connection::open(auth &auth__, const QString &con_name__)
             db_connection.setDatabaseName(auth__.db_name_);
 
             if(!db_connection.open()){
-                qDebug() << ("(x)Error connection to database by connection ::"+con_name__+":: .");
+                qDebug() << ("(x)Error occured while connect to database by connection ::"+con_name__+":: .");
                 return false;
             }
             else{

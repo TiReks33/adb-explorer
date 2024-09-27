@@ -4,7 +4,7 @@ delete_table::delete_table(QWidget *parent) :
     delete_form(parent,"table")
 
 {
-    ui->label->setText("Choose table to <font style=\"color: black;background: red;\">delete</font>");
+    ////ui->label->setText("Choose table to <font style=\"color: black;background: red;\">delete</font>");
 
 }
 

@@ -9,6 +9,7 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    blinkinbutton.cpp \
     create_db_name.cpp \
     create_table_constructor.cpp \
     createtupleconstructor.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
 
 HEADERS += \
     auth.h \
+    blinkinbutton.h \
     create_db_name.h \
     create_table_constructor.h \
     createtupleconstructor.h \

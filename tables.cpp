@@ -7,8 +7,9 @@ Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Tables)
 
-  , auth_(auth__)
+  , showTable_button{new BlinkinButton{"Reload tables list"}}
 
+  , auth_(auth__)
 
   , custom_query_result_window_(new CustomQueryResult{auth_})
   , settings_(new CustomQuerySettings)
@@ -18,6 +19,10 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->reloadLayout->addWidget(showTable_button);
+
+    showTable_button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
+
     ui->statusLine->setReadOnly(true);
 
     Qt::WindowFlags flags = Qt::Window  | Qt::WindowSystemMenuHint
@@ -26,7 +31,7 @@ Tables::Tables(auth& auth__,QWidget *parent) :
                                         | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
-    delete_table_window_->setWindowTitle("Remove table dialog");
+    ////delete_table_window_->setWindowTitle("Remove table dialog");
 
 
     constructor_->setWindowFlag(Qt::Dialog);
@@ -146,26 +151,50 @@ void Tables::init_connections()
         qDebug() << "(✓)Table constructor query successful completed.";
     });
 
-    connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
+//    connect(this,&Tables::constructor_query_fails, constructor_, &CreateTableConstructor::constructor_query_fails_handle,Qt::QueuedConnection);
 
-    connect(this,&Tables::constructor_query_fails, [=] () {
+//    connect(this,&Tables::constructor_query_fails, [=] () {
+//        qDebug() << "(x)Table constructor query fails.";
+//    });
+
+    connect(this,&Tables::constructor_query_fails, this,[=]{
+        constructor_->constructor_query_fails_handle();
         qDebug() << "(x)Table constructor query fails.";
+    },Qt::QueuedConnection);
+
+    connect(/*ui->*/showTable_button,&QPushButton::clicked,[=]{
+        show_tables();
+//        ui->selectButtonsLayout->setEnabled(true);
     });
 
-    connect(ui->showTable_button,&QPushButton::clicked,[=]{
-        show_tables();
+    connect(this,&Tables::tables_reloaded,[=]{
+//        ui->selectButtonsLayout->setEnabled(true);
+        ui->select_from_table_button->setEnabled(true);
+        ui->DescribeButton->setEnabled(true);
+        showTable_button->stop_blinkin();
+    });
+
+    connect(this,&Tables::disable_select_until_reload,[=]{
+        ui->select_from_table_button->setEnabled(false);
+        ui->DescribeButton->setEnabled(false);
+        showTable_button->start_blinkin(890);
     });
 
     connect(ui->tableView,&QTableView::clicked,[=](const QModelIndex & index){
         ////SETUP CURRENT INDEX POSITION (first 'a' index)
         ui->tableView->setCurrentIndex(index);
-
-        auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-
-        qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" << auth_.table_name_;
+//??
+    ////    auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+//??
+        qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex() << "::" /*<< auth_.table_name_*/;
     });
 
     connect(ui->select_from_table_button,&QPushButton::clicked,this,&Tables::show_table_content);
+//    connect(ui->select_from_table_button,&QPushButton::clicked,[=]{
+//        show_table_content();
+//        if(!settings_->ui->custom_checkbox->isChecked())
+//            ui->selectButtonsLayout->setEnabled(false);
+//    });
 
 
     connect(ui->Custom_Query_Button,&QPushButton::clicked, this, static_cast<void (Tables::*)()>(&Tables::get_custom_query_window_));
@@ -186,11 +215,17 @@ void Tables::init_connections()
     connect(ui->insert_inTable_button,&QPushButton::clicked,this, &Tables::get_tuple_constructor_instance);
 
 
-    connect(ui->DescribeButton,&QPushButton::clicked,this,&Tables::get_describe_table_instance);
+    connect(ui->DescribeButton,&QPushButton::clicked,this,&Tables::/*get_describe_table_instance*/show_table_description);
 
 
 
 }
+
+//void Tables::disable_select_until_reload()
+//{
+//    ui->select_from_table_button->setEnabled(false);
+//    ui->DescribeButton->setEnabled(false);
+//}
 
 
 void Tables::show_tables()
@@ -199,9 +234,9 @@ void Tables::show_tables()
 //timer.start();
 
     // ==> close current and open new connect with chosen db
-db_connection::close();
+////db_connection::close();
 
-        QSqlDatabase::database(auth::con_name_,false).setDatabaseName(auth_.db_name_);
+////        QSqlDatabase::database(auth::con_name_,false).setDatabaseName(auth_.db_name_);
 
 
 
@@ -218,56 +253,76 @@ qDebug() << "AFTER CLOSE()::";
             select_cells(0,0, ui->tableView);
 
 
-            auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+//            auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
         }
 
-        qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
+        qDebug() << "Number of existinf tables::" <<(model_.rowCount());
 
+qDebug()<< ui->tableView->currentIndex().data().toString();
 
-        if(!auth_.table_name_.isNull()){
+        if(ui->tableView->currentIndex().data().toString().isEmpty()){
+//        if(!auth_.table_name_.isNull()){
             ui->select_from_table_button->setEnabled(true);
             ui->select_from_table_button->setStyleSheet("background: green; color: white;");
         }
+
+        emit tables_reloaded();
+
     }
 
 //qDebug() << "The Set query model operation took" << timer.elapsed() << "milliseconds";
 //qDebug() << "The Set query model operation took" << timer.nsecsElapsed() << "nanoseconds";
 }
 
-void Tables::send_custom_query_slot(QString const& query__)
-{
 
 
-    if(!settings_->ui->custom_checkbox->isChecked()){
-    db_connection::open(auth_);
+//void Tables::send_custom_query_slot(QString const& query__)
+//{
 
+//    if(!settings_->ui->custom_checkbox->isChecked()){
 
-    if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch))
-        emit close_custom_query_form(); // don't need anymore?
-    if(!ui->tableView->model()->columnCount()) {
-        show_tables();
-        qDebug() << "rowCount() in model_==0::display result ignored.";
+//        db_connection::open(auth_);
 
-    }
-    }else{
+//        if(db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch))
+//            emit close_custom_query_form(); // don't need anymore?
+//qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
+//        if(!ui->tableView->model()->columnCount()) {
+//            show_tables();
+//            qDebug() << "rowCount() in model_==0::display result ignored.";
 
-        CustomQueryResult new_result_window{auth_};
+//            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+//                    " contain of displayable result. Current DB tables list reloaded.");
 
-    new_result_window.custom_query_slot(query__);
+//        } else{
+////            ui->selectButtonsLayout->setEnabled(false);
+////            qDebug() << "send_custom_query_slot::disabled_layout";
+//            emit disable_select_until_reload();
+//        }
 
-    if((new_result_window.ui->tableView->model())!=nullptr) {
+//    } else{
 
-        qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
-        emit close_custom_query_form(); // don't need anymore?
-        if(new_result_window.ui->tableView->model()->columnCount()>0){
-            new_result_window.show();
-            new_result_window.exec();
-        }
+//        CustomQueryResult new_result_window{auth_};
 
-    }
-    qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
-    }
-}
+//        new_result_window.custom_query_slot(query__);
+
+//        if((new_result_window.ui->tableView->model())!=nullptr) {
+
+//            qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
+
+//            emit close_custom_query_form(); // don't need anymore?
+
+//            if(new_result_window.ui->tableView->model()->columnCount()>0){
+//                new_result_window.show();
+//                new_result_window.exec();
+//            }
+
+//        }
+
+//        qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
+
+//    }
+
+//}
 
 
 void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_query_window__)
@@ -275,36 +330,61 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_que
 
 
     if(!settings_->ui->custom_checkbox->isChecked()){
-    db_connection::open(auth_);
+        db_connection::open(auth_);
+        qDebug()<< "SHASHLIK";
 
+        if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,ui->tableView,QHeaderView::Stretch))
+            custom_query_window__->close_window();
 
-    if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,ui->tableView,QHeaderView::Stretch))
-        ////emit close_custom_query_form();
-        custom_query_window__->close_window();
-    if(!ui->tableView->model()->columnCount()) {
-        show_tables();
-        qDebug() << "rowCount() in model_==0::display result ignored.";
+        qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
+        qDebug() << "tableViewModelRowsCOUNT::" << ui->tableView->model()->rowCount();
 
-    }
-    }else{
+        if(!ui->tableView->model()->rowCount()) {
+            show_tables();
+            qDebug() << "rowCount() in model_==0::display result ignored.";
+
+            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                    " contain of displayable result. Current DB tables list reloaded.");
+
+        } else{
+//            ui->selectButtonsLayout->setEnabled(false);
+//            qDebug() << "send_custom_query_slot::disabled_layout";
+            emit disable_select_until_reload();
+            ui->statusLine->clear();
+        }
+
+    } else{
 
         CustomQueryResult new_result_window{auth_};
 
-    new_result_window.custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
+        new_result_window.custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/);
 
-    if((new_result_window.ui->tableView->model())!=nullptr) {
+        if((new_result_window.ui->tableView->model())!=nullptr) {
 
-        qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
-        ////emit close_custom_query_form();
-        custom_query_window__->close_window();
-        if(new_result_window.ui->tableView->model()->columnCount()>0){
-            new_result_window.show();
-            new_result_window.exec();
+            qDebug() << "Number of columns in tableView->model()::"<<new_result_window.ui->tableView->model()->columnCount();
+            qDebug() << "Number of rows in tableView->model()::"<<new_result_window.ui->tableView->model()->rowCount();
+
+            custom_query_window__->close_window();
+
+            if(!new_result_window.ui->tableView->model()->rowCount()){
+
+                qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+
+                ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                        " contain of displayable result.");
+
+            } else{
+
+                ui->statusLine->clear();
+
+                new_result_window.show();
+                new_result_window.exec();
+            }
+
         }
 
     }
-    qDebug() << "NUMBER OF CORTEGES::"<< ((new_result_window.ui->tableView->model())==nullptr);
-    }
+
 }
 
 
@@ -355,21 +435,20 @@ qDebug()<<"AFTER EXECUTION()";
 
 void Tables::get_custom_query_window_()
 {
-    //    table_query_window_->setModal(true);
-    ////    table_query_window_->show();
+
         Custom_Query custom_query_window;
 
-    ////    connect(&custom_query_window,SIGNAL(send_custom_query(QString)),this,SLOT(send_custom_query_slot(QString)));
+
             connect(&custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),
                     this,static_cast<void(Tables::*)(/*QString,*/Custom_Query *)>(&Tables::send_custom_query_slot));
-    ////    connect(this,&Tables::close_custom_query_form,[&](){ custom_query_window.close_window();});
+
 
         connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::close);
 
         custom_query_window.setModal(false);
         custom_query_window.show();
         custom_query_window.exec();
-        //emit show_tables_signal();
+
 }
 
 void Tables::get_custom_query_window_(QString const& __pre_query)
@@ -390,11 +469,39 @@ void Tables::get_custom_query_window_(QString const& __pre_query)
 
 void Tables::show_table_content()
 {
+
+    qDebug()<<"SHOW TABLE [START]";
+
+    QString const curIndStr = escape_sql_backticks(ui->tableView->currentIndex().data().toString());
+
     if(!settings_->ui->select_checkbox->isChecked()){
-    db_connection::open(auth_);
+
+        db_connection::open(auth_);
+
+        qDebug() << "CurrentIndexString(Table)::" << curIndStr;
+
+        db_connection::set_query(QString("SELECT * FROM ")+/*auth_.table_name_*/curIndStr+(";"),&model_,ui->tableView,QHeaderView::Stretch);
 
 
-    db_connection::set_query(QString("SELECT * FROM ")+auth_.table_name_+(";"),&model_,ui->tableView,QHeaderView::Stretch);
+
+        qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
+        qDebug() << "tableViewModelRowsCOUNT::" << ui->tableView->model()->rowCount();
+
+        if(!ui->tableView->model()->rowCount()) {
+            show_tables();
+            qDebug() << "rowCount() in model_==0::display result ignored.";
+
+            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                    " contain of displayable result. Current DB tables list reloaded.");
+
+        } else{
+
+            emit disable_select_until_reload();
+            ui->statusLine->clear();
+        }
+
+
+
     }else{
 
         CustomQueryResult new_select_window{auth_};
@@ -402,15 +509,38 @@ void Tables::show_table_content()
         // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
         connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
 
-        new_select_window.setWindowTitle(auth_.table_name_+": table data");
-        new_select_window.show();
+        new_select_window.setWindowTitle(/*auth_.table_name_*/curIndStr+": table data");
 
-    new_select_window.custom_query_slot(QString("SELECT * FROM ")+auth_.table_name_+(";"));
+        new_select_window.custom_query_slot(QString("SELECT * FROM ")+/*auth_.table_name_*/curIndStr+(";"));
 
-    qDebug()<<"BEFORE EXECUTION ::";
-    new_select_window.exec();
+        if((new_select_window.ui->tableView->model())!=nullptr) {
+
+            qDebug() << "Number of columns in tableView->model()::"<<new_select_window.ui->tableView->model()->columnCount();
+            qDebug() << "Number of rows in tableView->model()::"<<new_select_window.ui->tableView->model()->rowCount();
+
+
+            if(!new_select_window.ui->tableView->model()->rowCount()){
+
+                qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+
+                ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                        " contain of displayable result.");
+            } else{
+
+            ui->statusLine->clear();
+
+            new_select_window.show();
+            new_select_window.exec();
+
+            }
+
+        }
+
     }
+    qDebug()<<"SHOW TABLE [END]";
 }
+
+
 
 void Tables::get_table_constructor()
 {
@@ -504,16 +634,39 @@ void Tables::get_tuple_constructor_instance()
         qDebug()<<"TupleConstructor window after exec() before out of scope";
 }
 
-void Tables::get_describe_table_instance()
+
+
+void Tables::/*get_describe_table_instance*/show_table_description()
 {
-    QString query_text = "DESC "+auth_.table_name_+';';
+    qDebug() << "Table describe[BEGIN]";
+
+    QString const curIndStr = escape_sql_backticks(ui->tableView->currentIndex().data().toString());
+    QString query_text = "DESC "+/*auth_.table_name_*/curIndStr+';';
 
     if(!settings_->ui->select_checkbox->isChecked()){
 
         db_connection::open(auth_);
 
+        emit disable_select_until_reload();
 
         db_connection::set_query(query_text,&model_,ui->tableView,QHeaderView::Stretch);
+
+        qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
+        qDebug() << "tableViewModelRowsCOUNT::" << ui->tableView->model()->rowCount();
+
+        if(!ui->tableView->model()->rowCount()) {
+            show_tables();
+            qDebug() << "rowCount() in model_==0::display result ignored.";
+
+            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                    " contain of displayable result. Current DB tables list reloaded.");
+
+        } else{
+
+            emit disable_select_until_reload();
+            ui->statusLine->clear();
+
+        }
 
     }else{
 
@@ -522,15 +675,37 @@ void Tables::get_describe_table_instance()
         // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
         connect(this,&Tables::custom_query_windows_close, &new_select_window, &Custom_Query::close);
 
-        new_select_window.setWindowTitle(auth_.table_name_+": detail table info");
-        new_select_window.show();
+        new_select_window.setWindowTitle(/*auth_.table_name_*/curIndStr+": detail table info");
 
         new_select_window.custom_query_slot(query_text);
 
-        qDebug()<<"BEFORE EXECUTION ::";
-        new_select_window.exec();
-    }
-}
 
+        if((new_select_window.ui->tableView->model())!=nullptr) {
+
+            qDebug() << "Number of columns in tableView->model()::"<<new_select_window.ui->tableView->model()->columnCount();
+            qDebug() << "Number of rows in tableView->model()::"<<new_select_window.ui->tableView->model()->rowCount();
+
+
+            if(!new_select_window.ui->tableView->model()->rowCount()){
+
+                qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+
+                ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                        " contain of displayable result.");
+
+            } else{
+
+                ui->statusLine->clear();
+
+                new_select_window.show();
+                new_select_window.exec();
+            }
+
+        }
+    }
+
+    qDebug() << "Table describe[END]";
+
+}
 
 

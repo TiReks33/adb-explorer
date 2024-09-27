@@ -20,20 +20,23 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="showTable_button">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <layout class="QVBoxLayout" name="reloadLayout">
+       <property name="leftMargin">
+        <number>6</number>
        </property>
-       <property name="text">
-        <string>Reload tables list</string>
+       <property name="topMargin">
+        <number>6</number>
        </property>
-      </widget>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>6</number>
+       </property>
+      </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="selectButtonsLayout">
        <item>
         <widget class="QPushButton" name="select_from_table_button">
          <property name="styleSheet">

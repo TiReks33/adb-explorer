@@ -30,7 +30,7 @@
 #include <customqueryresult.h>
 #include <ui_customqueryresult.h>
 
-
+#include "blinkinbutton.h"
 
 namespace Ui {
 class Tables;
@@ -52,7 +52,7 @@ public slots:
 
     void show_tables();
 
-    void send_custom_query_slot(QString const&);
+//    void send_custom_query_slot(QString const&);
 
     void send_custom_query_slot(/*QString,*/Custom_Query *);
 
@@ -98,6 +98,10 @@ signals:
 
     void custom_query_windows_close(); // 'close/*_stack*/_childs?
 
+    void tables_reloaded();
+
+    void disable_select_until_reload();
+
 private slots:
 
     void get_custom_query_window_();
@@ -110,7 +114,7 @@ private slots:
 
     void get_tuple_constructor_instance();
 
-    void get_describe_table_instance();
+    void /*get_describe_table_instance*/show_table_description();
 
 protected:
 //    bool event(QEvent* event);
@@ -118,8 +122,11 @@ protected:
 private:
     Ui::Tables *ui;
 
+    BlinkinButton* showTable_button;
+
     void init_connections();
 
+//    void disable_select_until_reload();
 
     auth& auth_;
 

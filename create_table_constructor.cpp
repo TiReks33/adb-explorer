@@ -6,7 +6,8 @@ QDebug operator<<(QDebug stream__, auth const &auth__){
     stream__ << "db_server::" << auth__.db_server_
              << "host::" << auth__.host_
              << "db_name::" << auth__.db_name_
-             << "table_name::" << auth__.table_name_;
+//             << "table_name::" << auth__.table_name_
+                ;
     return stream__;
 }
 

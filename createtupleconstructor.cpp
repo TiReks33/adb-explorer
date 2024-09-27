@@ -29,8 +29,8 @@ createTupleConstructor::~createTupleConstructor()
 void createTupleConstructor::signals_init()
 {
     connect(ui->comboBox,&QComboBox::currentTextChanged, [=](QString const& string_){
-        auth_.table_name_=string_;
-        qDebug() << "auth table name after textchanged()"<<auth_.table_name_;
+//        auth_.table_name_=string_;
+//        qDebug() << "auth table name after textchanged()"<<auth_.table_name_;
         if (string_==""){
             ui->frame->setEnabled(true);
             ui->update_tables_button->setEnabled(true);
@@ -69,7 +69,7 @@ void createTupleConstructor::signals_init()
 
     connect(ui->okButton,&QPushButton::clicked,[=]{
 //        QString final_query = "INSERT INTO "+auth_.table_name_+" ("+ui->plainTextEdit_2->toPlainText()+") "+"VALUES ";
-        QString final_query = QString("INSERT INTO `%1` (`%2`) VALUES ").arg(QString(escape_sql_backticks(auth_.table_name_)))
+        QString final_query = QString("INSERT INTO `%1` (`%2`) VALUES ").arg(QString(escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())))
                                                                         .arg(QString(escape_sql_backticks(ui->plainTextEdit_2->toPlainText())));
 
         int count = tuples_.count();
@@ -109,7 +109,7 @@ void createTupleConstructor::signals_init()
             qDebug() << "List from double list::" << list__;
             ui->plainTextEdit_2->setPlainText(pack_(list__));
         });
-        QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(auth_.table_name_)));
+        QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())));
         doublelist.update_doublelist(query);
         doublelist.setModal(true);
         doublelist/*list_selection_window_->*/.show();

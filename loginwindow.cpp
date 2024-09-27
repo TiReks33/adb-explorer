@@ -1,7 +1,7 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
 
-
+#include "blinkinbutton.h"
 
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,7 +26,7 @@ loginWindow::loginWindow(QWidget *parent)
 
 
 
-    connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_from_login(QString const&)));
+    connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_to_status(QString const&)));
 
 //    int r = 5;
 //    auto tr = QSharedPointer<int>::create(r);
@@ -86,6 +86,31 @@ loginWindow::loginWindow(QWidget *parent)
 
 //dialog.show();
 //dialog.exec();
+
+
+
+//    QDialog dialog;
+
+//    QVBoxLayout* layout = new QVBoxLayout;
+//    dialog.setLayout(layout);
+
+//    QPushButton* button1 = new QPushButton("Button 1");
+//    BlinkinButton* button2 = new BlinkinButton("Button 2");
+
+//    layout->addWidget(button2);
+
+//    layout->insertWidget(0,button1);
+
+//    connect(button1,&QPushButton::clicked,[=]{
+//        (!button2->is_active()) ? button2->start_blinkin(890) : button2->stop_blinkin();
+//    });
+////    button2->start_blinkin();
+
+//    dialog.show();
+
+
+
+//    dialog.exec();
 }
 
 loginWindow::~loginWindow()
@@ -109,12 +134,17 @@ void loginWindow::on_pushButton_clicked()
         else{
 
             ui->statusbar->showMessage("(✓)Successful authorization");
-            db_window_->setModal(true);
-            db_window_->show();
-            emit message_to_database_window("Database succesfull connected.");
 
-            this->hide();
+            if(db_window_->show_databases()){
+                db_window_->setModal(true);
+                db_window_->show();
+                emit message_to_database_window("SQL database autorization for user ::"+auth_.login_+":: succesfull.");
 
+                this->hide();
+            } else {
+                ui->statusbar->showMessage(ui->statusbar->currentMessage()
+                                           .append(".. but something goes wrong, and query to SQL DB failed.:("));
+            }
 
         }
 

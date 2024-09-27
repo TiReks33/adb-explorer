@@ -28,11 +28,11 @@ struct auth{
     /*static*/ QString db_server_; //default
     /*static*/ QString host_;
 
-    /*static*/ QString login_; //db_window
-    /*static*/ QString passw_;
+    /*static*/ QString login_=""; //db_window
+    /*static*/ QString passw_="";
 
-    /*static*/ QString db_name_; //tables_window
-    /*static*/ QString table_name_; //?
+    /*static*/ QString db_name_=""; //tables_window
+////    /*static*/ QString table_name_=""; //?
 
     //void backup_db_name(){ if(db_name_!="") db_name_backup_=db_name_;}
     //void reset_db_name_(){ if(db_name_backup_!="") db_name_=db_name_backup_;}
@@ -54,7 +54,7 @@ struct auth{
             login_=auth__.login_;
             passw_=auth__.passw_;
             db_name_=auth__.db_name_;
-            table_name_=auth__.table_name_;
+ ////           table_name_=auth__.table_name_;
         }
         return *this;
     }

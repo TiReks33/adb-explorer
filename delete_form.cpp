@@ -12,6 +12,8 @@ delete_form::delete_form(QWidget *parent,QString const &entity_name__) :
         qDebug() <<QString("%0 to delete:: %1").arg(entity_name_).arg(cur_text__);
     });
 
+    ui->label->setText("Choose "+entity_name_+ " to <font style=\"color: black;background: red;\">delete</font>");
+    setWindowTitle("Remove "+entity_name_+" dialog");
 }
 
 delete_form::~delete_form()
