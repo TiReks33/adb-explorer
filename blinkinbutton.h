@@ -30,7 +30,7 @@ private:
     QPointer<QTimer> timer;
     bool buttonState=true;
 
-    void init_signals();
+//    void init_signals();
 };
 
 #endif // BLINKINBUTTON_H

@@ -78,6 +78,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="queryButton">
+     <property name="styleSheet">
+      <string notr="true">background: gray; color: white;</string>
+     </property>
+     <property name="text">
+      <string>Query to SQL server</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="leftMargin">
       <number>0</number>

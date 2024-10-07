@@ -4,14 +4,16 @@ BlinkinButton::BlinkinButton(QWidget *parent) :
     QPushButton(parent)
   , timer{new QTimer{this}}
 {
-    init_signals();
+//    init_signals();
+    connect(timer, &QTimer::timeout, this, &BlinkinButton::update);
 }
 
 BlinkinButton::BlinkinButton(const QString &text, QWidget *parent) :
     QPushButton(text,parent)
   , timer{new QTimer{this}}
 {
-    init_signals();
+    //init_signals();
+    connect(timer, &QTimer::timeout, this, &BlinkinButton::update);
 }
 
 BlinkinButton::~BlinkinButton()
@@ -36,8 +38,10 @@ void BlinkinButton::start_blinkin(int freq_sec)
 
 void BlinkinButton::stop_blinkin()
 {
-    timer->stop();
-    this->setStyleSheet("background:palette(window)");
+    if(is_active()){
+        timer->stop();
+        this->setStyleSheet("background:palette(window)");
+    }
 }
 
 bool BlinkinButton::is_active()
@@ -45,7 +49,7 @@ bool BlinkinButton::is_active()
     return timer->isActive();
 }
 
-void BlinkinButton::init_signals()
-{
-    connect(timer, &QTimer::timeout, this, &BlinkinButton::update);
-}
+//void BlinkinButton::init_signals()
+//{
+//    connect(timer, &QTimer::timeout, this, &BlinkinButton::update);
+//}

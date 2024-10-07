@@ -12,9 +12,9 @@
 //};
 
 struct auth{
-    auth() :
-        db_server_("QMYSQL"/*"QMARIADB"*//*"QMYSQL3"*/)
-      , host_("localhost")
+    auth() ////:
+////        db_driver_("QMYSQL"/*"QMARIADB"*//*"QMYSQL3"*/)
+////      , host_("localhost")
 //      , con_name_("ADBEXPLORER")
     {}
 
@@ -25,8 +25,9 @@ struct auth{
 
 
 //private:
-    /*static*/ QString db_server_; //default
-    /*static*/ QString host_;
+    /*static*/ QString db_driver_=""; //default
+    /*static*/ QString host_="";
+               int port_=-1;
 
     /*static*/ QString login_=""; //db_window
     /*static*/ QString passw_="";
@@ -49,10 +50,13 @@ struct auth{
     auth& copy_(auth const& auth__)
     {
         if(this!=&auth__){
-            db_server_=auth__.db_server_;
+            db_driver_=auth__.db_driver_;
             host_=auth__.host_;
+            port_=auth__.port_;
+
             login_=auth__.login_;
             passw_=auth__.passw_;
+
             db_name_=auth__.db_name_;
  ////           table_name_=auth__.table_name_;
         }

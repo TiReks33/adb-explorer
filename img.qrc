@@ -7,5 +7,7 @@
         <file>txt/references_help_2.txt</file>
         <file>txt/references_help_1.txt</file>
         <file>pic/adb_exp.png</file>
+        <file>pic/anthead.png</file>
+        <file>pic/anthead2.png</file>
     </qresource>
 </RCC>

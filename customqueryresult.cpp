@@ -21,7 +21,7 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent) :
 
     connect(ui->pushButton,&QPushButton::clicked,[=]{
         qDebug()<< "auth::" << auth_.db_name_;
-        qDebug()<< "auth::" << auth_.db_server_;
+        qDebug()<< "auth::" << auth_.db_driver_;
         qDebug()<< "auth::" << auth_.host_;
     });
 }
@@ -30,11 +30,8 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent) :
 
 void CustomQueryResult::custom_query_slot(QString const & query__, QString const & con_name__, QHeaderView::ResizeMode scalemode__)
 {
-
     if(db_connection::try_to_reopen(auth_,con_name__))
-
-
-    db_connection::set_query(query__,&model_,ui->tableView,scalemode__,con_name__);
+        db_connection::set_query(query__,&model_,ui->tableView,scalemode__,con_name__);
 }
 
 

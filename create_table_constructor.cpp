@@ -3,7 +3,7 @@
 #include "tables.h"
 
 QDebug operator<<(QDebug stream__, auth const &auth__){
-    stream__ << "db_server::" << auth__.db_server_
+    stream__ << "db_server::" << auth__.db_driver_
              << "host::" << auth__.host_
              << "db_name::" << auth__.db_name_
 //             << "table_name::" << auth__.table_name_
@@ -24,6 +24,7 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,/*QWidget*/Tables *p
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/pic/anthead2.png"));
 
     ui->atr_type_capacity_1->setMaxLength(5);
 
@@ -72,7 +73,7 @@ void CreateTableConstructor::signals_init()
 {
     connect(ui->atr_type_comboBox_1,SIGNAL(currentTextChanged(QString const&)),this,SLOT(AttrTypeChanged(QString const&)));
 
-    connect(ui->foreign_key_checkBox_2,SIGNAL(stateChanged(int)),this,SLOT(foreignkeychecked(int)));
+    connect(ui->foreign_key_checkBox_2,SIGNAL(stateChanged(int)),this,SLOT(foreignkeychecked(int)),Qt::QueuedConnection);
 
     connect(ui->on_delete_checkBox_2,&QCheckBox::stateChanged,[=](int state){
         if(state==0)
@@ -93,7 +94,7 @@ void CreateTableConstructor::signals_init()
 
             //submodel_2_.clear();
 
-        ui->ref_DB_comboBox_2->setToolTip(current_DB_name__);
+            ui->ref_DB_comboBox_2->setToolTip(current_DB_name__);
 
             db_connection::close(subconnection_name_);
 
@@ -669,6 +670,7 @@ void CreateTableConstructor::foreignkeychecked(int state)
         ui->describe_tbl_button_2->setEnabled(false);
 
         ui->plus_button_2->setEnabled(false);
+
     } else {
 
         on_reload_con_button_2_clicked();
@@ -690,6 +692,7 @@ void CreateTableConstructor::foreignkeychecked(int state)
         ui->describe_tbl_button_2->setEnabled(true);
 
         ui->plus_button_2->setEnabled(true);
+
     }
 }
 
@@ -913,13 +916,15 @@ void CreateTableConstructor::on_reload_con_button_2_clicked()
         return;
     }
 
+
+ui->ref_DB_comboBox_2->blockSignals(true);
     db_connection::set_query("SHOW DATABASES;", &submodel_0_,ui->ref_DB_comboBox_2/*,multi_con_*//*auth_.con_name_,1*/);
 
 
     size_t size_of_list_=ui->ref_DB_comboBox_2->model()->rowCount();
 
     qDebug() << "NUMBER OF TABLES::" << size_of_list_;
-
+ui->ref_DB_comboBox_2->blockSignals(false);
     //qDebug() << "CURRENT TEXT::"<<ui->tableView->model()->index(1,0).data().toString();
     for(size_t i=0;i!=size_of_list_;++i){
         if(ui->ref_DB_comboBox_2->model()->index(i,0).data().toString()==auth_.db_name_){ // SET CURRENT DB AS DEFAULT
@@ -927,6 +932,7 @@ void CreateTableConstructor::on_reload_con_button_2_clicked()
             break; // return or break?
         }
     }
+
 }
 
 

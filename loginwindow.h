@@ -30,10 +30,17 @@ public:
     // close-event override for save/db closing connection-purpose after app closing
 //    void closeEvent(QCloseEvent *event){event->accept();};
 
+public slots:
+    void connection_timer_slot();
 
+    void gset_connection_options();
 
 signals:
     void message_to_database_window(QString const&);
+
+    void current_driver_check_();
+
+    void start_connection_timer_stuff();
 
 
 private slots:
@@ -48,6 +55,7 @@ private:
 
     auth auth_;
 
+    QPointer<QTimer> timer;
 
 };
 #endif // LOGINWINDOW_H

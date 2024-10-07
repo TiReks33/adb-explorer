@@ -19,6 +19,8 @@ Tables::Tables(auth& auth__,QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/pic/anthead2.png"));
+
     ui->reloadLayout->addWidget(showTable_button);
 
     showTable_button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Preferred);
@@ -76,7 +78,7 @@ void Tables::closeEvent(QCloseEvent *event)
     emit custom_query_windows_close();
 
     custom_query_result_window_->close();
-
+qDebug()<<"After quit from tables";
  //   db_connection::close(this->metaObject()->className());
   //  db_connection::remove(this->metaObject()->className());
 }
@@ -168,9 +170,25 @@ void Tables::init_connections()
     });
 
     connect(this,&Tables::tables_reloaded,[=]{
-//        ui->selectButtonsLayout->setEnabled(true);
-        ui->select_from_table_button->setEnabled(true);
-        ui->DescribeButton->setEnabled(true);
+
+        if(!ui->tableView->currentIndex().data().toString().isEmpty()){
+
+            ui->select_from_table_button->setStyleSheet("background: green; color: white;");
+            ui->select_from_table_button->setEnabled(true);
+
+            ui->DescribeButton->setStyleSheet("background-color: yellow;");
+            ui->DescribeButton->setEnabled(true);
+
+        } else {
+
+            ui->select_from_table_button->setStyleSheet("background: palette(window)");
+            ui->select_from_table_button->setEnabled(false);
+
+            ui->DescribeButton->setStyleSheet("background: palette(window)");
+            ui->DescribeButton->setEnabled(false);
+
+        }
+
         showTable_button->stop_blinkin();
     });
 
@@ -218,7 +236,13 @@ void Tables::init_connections()
     connect(ui->DescribeButton,&QPushButton::clicked,this,&Tables::/*get_describe_table_instance*/show_table_description);
 
 
-
+    connect(this,&Tables::empty_set,[=]{
+        if(settings_->ui->emptySetCheckBox->isChecked())
+        {
+            get_information_window("Empty set","(✓) [Note] :: Query result not contain/doesn't imply"
+                                   " contain of displayable result.");
+        }
+    });
 }
 
 //void Tables::disable_select_until_reload()
@@ -250,24 +274,27 @@ qDebug() << "AFTER CLOSE()::";
     if(db_connection::set_query("SHOW TABLES;",&model_,ui->tableView,QHeaderView::Stretch)){
 
         if((ui->tableView->model())!=nullptr){
+
+
+
             select_cells(0,0, ui->tableView);
 
-
 //            auth_.table_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
-        }
 
-        qDebug() << "Number of existinf tables::" <<(model_.rowCount());
 
-qDebug()<< ui->tableView->currentIndex().data().toString();
+            qDebug() << "Number of existing tables::" <<(model_.rowCount());
 
-        if(ui->tableView->currentIndex().data().toString().isEmpty()){
-//        if(!auth_.table_name_.isNull()){
-            ui->select_from_table_button->setEnabled(true);
-            ui->select_from_table_button->setStyleSheet("background: green; color: white;");
+            qDebug()<< "ui->tableView->currentIndex().data().toString()::" <<ui->tableView->currentIndex().data().toString();
+
+//            if(ui->tableView->currentIndex().data().toString().isEmpty()){
+////        if(!auth_.table_name_.isNull()){
+//                ui->select_from_table_button->setEnabled(true);
+//                ui->select_from_table_button->setStyleSheet("background: green; color: white;");
+//            }
+
         }
 
         emit tables_reloaded();
-
     }
 
 //qDebug() << "The Set query model operation took" << timer.elapsed() << "milliseconds";
@@ -328,29 +355,32 @@ qDebug()<< ui->tableView->currentIndex().data().toString();
 void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_query_window__)
 {
 
-
     if(!settings_->ui->custom_checkbox->isChecked()){
-        db_connection::open(auth_);
-        qDebug()<< "SHASHLIK";
 
-        if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,ui->tableView,QHeaderView::Stretch))
-            custom_query_window__->close_window();
+        if(db_connection::open(auth_)){
 
-        qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
-        qDebug() << "tableViewModelRowsCOUNT::" << ui->tableView->model()->rowCount();
+            if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,ui->tableView,QHeaderView::Stretch)){
+                custom_query_window__->close_window();
 
-        if(!ui->tableView->model()->rowCount()) {
-            show_tables();
-            qDebug() << "rowCount() in model_==0::display result ignored.";
+                qDebug() << "tableViewModelColumnCOUNT::" << ui->tableView->model()->columnCount();
+                qDebug() << "tableViewModelRowsCOUNT::" << ui->tableView->model()->rowCount();
 
-            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
-                                    " contain of displayable result. Current DB tables list reloaded.");
+                if(!ui->tableView->model()->rowCount()) {
+                    show_tables();
+                    qDebug() << "rowCount() in model_==0::display result ignored.";
 
-        } else{
-//            ui->selectButtonsLayout->setEnabled(false);
-//            qDebug() << "send_custom_query_slot::disabled_layout";
-            emit disable_select_until_reload();
-            ui->statusLine->clear();
+                    ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                            " contain of displayable result. Current DB tables list reloaded.");
+
+                    emit empty_set();
+
+                } else{
+        //            ui->selectButtonsLayout->setEnabled(false);
+        //            qDebug() << "send_custom_query_slot::disabled_layout";
+                    emit disable_select_until_reload();
+                    ui->statusLine->clear();
+                }
+            }
         }
 
     } else{
@@ -372,6 +402,8 @@ void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_que
 
                 ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                         " contain of displayable result.");
+
+                emit empty_set();
 
             } else{
 
@@ -426,6 +458,18 @@ qDebug()<<"AFTER EXECUTION()";
 ////db_connection::close/*_con*/(/*_con_name*/con_name__/*__auth.db_name_*/);
 //--window_counter_;
 //qDebug() << "COUNTER AFTER::" << window_counter_;
+}
+
+void Tables::get_information_window(const QString & header_text__, const QString & main_text__, QWidget *parent__)
+{
+    QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,header_text__,
+                                                      main_text__,
+                                                      QMessageBox::Ok,parent__)};
+
+    connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+    messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+    messageBox->setModal(false);
+    messageBox->show();
 }
 
 
@@ -494,6 +538,8 @@ void Tables::show_table_content()
             ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                     " contain of displayable result. Current DB tables list reloaded.");
 
+            emit empty_set();
+
         } else{
 
             emit disable_select_until_reload();
@@ -525,6 +571,9 @@ void Tables::show_table_content()
 
                 ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                         " contain of displayable result.");
+
+                emit empty_set();
+
             } else{
 
             ui->statusLine->clear();
@@ -591,15 +640,17 @@ void Tables::get_tuple_constructor_instance()
 {
     if(!ui->tableView->model()->rowCount())
     {
-        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current database is empty",
-                                                          "Current database is empty. You must create at least 1 table to insert data,"
-                                                            " or choose another DB.",
-                                                          QMessageBox::Ok,this/*0*/)};
+//        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current database is empty",
+//                                                          "Current database is empty. You must create at least 1 table to insert data,"
+//                                                            " or choose another DB.",
+//                                                          QMessageBox::Ok,this/*0*/)};
 
-        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-        //messageBox->setModal(false);
-        messageBox->show();
+//        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+//        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+//        //messageBox->setModal(false);
+//        messageBox->show();
+        get_information_window("Current database is empty","Current database is empty. You must create at least 1 table to insert data,"
+                                                            " or choose another DB.",this);
         return;
     }
         QPointer<createTupleConstructor> constr_window_{new createTupleConstructor{auth_/*,this*/}};
@@ -647,7 +698,7 @@ void Tables::/*get_describe_table_instance*/show_table_description()
 
         db_connection::open(auth_);
 
-        emit disable_select_until_reload();
+        //emit disable_select_until_reload();
 
         db_connection::set_query(query_text,&model_,ui->tableView,QHeaderView::Stretch);
 
@@ -660,6 +711,8 @@ void Tables::/*get_describe_table_instance*/show_table_description()
 
             ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                     " contain of displayable result. Current DB tables list reloaded.");
+
+            emit empty_set();
 
         } else{
 
@@ -692,6 +745,8 @@ void Tables::/*get_describe_table_instance*/show_table_description()
 
                 ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                         " contain of displayable result.");
+
+                emit empty_set();
 
             } else{
 

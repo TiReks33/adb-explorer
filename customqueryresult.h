@@ -23,7 +23,7 @@ public:
 public slots:
 
     friend class Tables;
-
+    friend class Databases;
 
     void custom_query_slot(QString const & query__, QString const & = auth::con_name_, QHeaderView::ResizeMode = QHeaderView::Stretch);
 

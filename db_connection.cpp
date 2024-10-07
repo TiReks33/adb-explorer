@@ -15,22 +15,31 @@ QString const auth::con_name_="ADBEXPLORER";
 
 
 
-bool db_connection::open(auth &auth__, const QString &con_name__)
+bool db_connection::open(auth &auth__, const QString &con_name__/*, QString const & options__*/)
 {
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
         //if(!QSqlDatabase::database(QSqlDatabase::database(con_name__).connectionName()).isOpen()){
         if(!database.isOpen()){
-
-            QSqlDatabase db_connection = QSqlDatabase::addDatabase(auth__.db_server_,con_name__);
+qDebug()<<"TUT SHASHLIKI";
+            QSqlDatabase db_connection = QSqlDatabase::addDatabase(auth__.db_driver_,con_name__);
 
             db_connection.setUserName(auth__.login_);
 
             db_connection.setPassword(auth__.passw_);
 
             //db_connection_.setHostName("localhost");//<-remote IP
+            db_connection.setHostName(auth__.host_);
+
+            db_connection.setPort(auth__.port_);
 
             db_connection.setDatabaseName(auth__.db_name_);
+
+//            if(!options__.isEmpty())
+            if(auth__.db_driver_=="QMARIADB" || auth__.db_driver_=="QMYSQL" || auth__.db_driver_=="QMYSQL3"){
+                db_connection.setConnectOptions("MYSQL_OPT_RECONNECT=1");
+                qDebug() << "MySQL/MariaDB flag to auto-retrieve the connection when database is gone was set.";
+            }
 
             if(!db_connection.open()){
                 qDebug() << ("(x)Error occured while connect to database by connection ::"+con_name__+":: .");
@@ -41,7 +50,7 @@ bool db_connection::open(auth &auth__, const QString &con_name__)
                 return true;
             }
         }
-            qDebug()<<("(✓)Server ::"+auth__.db_server_+":: from connection ::"+con_name__+":: already connected.");
+            qDebug()<<("(✓)Server ::"+auth__.db_driver_+":: from connection ::"+con_name__+":: already connected.");
             return true;
 }
 

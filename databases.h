@@ -57,9 +57,17 @@ signals:
 
     void delete_form_request();
 
+    void close_all_custom_windows_();
+
+    void window_rise_signal();
+
 private slots:
 
     void on_mysqldump_button_clicked();
+
+    void get_query_wndw();
+
+    void send_custom_query_slot(Custom_Query*);
 
 private:
     Ui::Databases *ui;
@@ -76,6 +84,32 @@ private:
 
     delete_db* delete_db_window_;
 
+
+
+    inline void keyPressEvent(QKeyEvent *e) {
+        if(e->key() != Qt::Key_Escape)
+            QDialog::keyPressEvent(e);
+        else {/* minimize */
+            qDebug()<<"escape pressed (databases)";
+            close();
+        }
+    }
+
+
+    inline void closeEvent(QCloseEvent *event){
+        QMessageBox::StandardButton reply = QMessageBox::warning(this, "Quit", "Do you want to quit?",
+                                                                 QMessageBox::Yes|QMessageBox::No);
+          if (reply == QMessageBox::No) {
+            qDebug() << "Database:: cancel closing";
+            event->ignore();
+//            return;
+          } else {
+            qDebug() << "Database:: closing accepted";
+            event->accept();
+          }
+    }
+
+    QString const subconnection_name_="Database::custom_query_connection";
 
 };
 

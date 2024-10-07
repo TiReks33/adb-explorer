@@ -66,6 +66,7 @@ public slots:
             Qt::WindowModality window_modality_flag__ = Qt::NonModal
             ) const;
 
+    void get_information_window(QString const&,QString const&,QWidget* = nullptr);
 
 
 signals:
@@ -101,6 +102,8 @@ signals:
     void tables_reloaded();
 
     void disable_select_until_reload();
+
+    void empty_set();
 
 private slots:
 
@@ -147,6 +150,19 @@ private:
 
 
     int tuples_windows_counter_=0;
+
+
+
+    inline void keyPressEvent(QKeyEvent *e) {
+        if(e->key() != Qt::Key_Escape)
+            QDialog::keyPressEvent(e);
+        else {/* minimize */
+            qDebug()<<"escape pressed (tables)";
+            close();
+        }
+    }
+
+
 
 };
 

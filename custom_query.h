@@ -30,6 +30,8 @@ public slots:
 
     void set_text(QString const&) const;
 
+    void add_note(QString const&);
+
 private:
     Ui::Custom_Query *ui;
     void connections_init();

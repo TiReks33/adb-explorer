@@ -31,7 +31,7 @@ struct db_connection{
 
 
 
-static bool open(auth&,QString const & con_name__ = auth::con_name_);
+static bool open(auth&,QString const & con_name__ = auth::con_name_/*,QString const & = ""*/);
 
 static bool try_to_reopen(auth &,QString const & con_name__ = auth::con_name_);
 
@@ -41,7 +41,7 @@ static void remove(QString const & = auth::con_name_);
 
 
 
-
+friend class loginWindow;
 
 
 

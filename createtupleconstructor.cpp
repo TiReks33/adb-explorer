@@ -11,6 +11,8 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/pic/anthead2.png"));
+
 //    SIGNALS::
 
         signals_init();
@@ -246,6 +248,8 @@ void createTupleConstructor::on_addTupleButton_clicked()
     tuples_.append(ui->plainTextEdit->toPlainText());
 
     ui->label_amount->setText(QString::number(++tuples_added_));
+
+    ui->plainTextEdit->clear();
 }
 
 void createTupleConstructor::on_describeButton_clicked()

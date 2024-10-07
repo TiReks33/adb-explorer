@@ -14,6 +14,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/pic/anthead2.png"));
+
     ui->statusLine->setReadOnly(true);
 
     Qt::WindowFlags flags = Qt::Window  | Qt::WindowSystemMenuHint
@@ -73,11 +75,13 @@ void Databases::init_signals()
 
 
     ////connect(this,SIGNAL(show_tables_signal()),tables_window_,SLOT(show_tables()));
-    connect(this,&Databases::show_tables_signal,[=]{
+    connect(this,&Databases::show_tables_signal,this,[=]{
         db_connection::close();
         QSqlDatabase::database(auth::con_name_,false).setDatabaseName(auth_.db_name_);
         tables_window_->show_tables();
-    });
+
+    },Qt::QueuedConnection);
+
 
     connect(tables_window_,&Tables::db_show,[=]{
         show_databases();
@@ -126,8 +130,8 @@ void Databases::init_signals()
     connect(ui->showTables_button,&QPushButton::clicked,[=]{
         tables_window_->show();
         this->hide();
+        emit close_all_custom_windows_();
         emit show_tables_signal();
-
     });
 
     connect(ui->tableView,&QTableView::activated,[=](const QModelIndex &index){
@@ -153,6 +157,18 @@ void Databases::init_signals()
         delete_db_window_->show();
         emit delete_form_request();
     });
+
+
+//    connect(ui->queryButton, &QPushButton::clicked,[=]{
+//        Custom_Query custom_wndw{this};
+//        custom_wndw.add_note("*Note: if you need to operate with certain database or tables in it, "
+//                        "you must choose database from 'Database' window and click 'Show tables in selected database'.");
+
+//        custom_wndw.show();
+//        custom_wndw.exec();
+//    });
+
+    connect(ui->queryButton, &QPushButton::clicked,this, &Databases::get_query_wndw);
 
 }
 
@@ -236,156 +252,238 @@ void Databases::on_mysqldump_button_clicked()
 
     return;
 
-    QScopedPointer<QDialog> dump_auth_choose{new QDialog{this}};
+//    QScopedPointer<QDialog> dump_auth_choose{new QDialog{this}};
 
-    dump_auth_choose->setWindowTitle("SQL dump");
+//    dump_auth_choose->setWindowTitle("SQL dump");
 
-    dump_auth_choose->setModal(true);
+//    dump_auth_choose->setModal(true);
 
-    dump_auth_choose->setMinimumSize(320,240);
+//    dump_auth_choose->setMinimumSize(320,240);
 
-    dump_auth_choose->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+//    dump_auth_choose->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 
-    dump_auth_choose -> setLayout(new QVBoxLayout);
+//    dump_auth_choose -> setLayout(new QVBoxLayout);
 
-    QLabel * label = new QLabel;
+//    QLabel * label = new QLabel;
 
-    label->setText("Please, choose credential for dumping.");
+//    label->setText("Please, choose credential for dumping.");
 
-    dump_auth_choose->layout()->addWidget(label);
+//    dump_auth_choose->layout()->addWidget(label);
 
-    QPushButton * current_credential_button = new QPushButton;
+//    QPushButton * current_credential_button = new QPushButton;
 
-    dump_auth_choose->layout()->addWidget(current_credential_button);
+//    dump_auth_choose->layout()->addWidget(current_credential_button);
 
-    current_credential_button->setText("current_credential_button");
-
-
-    connect (current_credential_button, &QPushButton::clicked,[&](){
-
-        QScopedPointer<QDialog> dump_name{new QDialog{this}};
-
-        dump_name->setWindowTitle("Dump name setting");
-
-        dump_name->setModal(true);
+//    current_credential_button->setText("current_credential_button");
 
 
-        connect(dump_name.get(), &QDialog::destroyed,[=](){ qDebug() << "dump_name button destroyed(~)";});
+//    connect (current_credential_button, &QPushButton::clicked,[&](){
 
-        dump_name->setMinimumSize(int(dump_auth_choose->width()),int(dump_auth_choose->height()/2));
+//        QScopedPointer<QDialog> dump_name{new QDialog{this}};
 
-        dump_name->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+//        dump_name->setWindowTitle("Dump name setting");
 
-        dump_name -> setLayout(new QVBoxLayout);
-
-        QLabel * label = new QLabel;
-
-        label->setText("Set name for dump:");
-
-        dump_name->layout()->addWidget(label);
-
-        QLineEdit * line_edit = new QLineEdit(this);
-
-        dump_name->layout()->addWidget(line_edit);
-
-        line_edit->setPlaceholderText("dump.sql");
-
-        QDialogButtonBox * button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+//        dump_name->setModal(true);
 
 
-        connect(button_box, &QDialogButtonBox::rejected,[&](){
-            dump_name->close();
-        });
+//        connect(dump_name.get(), &QDialog::destroyed,[=](){ qDebug() << "dump_name button destroyed(~)";});
 
-        dump_name->layout()->addWidget(button_box);
+//        dump_name->setMinimumSize(int(dump_auth_choose->width()),int(dump_auth_choose->height()/2));
+
+//        dump_name->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+
+//        dump_name -> setLayout(new QVBoxLayout);
+
+//        QLabel * label = new QLabel;
+
+//        label->setText("Set name for dump:");
+
+//        dump_name->layout()->addWidget(label);
+
+//        QLineEdit * line_edit = new QLineEdit(this);
+
+//        dump_name->layout()->addWidget(line_edit);
+
+//        line_edit->setPlaceholderText("dump.sql");
+
+//        QDialogButtonBox * button_box = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
 
-        connect(button_box, &QDialogButtonBox::accepted,[&](){
-                QProcess dumpProcess(this);
-                QStringList args;
-                args << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << "--all-databases" /*<< "aatest1" << "abitura"*/;
-                qDebug() << "args StringList->>" << args << "<<-args StringList";
-                QString output_filename = line_edit->text().isEmpty() ? "dump.sql" : (line_edit->text().right(4)==".sql") ? line_edit->text() : line_edit->text()+".sql" ;
-                qDebug() << "right 4==" << line_edit->text().right(4);
+//        connect(button_box, &QDialogButtonBox::rejected,[&](){
+//            dump_name->close();
+//        });
 
-                dumpProcess.setStandardOutputFile(/*"Qtaatest1.sql"*/output_filename);
+//        dump_name->layout()->addWidget(button_box);
 
-                qDebug() << "signal accepted emited";
 
-//                QObject::connect(&dumpProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
-                  QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
+//        connect(button_box, &QDialogButtonBox::accepted,[&](){
+//                QProcess dumpProcess(this);
+//                QStringList args;
+//                args << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << "--all-databases" /*<< "aatest1" << "abitura"*/;
+//                qDebug() << "args StringList->>" << args << "<<-args StringList";
+//                QString output_filename = line_edit->text().isEmpty() ? "dump.sql" : (line_edit->text().right(4)==".sql") ? line_edit->text() : line_edit->text()+".sql" ;
+//                qDebug() << "right 4==" << line_edit->text().right(4);
 
-                      qDebug() << "signal QProcess::finished emited";
-                    QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
-                    if(exitStatus==QProcess::NormalExit && exitCode == 0){
-                        QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
-                    qDebug() << status_message;
-                    dump_name->close();
+//                dumpProcess.setStandardOutputFile(/*"Qtaatest1.sql"*/output_filename);
 
-                    //QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
-                    if(grand_parent) grand_parent->message_to_status(status_message) ;
+//                qDebug() << "signal accepted emited";
 
-                    dump_auth_choose->close();
-                    } else {
-                        QString const status_message =  "(x) Dumping process failed. Exit code: " + QString::number(exitCode)+". ";
-                        QString const detailed_err_desc ="Detailed error description: ";
-                        QString const stderr_text = dumpProcess.readAllStandardError() ;
-                        QString const full_err_message = status_message+detailed_err_desc+stderr_text;
-                        //QMessageBox::warning(this,"Dumping process failed",status_message);
-                        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Warning,"Dumping process failed",status_message+detailed_err_desc+"<FONT COLOR='#ff0000'>"+'\"'+stderr_text+'\"'+"</FONT>"+'.',
-                                                                          QMessageBox::Ok,this)};
+////                QObject::connect(&dumpProcess,QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
+//                  QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
 
-                        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-                        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-                        messageBox->show();
-                        ////messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+//                      qDebug() << "signal QProcess::finished emited";
+//                    QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
+//                    if(exitStatus==QProcess::NormalExit && exitCode == 0){
+//                        QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
+//                    qDebug() << status_message;
+//                    dump_name->close();
 
-                        if(grand_parent) grand_parent->message_to_status(full_err_message) ;
-                        qCritical()<< "Error string: "<<dumpProcess.errorString();
+//                    //QPointer<Databases> grand_parent = qobject_cast<Databases *>(dump_auth_choose->parent());
+//                    if(grand_parent) grand_parent->message_to_status(status_message) ;
 
-                        qWarning()<<"ReadAllStandardError::"<<stderr_text;
-                    }
-                    qDebug()<<"readAllStandardOutput::"<<dumpProcess.readAllStandardOutput();
-                });
+//                    dump_auth_choose->close();
+//                    } else {
+//                        QString const status_message =  "(x) Dumping process failed. Exit code: " + QString::number(exitCode)+". ";
+//                        QString const detailed_err_desc ="Detailed error description: ";
+//                        QString const stderr_text = dumpProcess.readAllStandardError() ;
+//                        QString const full_err_message = status_message+detailed_err_desc+stderr_text;
+//                        //QMessageBox::warning(this,"Dumping process failed",status_message);
+//                        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Warning,"Dumping process failed",status_message+detailed_err_desc+"<FONT COLOR='#ff0000'>"+'\"'+stderr_text+'\"'+"</FONT>"+'.',
+//                                                                          QMessageBox::Ok,this)};
 
-                  connect(&dumpProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
-                  {
-                      qWarning() << "Occured error: " << error ;
-                  });
+//                        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+//                        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+//                        messageBox->show();
+//                        ////messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
 
-                  dumpProcess.setReadChannel(QProcess::StandardOutput);
+//                        if(grand_parent) grand_parent->message_to_status(full_err_message) ;
+//                        qCritical()<< "Error string: "<<dumpProcess.errorString();
 
-                  connect(&dumpProcess, &QProcess::readyReadStandardError,[=](){});
+//                        qWarning()<<"ReadAllStandardError::"<<stderr_text;
+//                    }
+//                    qDebug()<<"readAllStandardOutput::"<<dumpProcess.readAllStandardOutput();
+//                });
 
-                  dumpProcess.start("mysqldump", args);
-                  dumpProcess.waitForFinished();
+//                  connect(&dumpProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
+//                  {
+//                      qWarning() << "Occured error: " << error ;
+//                  });
 
-        });
+//                  dumpProcess.setReadChannel(QProcess::StandardOutput);
 
-        dump_name->show();
-        dump_name->exec();
-    });
+//                  connect(&dumpProcess, &QProcess::readyReadStandardError,[=](){});
 
-//    QPushButton * another_credential_button = new QPushButton;
+//                  dumpProcess.start("mysqldump", args);
+//                  dumpProcess.waitForFinished();
 
-//    dump_auth_choose->layout()->addWidget(another_credential_button);
+//        });
 
-//    QPushButton * exit_button = new QPushButton;
-
-//    connect(exit_button,&QPushButton::clicked,[&](){
-//        dump_auth_choose->close();
+//        dump_name->show();
+//        dump_name->exec();
 //    });
 
-//    exit_button->setText("Cancel");
+////    QPushButton * another_credential_button = new QPushButton;
 
-//    dump_auth_choose->layout()->addWidget(exit_button);
+////    dump_auth_choose->layout()->addWidget(another_credential_button);
 
-    dump_auth_choose->show();
-    dump_auth_choose->exec();
+////    QPushButton * exit_button = new QPushButton;
 
-//    QProcess dumpProcess(this);
-//    QStringList args;
-//    args << "-uroot" << "-pmysql" << "test";
-//    dumpProcess.setStandardOutputFile("test.sql");
-//    dumpProcess.start("mysqldump", args);
+////    connect(exit_button,&QPushButton::clicked,[&](){
+////        dump_auth_choose->close();
+////    });
+
+////    exit_button->setText("Cancel");
+
+////    dump_auth_choose->layout()->addWidget(exit_button);
+
+//    dump_auth_choose->show();
+//    dump_auth_choose->exec();
+
+////    QProcess dumpProcess(this);
+////    QStringList args;
+////    args << "-uroot" << "-pmysql" << "test";
+////    dumpProcess.setStandardOutputFile("test.sql");
+    ////    dumpProcess.start("mysqldump", args);
+}
+
+void Databases::get_query_wndw()
+{
+
+    QPointer<Custom_Query> custom_query_window{new Custom_Query{this}};
+
+        custom_query_window->add_note("*Note: if you need to operate with certain database or tables in it, "
+                         "you must choose database from 'Database' window and click 'Show tables in selected database'.");
+
+        connect(custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),
+                this,static_cast<void(Databases::*)(/*QString,*/Custom_Query *)>(&Databases::send_custom_query_slot));
+
+
+        connect(this,&Databases::close_all_custom_windows_, custom_query_window , &Custom_Query::close, Qt::QueuedConnection);
+
+        connect(this,&Databases::window_rise_signal,[=]{
+            qDebug()<<"1";
+            if(custom_query_window)
+                custom_query_window->raise();
+            qDebug()<<"2";
+        });
+
+    custom_query_window->setAttribute( Qt::WA_DeleteOnClose, true );
+    custom_query_window->setModal(false);
+    custom_query_window->show();
+//    custom_query_window->exec();
+
+
+}
+
+void Databases::send_custom_query_slot(Custom_Query *custom_query_window__)
+{
+static int wndw_cnt=0;
+wndw_cnt++;
+    auth* auth_copy{new auth};
+
+    auth_copy->copy_(auth_);
+
+    auth_copy->db_name_.clear();
+
+    QScopedPointer<CustomQueryResult> new_result_window{new CustomQueryResult{{*auth_copy},this}};
+
+    connect(new_result_window.get(),&CustomQueryResult::destroyed,[=]{
+        qDebug()<< "~new_result_window (destructor)";
+        delete auth_copy;
+        if(!(--wndw_cnt)){
+            db_connection::close(subconnection_name_);
+            db_connection::remove(subconnection_name_);
+        }
+    });
+
+     connect(this,&Databases::close_all_custom_windows_, new_result_window.get() , &CustomQueryResult::close, Qt::QueuedConnection);
+
+    new_result_window->custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.ui->tableView*/,subconnection_name_);
+
+    if((new_result_window->ui->tableView->model())!=nullptr) {
+
+        qDebug() << "Number of columns in tableView->model()::"<<new_result_window->ui->tableView->model()->columnCount();
+        qDebug() << "Number of rows in tableView->model()::"<<new_result_window->ui->tableView->model()->rowCount();
+
+        custom_query_window__->close_window();
+
+        if(!new_result_window->ui->tableView->model()->rowCount()){
+
+            qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+
+            ui->statusLine->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                    " contain of displayable result.");
+
+        } else{
+
+            ui->statusLine->clear();
+
+            new_result_window->show();
+            new_result_window->exec();
+        }
+
+    } else{
+        emit window_rise_signal();
+    }
+
 }

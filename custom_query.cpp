@@ -30,6 +30,7 @@ Custom_Query::Custom_Query(QWidget *parent) :
 
 Custom_Query::~Custom_Query()
 {
+        qDebug()<<"~CustomQuery activated";
     delete ui;
 }
 
@@ -75,4 +76,9 @@ void Custom_Query::close_window()
 void Custom_Query::set_text(QString const& text__) const
 {
     this->ui->plainTextEdit->setPlainText(text__);
+}
+
+void Custom_Query::add_note(const QString & message__)
+{
+    ui->verticalLayout->insertWidget(0,new QLabel(message__));
 }
