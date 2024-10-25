@@ -7,7 +7,7 @@
 #include <QObject>
 #include <QDebug>
 
-
+// this class inherits pure virtual to delete entities in 'table' form
 class delete_table : public delete_form
 {
     Q_OBJECT

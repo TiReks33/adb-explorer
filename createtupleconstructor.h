@@ -1,7 +1,7 @@
 #ifndef CREATETUPLECONSTRUCTOR_H
 #define CREATETUPLECONSTRUCTOR_H
 
-#include "inserttupleconfirm.h"
+////#include "inserttupleconfirm.h"
 
 #include <QDialog>
 #include "customqueryresult.h"
@@ -9,6 +9,8 @@
 #include "twolistselection.h"
 #include "helping_stuff.h"
 #include "tables.h"
+
+#include "scrolledstatusbar.h"
 
 namespace Ui {
 class createTupleConstructor;
@@ -22,29 +24,23 @@ public:
     explicit createTupleConstructor(auth& auth__,QWidget *parent = nullptr);
     ~createTupleConstructor();
 
+    // clear all entered data from form
     void reset();
 
+    // overload (show window + tables list query exec)
     void show();
 
 private slots:
 
     void update_tables_list();
 
-//    void on_reset_button_clicked();
-
-//    void columns_selected_handler();
-
-//    void on_addColsButton_clicked();
-
     void closeEvent(QCloseEvent *event);
 
+    // add value to table
     void on_addTupleButton_clicked();
 
+    // describe table
     void on_describeButton_clicked();
-
-//public slots:
-
-//    void import_list(QStringList);
 
 signals:
 
@@ -56,6 +52,8 @@ signals:
 
 private:
     Ui::createTupleConstructor *ui;
+
+    scrolledStatusBar* statusBar;
 
     void signals_init();
 

@@ -16,27 +16,28 @@
 //#include "multi_connection.h"
 #include "helping_stuff.h"
 
+// Custom form to iterate trough 2x lists
 class TwoListSelection : public QDialog {
   Q_OBJECT
 public:
   explicit TwoListSelection(auth& auth__,QDialog *parent = nullptr);
     virtual ~TwoListSelection();
 
+  // save previous elements and adding new to the left (input) list
   void addAvailableItems(const QStringList &items);
 
+  // returns right (output) selected list of items
   QStringList selectedItems();
 
+  // clear all
   void clear(){ mOutput->clear();mInput->clear();list_before_changes_.clear();}
 
-//  void update_doublelist();
+  // set query result as input list
   void update_doublelist(QString const&,QString const& = auth::con_name_);
-
-public slots:
-
-    void update_doublelist_handler();
 
 signals:
 
+    // transfer right (output) list to external object
     void export_list(QStringList);
 
 private:
@@ -44,6 +45,7 @@ private:
 
   void connections();
 
+  // change buttons active status if no output items selected
   void setStatusButton();
 
   QListWidget *mInput;

@@ -11,6 +11,7 @@ namespace Ui {
 class delete_form;
 }
 
+// pure virtual class to be inherited by 'database', 'table' etc. forms
 class delete_form : public QDialog
 {
     Q_OBJECT

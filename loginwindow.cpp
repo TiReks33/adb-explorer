@@ -3,9 +3,9 @@
 
 #include "blinkinbutton.h"
 
-int timeout_reconnect = 15000; //60000
+//int timeout_reconnect = 15000; //60000
 
-bool CONNECTION_LOST_MESSAGE = true;
+//bool CONNECTION_LOST_MESSAGE = true;
 
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,12 +13,26 @@ loginWindow::loginWindow(QWidget *parent)
     , db_window_(new Databases(auth_))
     , timer{new QTimer{this}}
 {
+
+    form_init();
+
+    signals_init();
+
+
+
+    // if no file -- create it and write default settings to it
+    if(!read4rom_recon_opts_file())
+        write2recon_opts_file();
+
+}
+
+void loginWindow::form_init()
+{
     ui->setupUi(this);
     this->setFixedSize(QSize(600, 325));
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
-//    ui->Host_Form->setText("localhost");
 
     ui->cc_label->setToolTip("<pre style=\"white-space: pre-wrap;\"><img src=':/pic/9rnvobslce_cc.png' height='16' width='16'><b>"
                         "[Non-Commercial License<br>   Requires Attribution]</b><br>This logo's "
@@ -30,7 +44,30 @@ loginWindow::loginWindow(QWidget *parent)
     ui->cc_label->setToolTipDuration(60000);
 
 
+    QStringList drivers_list = QSqlDatabase::drivers();
 
+    std::sort(drivers_list.begin(), drivers_list.end());
+
+    ui->driverComboBox->addItems(drivers_list);
+
+
+
+    ui->Login_Form->setFocus();
+
+    setTabOrder(ui->Login_Form, ui->Password_Form);
+    setTabOrder(ui->Password_Form, ui->checkBox);
+    setTabOrder(ui->checkBox, ui->Host_Form);
+    setTabOrder(ui->Host_Form, ui->conOptsButton);
+    setTabOrder(ui->conOptsButton, ui->port_checkBox);
+    setTabOrder(ui->port_checkBox, ui->portForm);
+    setTabOrder(ui->portForm, ui->driverComboBox);
+    setTabOrder(ui->driverComboBox, ui->pushButton);
+
+}
+
+void loginWindow::signals_init()
+{
+    // message to 2nd window after successful login
     connect(this,SIGNAL(message_to_database_window(QString const&)),db_window_,SLOT(message_to_status(QString const&)));
 
 
@@ -43,89 +80,37 @@ loginWindow::loginWindow(QWidget *parent)
         }
     });
 
-
-//    QDialog dialog;
-
-//    QVBoxLayout* layout = new QVBoxLayout;
-//    dialog.setLayout(layout);
-
-//    QPushButton* button1 = new QPushButton("Button 1");
-//    BlinkinButton* button2 = new BlinkinButton("Button 2");
-
-//    layout->addWidget(button2);
-
-//    layout->insertWidget(0,button1);
-
-//    connect(button1,&QPushButton::clicked,[=]{
-//        (!button2->is_active()) ? button2->start_blinkin(890) : button2->stop_blinkin();
-//    });
-////    button2->start_blinkin();
-
-//    dialog.show();
-
-
-//    dialog.exec();
-
-
-
-    QStringList drivers_list = QSqlDatabase::drivers();
-
-//    std::sort(drivers_list.begin(), drivers_list.end(), [](const QString &lhs, const QString &rhs)
-//    {
-//        QString num_lhs = lhs.split(' ').last();
-//        QString num_rhs = rhs.split(' ').last();
-//        return num_lhs < num_rhs;
-//    });
-
-    std::sort(drivers_list.begin(), drivers_list.end());
-
-    ui->driverComboBox->addItems(drivers_list);
-
-
-    ////ui->pushButton->setFocus();
-    ui->Login_Form->setFocus();
-
-    setTabOrder(ui->Login_Form, ui->Password_Form);
-    setTabOrder(ui->Password_Form, ui->checkBox);
-    setTabOrder(ui->checkBox, ui->Host_Form);
-    setTabOrder(ui->Host_Form, ui->conOptsButton);
-    setTabOrder(ui->conOptsButton, ui->port_checkBox);
-    setTabOrder(ui->port_checkBox, ui->portForm);
-    setTabOrder(ui->portForm, ui->driverComboBox);
-    setTabOrder(ui->driverComboBox, ui->pushButton);
-
-
-
-
-
+    // wip
     connect(this,&loginWindow::current_driver_check_,[=]{
 
         QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current SQL driver issue",
                                                           39+auth_.db_driver_+39+" driver currently not tested.",
                                                           QMessageBox::Ok,this/*0*/)};
 
-        connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+        ////connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
         messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
         //messageBox->setModal(false);
         messageBox->show();
 
     });
 
-
+    // start SQL-server alive-check
     connect(this,&loginWindow::start_connection_timer_stuff,[=]{
             timer->start(timeout_reconnect);
     });
 
+    // check that SQL server alive every 'timeout_reconnect'
     connect(timer, &QTimer::timeout, this, &loginWindow::connection_timer_slot);
 
-
+    // get options dialog (settings read from file)
     connect(ui->conOptsButton, &QPushButton::clicked,[=]{
         gset_connection_options();
     });
 
+    // write settings changes to file
+    connect(this, &loginWindow::reconnect_data_changed, this, &loginWindow:: write2recon_opts_file);
+
 }
-
-
 
 loginWindow::~loginWindow()
 {
@@ -135,83 +120,110 @@ loginWindow::~loginWindow()
 
 void loginWindow::connection_timer_slot()
 {
-//    db_connection::reopen_exist(auth::con_name_);
-//    if(!QSqlQuery(QSqlDatabase::database(auth::con_name_,false)).exec("SELECT 1")){
-//        //QMessageBox::critical(this,"Connection lost","Connection to SQL database lost.",QMessageBox::Ok);
-//        qDebug()<<"Connection lost.. trying to reopen..";
-//    } else{
-//        qDebug()<<"Connection reopened!";
-//    }
 
     static QPointer <QMessageBox> messageBox;
 
-    if(db_connection::reopen_exist(auth::con_name_)){
+    //flags to report about error connection and reconnect only once (prevent log rewriting with useless info);
+    static bool disconnect_once_msg = false, reconnect_once_msg = false;
 
-        QSqlDatabase database = QSqlDatabase::database(auth::con_name_,true);
+    QSqlDatabase database = QSqlDatabase::database(auth::con_name_,true);
 
-        QSqlQuery qry = QSqlQuery(database);
-    //    QSqlQuery qry = QSqlQuery(db__);
+    QSqlQuery qry = QSqlQuery(database);
 
-//        if(qry.prepare("SELECT 1")){ //MY_SQL_QUERY
+    //simple dummy SQL query
+    if(qry.exec("SELECT 1")){
 
-            if(qry.exec("SELECT 1")){
-                qDebug()<<"Connection opened!";
-                if(CONNECTION_LOST_MESSAGE && messageBox){
-                    if(messageBox->isVisible()){
-                        messageBox->close();
-                    }
-                }
-            } else{
-                QString const err = qry.lastError().text();
-                QString const err_number = qry.lastError().nativeErrorCode();
-//                QString const err_dbtext = qry.lastError().databaseText();
-//                QString const err_driver_text = qry.lastError().driverText();
+        disconnect_once_msg=false;
 
-                qDebug() << err;
-                qDebug() << err_number;
-//                qDebug() << err_dbtext;
-//                qDebug() << err_driver_text;
+        if(!reconnect_once_msg){
+        std::cout << "Connection is alive!" << std::endl;
+        qDebug() << "Connection is alive!";
+        reconnect_once_msg=true;
+        }
 
-                 qDebug()<<"Connection lost.. trying to reopen..";
-                 if(CONNECTION_LOST_MESSAGE && !messageBox){
-                     if((messageBox = new QMessageBox{QMessageBox::Critical,"Connection lost",QString("Connection to SQL database lost. Details: ")+
-                                                                                    "<FONT COLOR='#ff0000'>"+'\"'+err+'\"'+"</FONT>"+
-                                                                                    ". Error number: "+"<FONT COLOR='#ff0000'>"+err_number+"</FONT>"+'.',
-                                                                                        QMessageBox::NoButton,this})){
-                         messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-                         connect(messageBox,&QMessageBox::destroyed,[=]{
-                             qDebug() << "~MessageBox::Critical";
-                         });
+        if(messageBox){
 
-                         QPushButton* recon_but = messageBox->addButton("Force reconnect",QMessageBox::ActionRole);
+            messageBox->close();
 
-                         recon_but->disconnect();
+        }
+    } else{
 
-                         connect(recon_but,&QPushButton::clicked,[=]{
-                             connection_timer_slot();
-                         });
+       static bool error_change = false;
 
-                         messageBox->open();
-                     }
+       static QString err="";
+       QString temp = qry.lastError().text();
+
+       if(temp!=err) error_change = true;
+       err=temp;
+
+       static QString err_number = "";
+       temp = qry.lastError().nativeErrorCode();
+
+       if(temp!=err_number) error_change = true;
+       err_number=temp;
+
+
+        reconnect_once_msg=false;
+
+        if(!disconnect_once_msg || error_change){
+
+        qDebug() << err;
+        std::cout << err.toStdString() << std::endl;
+        qDebug() << err_number;
+        std::cout << err_number.toStdString() << std::endl;
+
+
+        qDebug()<<"Connection lost.. trying to reopen..";
+        std::cout << "Connection lost.. trying to reopen.." << std::endl;
+
+        disconnect_once_msg=true;
+        }
+
+        // show warning window if flag is set in settings
+        if(CONNECTION_LOST_MESSAGE){
+            // allocate memory and create new window if pointer is nullptr OR error code is changed from previous
+             if(!messageBox || error_change){
+
+                 if(messageBox) messageBox->close();
+
+                 if((messageBox = new QMessageBox{QMessageBox::Critical,"Connection lost",QString("Connection to SQL database lost. Details: ")+
+                                                                                "<FONT COLOR='#ff0000'>"+'\"'+err+'\"'+"</FONT>"+
+                                                                                ". Error number: "+"<FONT COLOR='#ff0000'>"+err_number+"</FONT>"+'.',
+                                                                                    QMessageBox::NoButton,this})){
+                     messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+
+//                     connect(messageBox,&QMessageBox::destroyed,[=]{
+//                         qDebug() << "~MessageBox::Critical";
+//                     });
+
+                     // reconnect by clicking reload button
+                     QPushButton* recon_but = messageBox->addButton("Force reconnect",QMessageBox::ActionRole);
+
+                     recon_but->disconnect();
+
+                     connect(recon_but,&QPushButton::clicked,[=]{
+                         connection_timer_slot();
+                     });
+
+                     messageBox->open();
                  }
-            }
-//        } else{
-//            qDebug() << "Query not prepared";
-//            qDebug() << "Try to open again..";
-
-//        }
+             }
+        }
+        error_change = false;
     }
+
 }
 
 void loginWindow::gset_connection_options()
 {
     QPointer<QDialog> options_dialog = new QDialog{this};
 
+    // flag to dealloc memory after closing
     options_dialog->setAttribute(Qt::WA_DeleteOnClose,true);
 
-    connect(options_dialog,&QDialog::destroyed,[=]{
-        qDebug() << "~Options_dialog";
-    });
+//    connect(options_dialog,&QDialog::destroyed,[=]{
+//        qDebug() << "~Options_dialog";
+//    });
 
 
     QVBoxLayout* options_layout = new QVBoxLayout;
@@ -232,9 +244,12 @@ void loginWindow::gset_connection_options()
 
     timeout_line->setText(QString::number(timeout_reconnect));
 
-    //QIntValidator* validator = new QIntValidator(1000, 2073600000);
+    // only digits validation
+    QIntValidator* int_validator = new QIntValidator(1000, 2073600000);
 
-    timeout_line->setValidator( new QIntValidator(1000, 2073600000) );
+    timeout_line->setValidator( int_validator );
+
+    connect(timeout_line, &QLineEdit::destroyed,[=]{ delete int_validator; /*qDebug() << "~int_validator";*/ });
 
     options_layout->addLayout(rec_timeout_layout);
 
@@ -296,12 +311,14 @@ void loginWindow::gset_connection_options()
     options_layout->setSizeConstraint(QLayout::SetFixedSize);
 
 
-    qDebug() << statusbar->font();
+//    qDebug() << statusbar->font();
 
     connect(buttonBox, &QDialogButtonBox::accepted, [=]{
             QString str = timeout_line->text();
             int pos=0;
             auto timeout_validate = timeout_line->validator()->validate(str,pos);
+
+            // check correctness for timeout value
             if(timeout_validate!=QValidator::Acceptable){
 
                 statusbar->setStyleSheet("color:red;");
@@ -312,6 +329,9 @@ void loginWindow::gset_connection_options()
             timeout_reconnect=timeout_line->text().toInt();
 
             CONNECTION_LOST_MESSAGE=warning_message_checkbox->isChecked();
+
+            // synchronize .cfg file
+            emit reconnect_data_changed();
 
             options_dialog->accept();
     });
@@ -325,11 +345,23 @@ void loginWindow::gset_connection_options()
 
 void loginWindow::on_pushButton_clicked()
 {
+    this->ui->statusbar->showMessage("Please wait..");
+    // display message immediately
+    QApplication::processEvents();
+
+    this->setCursor(Qt::WaitCursor);
+
+    // auth_ structure with credentials to transfer across multiply childs via reference
     auth_.login_=this->ui->Login_Form->text();
     auth_.passw_=this->ui->Password_Form->text();
-    auth_.host_=this->ui->Host_Form->text();
+
+    if(!ui->Host_Form->text().isEmpty())
+        auth_.host_=this->ui->Host_Form->text();
+
     auth_.db_driver_=this->ui->driverComboBox->currentText();
-    auth_.port_=this->ui->portForm->text().toInt();
+
+    if(ui->port_checkBox->isChecked()&&!ui->portForm->text().isEmpty())
+        auth_.port_=this->ui->portForm->text().toInt();
 
 
         if(!db_connection::open(auth_))
@@ -341,10 +373,15 @@ void loginWindow::on_pushButton_clicked()
             if(db_window_->show_databases()){
                 db_window_->setModal(true);
                 db_window_->show();
+
+                // 'Database' window status bar message
                 emit message_to_database_window("SQL database autorization for user ::"+auth_.login_+":: succesfull.");
 
+                // wip
                 if(auth_.db_driver_!="QMARIADB" && auth_.db_driver_!="QMYSQL" && auth_.db_driver_!="QMYSQL3")
-                emit current_driver_check_();
+                    emit current_driver_check_();
+
+                ////QTimer::singleShot(0,this,SLOT(connection_timer_slot()));
 
                 this->hide();
             } else {
@@ -352,10 +389,13 @@ void loginWindow::on_pushButton_clicked()
                                            .append(".. but something goes wrong, and query to SQL DB failed.:("));
             }
 
-            emit start_connection_timer_stuff();
+            // start SQL connection checking
+            if(auth_.host_!="127.0.0.1" && auth_.host_!="localhost")
+                emit start_connection_timer_stuff();
 
         }
 
+    this->setCursor(Qt::ArrowCursor);
 }
 
 
@@ -367,5 +407,39 @@ void loginWindow::on_checkBox_stateChanged(int arg1)
         ui->Password_Form->setEchoMode(QLineEdit::Normal);
 
 }
+
+void loginWindow::write2recon_opts_file()
+{
+    QFile outFile(config_f_name);
+    outFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream textStream(&outFile);
+    textStream << "timeout_reconnect" << '=' << QString::number(timeout_reconnect) << Qt::endl;
+    textStream << "CONNECTION_LOST_MESSAGE" << '=' << QString::number(CONNECTION_LOST_MESSAGE) << Qt::endl;
+}
+
+bool loginWindow::read4rom_recon_opts_file()
+{
+    QMap<QString,int> __settings_map;
+
+    // fill the QMap container with key-values pairs
+    if(get_settings_4rom_file(config_f_name,__settings_map)){
+        int temp;
+
+        // find necessary settings
+        if((temp = __settings_map.value("timeout_reconnect"))!=-1)
+            timeout_reconnect = temp;
+
+        if((temp = __settings_map.value("CONNECTION_LOST_MESSAGE"))!=-1)
+            CONNECTION_LOST_MESSAGE = temp;
+
+        return true;
+    }
+
+    qWarning() << "Error while read from"<<config_f_name;
+
+    return false;
+}
+
+
 
 

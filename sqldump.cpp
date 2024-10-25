@@ -6,27 +6,21 @@ SqlDump_credentials::SqlDump_credentials(auth& auth__,/*QWidget*/Databases *pare
     : QDialog/*QWidget*/(parent)
     , auth_{auth__}
 
-    //, settings_dialog_{new SqlDump_settings/*{this}*/}
 {
     init_form();
     init_connections();
 
-//    setAttribute(Qt::WA_DeleteOnClose, true);
 }
 
 SqlDump_credentials::~SqlDump_credentials()
 {
-    qDebug()<<"~SqlDump_credentials";
+   // qDebug()<<"~SqlDump_credentials";
 
-    //delete settings_dialog_;
 }
 
 void SqlDump_credentials::init_form()
 {
     setWindowTitle("SQL dump");
-
-    //setModal(true);
-//    setWindowModality(Qt::WindowModal);
 
     setMinimumSize(320,240);
 
@@ -48,11 +42,11 @@ void SqlDump_credentials::init_form()
 
     layout->addWidget(current_credential_button_);
 
-    current_credential_button_->setText("current_credential_button");
+    current_credential_button_->setText("Current credential data");
 
     layout->addWidget(another_credential_button_);
 
-    another_credential_button_->setText("another_credential_button");
+    another_credential_button_->setText("Another credential data");
 
     exit_button_ = new QPushButton;
 
@@ -69,30 +63,138 @@ void SqlDump_credentials::init_connections()
         this->close();
     });
 
+    // select current sql user and go to the dump settings choose
     connect(current_credential_button_,&QPushButton::clicked,[=](){
-        //settings_dialog_->setModal(true);
-        ///if(!settings_dialog_)
+
             settings_dialog_.reset(new SqlDump_settings{auth_,this}); // doesn't need to '(std::nothrow)' because smartpointer nulled it already.
         if(settings_dialog_){
 
             settings_dialog_->setModal(true);
             settings_dialog_->show();
-            ///this->hide();
-//            connect(settings_dialog_,&SqlDump_settings::closed,[=]{
-//                this->show();
-//            });
 
-            //this->hide();
         } /*else {
             qDebug() << "Error[Allocating memory failed]";
             this->close();
         }*/
     });
 
-    connect(this,&SqlDump_credentials::message,[=]{
-        qDebug()<<"message signal from SqlDump_credentials";
+    // enter another credentials for dump
+    connect(another_credential_button_,&QPushButton::clicked,this,&SqlDump_credentials::get_another_credentials_window);
+
+}
+
+void SqlDump_credentials::get_another_credentials_window()
+{
+    QPointer<QDialog> ac_dialog = new QDialog{this};
+
+    ac_dialog->setAttribute(Qt::WA_DeleteOnClose,true);
+//    connect(ac_dialog,&QDialog::destroyed,[=]{qDebug()<<"~ac_dialog";});
+
+    QVBoxLayout* main_layout = new QVBoxLayout;
+
+    QGridLayout* ac_layout = new QGridLayout;
+
+    ac_dialog->setLayout(main_layout);
+
+    main_layout->addLayout(ac_layout);
+
+    QLabel* ac_login_lbl = new QLabel("Login");
+    QLabel* ac_passw_lbl = new QLabel("Password");
+    QLineEdit* login_form = new QLineEdit;
+    QLineEdit* passw_form = new QLineEdit;
+    /*ac_login_lay*/ac_layout->addWidget(ac_login_lbl,0,0);
+    ac_login_lbl->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+    /*ac_login_lay*/ac_layout->addWidget(login_form,0,1);
+    /*ac_passw_lay*/ac_layout->addWidget(ac_passw_lbl,1,0);
+    ac_passw_lbl->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+    /*ac_passw_lay*/ac_layout->addWidget(passw_form,1,1);
+
+    QCheckBox* checkBox = new QCheckBox;
+
+    connect(checkBox,&QCheckBox::stateChanged,[=](int state_arg__){
+        if (state_arg__ == Qt::Checked)
+            passw_form->setEchoMode(QLineEdit::Password);
+        else
+            passw_form->setEchoMode(QLineEdit::Normal);
     });
 
+    checkBox->setChecked(true);
+
+
+    QHBoxLayout* pass_check_lay = new QHBoxLayout;
+    pass_check_lay->addWidget(checkBox);
+    QLabel* pass_check_lbl = new QLabel("hide");
+    pass_check_lay->addWidget(pass_check_lbl);
+
+    ac_layout->addLayout(pass_check_lay,1,2);
+
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                     | QDialogButtonBox::Cancel);
+
+    ac_layout->addWidget(buttonBox,2,1);
+
+    QLabel* status_lbl = new QLabel;
+
+    status_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
+    status_lbl->setStyleSheet("color:red;");
+
+    status_lbl->setWordWrap(true);
+
+    main_layout->addWidget(status_lbl);
+
+    connect(login_form,&QLineEdit::textChanged,[=]{if(!status_lbl->text().isEmpty()){status_lbl->clear();/*qDebug() << "clear1";*/}});
+    connect(passw_form,&QLineEdit::textChanged,[=]{if(!status_lbl->text().isEmpty()){status_lbl->clear();/*qDebug() << "clear2";*/}});
+
+
+    main_layout->setSpacing(3);
+
+
+    connect(buttonBox, &QDialogButtonBox::rejected, ac_dialog, &QDialog::reject);
+
+
+    connect(buttonBox, &QDialogButtonBox::accepted,[=]{
+
+        auth* _auth{nullptr};
+
+        _auth = new auth{auth_};
+
+        _auth->login_ = login_form->text();
+        _auth->passw_ = passw_form->text();
+
+        connect(this,&SqlDump_credentials::destroyed,[=]{
+            delete _auth;
+            //qDebug() << "~_auth";
+        });
+
+    this->setCursor(Qt::WaitCursor);
+        if(db_connection::open((*_auth),alt_con_name)){
+
+            settings_dialog_.reset(new SqlDump_settings{(*_auth),this}); // doesn't need to '(std::nothrow)' because smartpointer nulled it already.
+            if(settings_dialog_){
+
+                settings_dialog_->setModal(true);
+                settings_dialog_->show();
+                ac_dialog->close();
+
+                connect(settings_dialog_.get(),&SqlDump_settings::destroyed,[=]{
+                    db_connection::close(alt_con_name);
+                    db_connection::remove(alt_con_name);
+                });
+            }
+        } else{
+            qDebug() << "Alt connection not opened.";
+            ////QMessageBox::information(ac_dialog,"Logging failed","Error while connecting to SQL Server with entered credentials.",QMessageBox::Ok);
+            status_lbl->setText("Error while logging to SQL Server. Please, check entered credentials and try again.");
+        }
+    this->setCursor(Qt::ArrowCursor);
+
+    });
+
+    ac_dialog->setModal(true);
+    ac_dialog->show();
+    ac_dialog->exec();
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,21 +210,17 @@ SqlDump_settings::SqlDump_settings(auth& auth__,/*QWidget*/SqlDump_credentials *
     init_form();
     init_connections();
 
-//    setAttribute(Qt::WA_DeleteOnClose,true);
 }
 
 SqlDump_settings::~SqlDump_settings()
 {
-    qDebug()<<"~SqlDump_settings";
-    //delete dump_name_window_;
+   // qDebug()<<"~SqlDump_settings";
 }
 
 void SqlDump_settings::init_form()
 {
     setWindowTitle("SQL dump");
 
-    //setModal(true);
-//    setWindowModality(Qt::WindowModal);
 
     setMinimumSize(320,240);
 
@@ -134,13 +232,15 @@ void SqlDump_settings::init_form()
 
     label_ = new QLabel;
 
-    label_->setText("Please, choose what you want to backup(dump).");
+    label_->setText("Please, choose what you want to backup(dump):\n1) all databases in current SQL server;\n2) select specific DBs;\n3) select specific tables in chosen DB.");
+
+    label_->setWordWrap(true);
 
     layout->addWidget(label_);
 
-    radio_but_0 = new QRadioButton{"all_databases",this};
-    radio_but_1 = new QRadioButton{"choose_dbs",this};
-    radio_but_2 = new QRadioButton{"tables_of_chosen_db",this};
+    radio_but_0 = new QRadioButton{"All databases",this};
+    radio_but_1 = new QRadioButton{"Choose databases",this};
+    radio_but_2 = new QRadioButton{"Select tables from chosen DB",this};
 
     layout->addWidget(radio_but_0);
     layout->addWidget(radio_but_1);
@@ -188,12 +288,12 @@ void SqlDump_settings::choose_settings_interactive()
         if(QScopedPointer<TwoListSelection> double_list{new TwoListSelection{auth_,this}}){
 
             connect(double_list.get(),&TwoListSelection::export_list,[&](QStringList list__){
-                qDebug() << "List from double list::" << list__;
-//                    QStringList args{"--databases " + escape_sql_backticks(pack_(list__," "))};
+               // qDebug() << "List from double list::" << list__;
+
         QStringList args;
                 args << "--databases" << escape_sql_backticks( list__ ); //!!!!
 
-                qDebug()<<"LIST PACKED::"<<args;
+               // qDebug()<<"LIST PACKED::"<<args;
 
                 set_dump_name(auth_,args,this);
 
@@ -228,32 +328,25 @@ void SqlDump_settings::choose_settings_interactive()
 
 void SqlDump_settings::chose_tables_from_db(const QString &chosen_db__)
 {
-    db_connection::close(subconnection_name_); //1
+    db_connection::close(subconnection_name_);
 
     auth* auth_temp {nullptr}; // not static obj because 'customqueryresult' gets reference of auth, not value (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
-qDebug() << (auth_temp==nullptr);
+//qDebug() << (auth_temp==nullptr);
     auth_temp = new auth{auth_};
 
     auth_temp->db_name_ = chosen_db__;
 
-    QSqlDatabase::database(subconnection_name_,false).setDatabaseName(chosen_db__); //2
+    QSqlDatabase::database(subconnection_name_,false).setDatabaseName(chosen_db__);
 
-    //if(QScopedPointer<TwoListSelection> double_list{new TwoListSelection{(*auth_temp),/*this*/dump_db_choose_window_.get()}}){
     double_list_.reset(new TwoListSelection{(*auth_temp),dump_db_choose_window_.get()});
     if(double_list_){
-//                                    double_list->setAttribute(Qt::WA_DeleteOnClose,true);
 
         connect(double_list_.get(),&TwoListSelection::export_list,[=](QStringList list__){
-            qDebug() << "List from double list::" << list__;
-//                                        QString const db_args_list = db_name + " " + escape_sql_backticks(pack_(list__," "));
-//                                        qDebug() << "db_name==Null?" << (db_name==)
-            qDebug() << "11111";
+            //qDebug() << "List from double list::" << list__;
 
             QStringList args;
             args << chosen_db__ << escape_sql_backticks(list__);
-            qDebug()<<"LIST PACKED::"<< args;
-
-            //delete dump_name_window_;
+           // qDebug()<<"LIST PACKED::"<< args;
 
             set_dump_name((*auth_temp),args,this);
         });
@@ -267,7 +360,7 @@ qDebug() << (auth_temp==nullptr);
 
         connect(double_list_.get(),&TwoListSelection::destroyed,[=]{
             delete auth_temp;
-            qDebug() << "~auth_temp (in SqlDump_settings::radio_but2 handler)";
+           // qDebug() << "~auth_temp (in SqlDump_settings::radio_but2 handler)";
         });
 
 
@@ -302,20 +395,17 @@ SqlDump_name::SqlDump_name(auth& auth__,/*QString const& args__,*/QStringList ar
     init_form();
     init_connections();
 
-//    setAttribute(Qt::WA_DeleteOnClose,true);
 }
 
 SqlDump_name::~SqlDump_name()
 {
-    qDebug()<<"~SqlDump_name";
+   // qDebug()<<"~SqlDump_name";
 
 }
 
 void SqlDump_name::init_form()
 {
     setWindowTitle("Dump name setting");
-
-    //setModal(true);
 
     setMinimumSize(320,120);
 
@@ -362,19 +452,26 @@ void SqlDump_name::get_dump()
     QProcess dumpProcess(this);
     QStringList args_list;
     args_list << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << args_/*"--databases"<< "aatest1" << "abitura"*/;
-    qDebug() << "args StringList->>" << args_list << "<--args StringList";
+    //qDebug() << "args StringList->>" << args_list << "<--args StringList";
+
+    // validation of format '.sql' in output file name
     QString output_filename = line_edit_->text().isEmpty() ? "dump.sql" : (line_edit_->text().right(4)==".sql") ? line_edit_->text() : line_edit_->text()+".sql" ;
-    qDebug() << "right 4==" << line_edit_->text().right(4);
+
+    output_filename = adbexplorer::filepath_+'/'+output_filename;
+
+    //qDebug() << "right 4==" << line_edit_->text().right(4);
 
     dumpProcess.setStandardOutputFile(output_filename);
 
 
       QObject::connect(&dumpProcess,static_cast<void (QProcess::*) (int, QProcess::ExitStatus)>(&QProcess::finished),[&](int exitCode, QProcess::ExitStatus exitStatus){
 
-          qDebug() << "signal QProcess::finished emited";
+         // qDebug() << "signal QProcess::finished emited";
 
+        // DUMPING IS SUCCESSFUL ONLY IF::
         if(exitStatus==QProcess::NormalExit && exitCode == 0){
-            QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) ;
+
+            QString const status_message = "(✓) Dumping process finished successfully. Exit code: " + QString::number(exitCode) +". Output file: "+output_filename ;
         qDebug() << status_message;
 
         emit message(status_message);
@@ -390,7 +487,7 @@ void SqlDump_name::get_dump()
             QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Warning,"Dumping process failed",status_message+detailed_err_desc+"<FONT COLOR='#ff0000'>"+'\"'+stderr_text+'\"'+"</FONT>"+'.',
                                                               QMessageBox::Ok/*,this*/)};
 
-            connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+//            connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
             messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
             messageBox->show();
 
@@ -413,10 +510,12 @@ void SqlDump_name::get_dump()
 
       connect(&dumpProcess, &QProcess::readyReadStandardError,[=](){});
 
+      this->setCursor(Qt::WaitCursor);
+
       dumpProcess.start("mysqldump", args_list);
       dumpProcess.waitForFinished();
 
-
+      this->setCursor(Qt::ArrowCursor);
 
 
 }
@@ -428,41 +527,28 @@ void SqlDump_name::get_dump()
 SqlDump_db_choose::SqlDump_db_choose(auth& auth__,QWidget *parent)
     : QDialog(parent)
 
-    //, parent_(parent)
-
     , auth_(auth__)
 
-//    , model_{new QSqlQueryModel}
 
 {
     init_form();
     init_connections();
 
-//    show_db();
 
 }
 
 SqlDump_db_choose::~SqlDump_db_choose()
 {
-    qDebug()<<"~SqlDump_db_choose";
-//    delete model_;
+   // qDebug()<<"~SqlDump_db_choose";
 }
 
 bool SqlDump_db_choose::show_db()
 {
     if(db_connection::try_to_reopen(auth_)){
 
-//        if(QPointer<QSqlQueryModel> model{new QSqlQueryModel}){
-
-//            connect(this,&SqlDump_db_choose::destroyed,[=]{
-//                delete model;
-//                qDebug() << "~model(from SqlDump_db_choose)";
-//            });
-
             if(db_connection::set_query("SHOW DATABASES",/*model*/&model_,comboBox_)){
                 return true;
             }
-//        }
     }
     return false;
 }
@@ -509,7 +595,6 @@ void SqlDump_db_choose::init_form()
 
     QLabel* button_icon_label = new QLabel{};
     button_icon_label->setPixmap(reload_icon.pixmap(QSize(16,16)));
-//    reload_button_->layout()->addWidget(button_rich_text_label);
     button_sublayout->addWidget(button_icon_label);
     button_sublayout->addWidget(button_rich_text_label);
 
@@ -517,17 +602,11 @@ void SqlDump_db_choose::init_form()
 
     connection_layout->addWidget(reload_button_);
 
-//    layout->addWidget(comboBox_);
-
     layout->addLayout(connection_layout);
 
     buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok ,this);
 
     layout->addWidget(buttonBox_);
-
-//    comboBox_->addItem("ABCabc123");
-
-//    comboBox_->addItem("456DeFghIi");
 
 }
 
@@ -537,7 +616,6 @@ void SqlDump_db_choose::init_connections()
 
     connect(reload_button_,&QPushButton::clicked,[=]{
         show_db();
-        qDebug() << "reload_button clicked";
     });
 
     connect(buttonBox_,&QDialogButtonBox::accepted,[=]{

@@ -23,20 +23,19 @@ delete_form::~delete_form()
 
 void delete_form::delete_form_request_slot(){
     emit delete_form_send(ui->comboBox);
-    qDebug() << "Delete form signal was send.";
+    //qDebug() << "Delete form signal was send.";
 }
 
-void delete_form::on_buttonBox_accepted(){
-
-    //qDebug() <<QString("%0 to delete:: %1").arg(entity_name_).arg(ui->comboBox->currentText());
+void delete_form::on_buttonBox_accepted()
+{
 
     QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", QString("Do you really want to delete chosen %0 \"%1\"?").arg(entity_name_).arg(ui->comboBox->currentText()),
                                                              QMessageBox::Yes|QMessageBox::No);
       if (reply == QMessageBox::Yes) {
           emit delete_entity(ui->comboBox);
-        qDebug() << QString("Yes was clicked in delete %0 form").arg(entity_name_);
+        //qDebug() << QString("Yes was clicked in delete %0 form").arg(entity_name_);
       } else {
-        qDebug() << "cancel deletion";
+        //qDebug() << "cancel deletion";
       }
 
 }

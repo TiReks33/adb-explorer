@@ -66,6 +66,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="describeCheckBox">
+         <property name="text">
+          <string>Separate window for table description</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="custom_checkbox">
          <property name="text">
           <string>Separate window for custom query</string>
@@ -77,6 +87,13 @@
        </item>
        <item>
         <widget class="QCheckBox" name="emptySetCheckBox">
+         <property name="text">
+          <string>Display empty query result</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="emptySetNotifyCheckBox">
          <property name="text">
           <string>Show message if result of SQL query
 doesn't imply contain of displayable result</string>
@@ -114,9 +131,9 @@ doesn't imply contain of displayable result</string>
     </layout>
    </item>
    <item>
-    <widget class="QPushButton" name="Close_button">
-     <property name="text">
-      <string>Close</string>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

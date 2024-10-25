@@ -19,7 +19,7 @@ BlinkinButton::BlinkinButton(const QString &text, QWidget *parent) :
 BlinkinButton::~BlinkinButton()
 {
     delete timer;
-    qDebug() << "~BlinkinButton destroyed";
+    ////qDebug() << "~BlinkinButton destroyed";
 }
 
 void BlinkinButton::update()
@@ -28,7 +28,7 @@ void BlinkinButton::update()
         this->setStyleSheet("background: palette(window)");
     else
         this->setStyleSheet("background: lightgreen");
-    qDebug()<<"update...";
+    ////qDebug()<<"update...";
 }
 
 void BlinkinButton::start_blinkin(int freq_sec)

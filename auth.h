@@ -3,53 +3,44 @@
 #include <QString>
 #include <QDebug>
 
+#include <QDir>
 
+namespace adbexplorer
+{
+    QString const filepath_ = QDir::homePath()+"/.adb-explorer";
+}
 
-//enum class default_con_
-//{
-//    default_ = 0,
-//    non_default_ = 1
-//};
-
+// credential structure (cross-window transer solution)
 struct auth{
-    auth() ////:
-////        db_driver_("QMYSQL"/*"QMARIADB"*//*"QMYSQL3"*/)
-////      , host_("localhost")
-//      , con_name_("ADBEXPLORER")
-    {}
-
+    auth(){}
 
     ~auth(){
-        qDebug() << "~auth destructor called";
+        ////qDebug() << "~auth destructor called";
     }
 
 
-//private:
-    /*static*/ QString db_driver_=""; //default
-    /*static*/ QString host_="";
-               int port_=-1;
+    QString db_driver_="";
+    QString host_="localhost";
 
-    /*static*/ QString login_=""; //db_window
-    /*static*/ QString passw_="";
+    // if no port added -- default driver port is used
+    int port_=-1;
 
-    /*static*/ QString db_name_=""; //tables_window
-////    /*static*/ QString table_name_=""; //?
+    QString login_="";
+    QString passw_="";
 
-    //void backup_db_name(){ if(db_name_!="") db_name_backup_=db_name_;}
-    //void reset_db_name_(){ if(db_name_backup_!="") db_name_=db_name_backup_;}
+    QString db_name_="";
 
-    //QString db_name_backup_="";
-
+    // default SQL connection name for app (not default connection, which is the unnamed connection)
     static QString const con_name_;
 
-//    static QString const default_con_name_;
-
-
+    // debug overload
     friend QDebug operator<<(QDebug stream__, auth const &auth__);
 
+    // copy object data to other
     auth& copy_(auth const& auth__)
     {
         if(this!=&auth__){
+
             db_driver_=auth__.db_driver_;
             host_=auth__.host_;
             port_=auth__.port_;
@@ -58,7 +49,7 @@ struct auth{
             passw_=auth__.passw_;
 
             db_name_=auth__.db_name_;
- ////           table_name_=auth__.table_name_;
+
         }
         return *this;
     }

@@ -15,7 +15,9 @@ class create_db_name : public QDialog
     Q_OBJECT
 signals:
 
-    void create_db_signal(QString const&);
+    void create_db_signal(QString const&query__);
+
+    void create_db_signal(QString const& query__,QString const& newdb_name__);
 
 public:
     explicit create_db_name(QWidget *parent = nullptr);

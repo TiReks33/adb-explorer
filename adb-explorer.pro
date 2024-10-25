@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     blinkinbutton.cpp \
+    clickablelabel.cpp \
     create_db_name.cpp \
     create_table_constructor.cpp \
     createtupleconstructor.cpp \
@@ -22,10 +23,9 @@ SOURCES += \
     delete_form.cpp \
     delete_table.cpp \
     helping_stuff.cpp \
-    inserttupleconfirm.cpp \
     main.cpp \
     loginwindow.cpp \
-    multi_connection.cpp \
+    scrolledstatusbar.cpp \
     select_cells.cpp \
     sqldump.cpp \
     tables.cpp \
@@ -34,6 +34,7 @@ SOURCES += \
 HEADERS += \
     auth.h \
     blinkinbutton.h \
+    clickablelabel.h \
     create_db_name.h \
     create_table_constructor.h \
     createtupleconstructor.h \
@@ -46,9 +47,8 @@ HEADERS += \
     delete_form.h \
     delete_table.h \
     helping_stuff.h \
-    inserttupleconfirm.h \
     loginwindow.h \
-    multi_connection.h \
+    scrolledstatusbar.h \
     select_cells.hpp \
     sqldump.h \
     tables.h \
@@ -58,13 +58,11 @@ FORMS += \
     create_db_name.ui \
     create_table_constructor.ui \
     createtupleconstructor.ui \
-    createtupleconstructor1.ui \
     custom_query.ui \
     customqueryresult.ui \
     customquerysettings.ui \
     databases.ui \
     delete_form.ui \
-    inserttupleconfirm.ui \
     loginwindow.ui \
     tables.ui
 

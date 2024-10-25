@@ -13,6 +13,7 @@ namespace Ui {
 class delete_db;
 }
 
+// this class inherits pure virtual to delete entities in 'database' form
 class delete_db : public delete_form
 {
     Q_OBJECT

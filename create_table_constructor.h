@@ -14,8 +14,10 @@
 #include "ui_customqueryresult.h"
 #include "db_connection.h"
 #include "helping_stuff.h"
-#include "multi_connection.h"
+////#include "multi_connection.h"
 #include "QPointer"
+
+#include "scrolledstatusbar.h"
 
 //#include "tables.h"
 class Tables;
@@ -39,64 +41,76 @@ public:
     explicit CreateTableConstructor(auth& auth__,/*QWidget*/Tables *parent = nullptr);
     ~CreateTableConstructor();
 
+    // SQL decimal validator (is int part of number more or equal than float part?)
     bool decimal_type_more_or_eq();
 
+    // add corteges types in table
     bool add_attributes(QPlainTextEdit*);
 
+    // add foreign keys of table
     bool add_keys(QPlainTextEdit*);
 
 public slots:
 
+    // show/hide buttons depending on selected attribute type
     void AttrTypeChanged(QString const &);
 
+    // form's button highlight switcher
     void foreignkeychecked(int);
 
     void closeEvent(QCloseEvent *event);
 
+    // unique table name checking
     void current_exist_tables_slot(QList<QString>);
 
     void constructor_query_fails_handle();
 
+    // erase current form data in next<->back switch
     void erase();
 
+    // warning flag for closeEvent()
     void set_warning_flag_(bool condition){_warning_flag_=condition;}
 
 private slots:
+    // 1st next
     void on_next_0_clicked();
 
+    // table description if foreign key form
     void describe_table();
 
+    // reload current connection
     void on_reload_con_button_2_clicked();
-
-    void get_help_window(QString const&,QString const&,QWidget* = nullptr);
 
     void /*QDialog **/ get_help_window(QPointer<QDialog>&,QString const&,QString const&,QWidget* = nullptr);
 
 signals:
 
-    void send_custom_query(QString const&);
+    void send_custom_query(QString const& query_text__);
+
+    void send_custom_query(QString const& query_text__,QString const& newtable_name__);
 
     void closed();
 
 private:
     Ui::CreateTableConstructor *ui;
 
+    scrolledStatusBar* statusBar_0;
+    scrolledStatusBar* statusBar_1;
+    scrolledStatusBar* statusBar_2;
+
     void signals_init();
 
     bool first_attribute_;
-    QString sql_query_;
     bool first_key_;
     QList<QString> attributes_;
 
     auth& auth_;
-    auth auth_autonome_;
 
-
+    // foreign key form's sql query models[
     QSqlQueryModel submodel_0_;
     QSqlQueryModel submodel_1_;
     QSqlQueryModel submodel_2_;
-
-    QList<QString> non_dflt_conction_names_;
+    //]
 
     QList<QString> exist_table_names_;
 
@@ -125,6 +139,8 @@ private:
     QString const spec_chars_lit = "_$";
 
     //auth* __auth;
+
+    QString current_t_name_ = "";
 
 };
 

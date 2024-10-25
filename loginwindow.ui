@@ -44,11 +44,13 @@
          <widget class="QLabel" name="label_3">
           <property name="font">
            <font>
-            <family>Generale Station SemiExtended</family>
+            <family>Noto Sans</family>
+            <weight>75</weight>
+            <bold>true</bold>
            </font>
           </property>
           <property name="toolTip">
-           <string>&lt;span style=&quot; font-family:'Generale Station','SemiExtended';&quot;&gt;&lt;font style=&quot;color: yellow;background: brown;&quot;&gt;[A]DB_Explorer&lt;/font&gt;&lt;/span&gt;</string>
+           <string>&lt;span style=&quot; font-family:'Noto Sans','Black';&quot;&gt;&lt;font style=&quot;color: yellow;font-weight:bold;background: brown;&quot;&gt;[A]DB_Explorer&lt;/font&gt;&lt;/span&gt;</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>
@@ -92,7 +94,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>v.0.9</string>
+           <string>v.1.0</string>
           </property>
          </widget>
         </item>
@@ -124,116 +126,7 @@
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="6" column="2">
-          <widget class="QLineEdit" name="Host_Form">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>192.168.0.105</string>
-           </property>
-           <property name="placeholderText">
-            <string>localhost</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QLineEdit" name="Password_Form">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>18715</string>
-           </property>
-           <property name="echoMode">
-            <enum>QLineEdit::Password</enum>
-           </property>
-           <property name="placeholderText">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" colspan="2">
-          <widget class="QLabel" name="label_6">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <family>Generale Station SemiExtended</family>
-             <pointsize>11</pointsize>
-             <italic>false</italic>
-             <strikeout>false</strikeout>
-             <kerning>true</kerning>
-            </font>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <property name="text">
-            <string>&lt;font style=&quot;color: yellow;background: brown;&quot;&gt;[A]DB_Explorer&lt;/font&gt;</string>
-           </property>
-           <property name="scaledContents">
-            <bool>true</bool>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0" colspan="2">
-          <widget class="QLabel" name="label_4">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>SQL Server
-Hostname/IP-address</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-           <property name="wordWrap">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="2">
-          <widget class="QPushButton" name="pushButton">
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-             <strikeout>false</strikeout>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">background-color: green; color: white;</string>
-           </property>
-           <property name="text">
-            <string>Authorize</string>
-           </property>
-           <property name="default">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="2">
+         <item row="8" column="2">
           <widget class="QLineEdit" name="portForm">
            <property name="enabled">
             <bool>false</bool>
@@ -261,18 +154,24 @@ Hostname/IP-address</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="0" colspan="2">
-          <widget class="QLabel" name="driverLabel">
+         <item row="5" column="2">
+          <widget class="QLineEdit" name="Login_Form">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
-            <string>SQL driver</string>
+            <string/>
+           </property>
+           <property name="placeholderText">
+            <string/>
            </property>
           </widget>
          </item>
-         <item row="8" column="2">
-          <widget class="QComboBox" name="driverComboBox"/>
-         </item>
-         <item row="7" column="0">
-          <widget class="QCheckBox" name="port_checkBox">
+         <item row="7" column="0" colspan="2">
+          <widget class="QLabel" name="label_4">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -280,14 +179,90 @@ Hostname/IP-address</string>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>set specific port</string>
+            <string>SQL Server
+Hostname/IP-address</string>
            </property>
-           <property name="checked">
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
             <bool>false</bool>
            </property>
           </widget>
          </item>
-         <item row="5" column="3">
+         <item row="9" column="0" colspan="2">
+          <widget class="QLabel" name="driverLabel">
+           <property name="text">
+            <string>SQL driver</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Login</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0" colspan="2">
+          <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Password</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QLineEdit" name="Password_Form">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+           <property name="placeholderText">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="2">
+          <widget class="QPushButton" name="pushButton">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+             <strikeout>false</strikeout>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: green; color: white;</string>
+           </property>
+           <property name="text">
+            <string>Authorize</string>
+           </property>
+           <property name="default">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="3">
           <widget class="QCheckBox" name="checkBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -303,21 +278,8 @@ Hostname/IP-address</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Login</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QLineEdit" name="Login_Form">
+         <item row="7" column="2">
+          <widget class="QLineEdit" name="Host_Form">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -325,15 +287,15 @@ Hostname/IP-address</string>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>alexander</string>
+            <string/>
            </property>
            <property name="placeholderText">
-            <string/>
+            <string>localhost</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="0" colspan="2">
-          <widget class="QLabel" name="label_2">
+         <item row="8" column="0">
+          <widget class="QCheckBox" name="port_checkBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -341,11 +303,17 @@ Hostname/IP-address</string>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Password</string>
+            <string>set specific port</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
-         <item row="2" column="2">
+         <item row="9" column="2">
+          <widget class="QComboBox" name="driverComboBox"/>
+         </item>
+         <item row="3" column="2">
           <widget class="QLabel" name="label_5">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -373,13 +341,101 @@ Hostname/IP-address</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="3">
+         <item row="0" column="2" rowspan="3">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="sizeConstraint">
+            <enum>QLayout::SetMinimumSize</enum>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>Noto Sans</family>
+               <pointsize>14</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+               <strikeout>false</strikeout>
+              </font>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <property name="text">
+              <string>&lt;font style=&quot;color: yellow;background: brown;&quot;&gt;[A]DB_Explorer&lt;/font&gt;</string>
+             </property>
+             <property name="scaledContents">
+              <bool>true</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item row="7" column="3">
           <widget class="QPushButton" name="conOptsButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Set specific server connection parameters</string>
+           </property>
+           <property name="toolTipDuration">
+            <number>-1</number>
            </property>
            <property name="text">
             <string>Options</string>

@@ -25,6 +25,7 @@ public slots:
     friend class Tables;
     friend class Databases;
 
+    // general func to display result of query to separate window
     void custom_query_slot(QString const & query__, QString const & = auth::con_name_, QHeaderView::ResizeMode = QHeaderView::Stretch);
 
 signals:

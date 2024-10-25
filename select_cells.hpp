@@ -3,6 +3,7 @@
 #include <QItemSelectionModel>
 #include <QAbstractItemView>
 
+// group of overload functions that gives selection of cells in tables by indexes
 void select_cells(const QModelIndex &index, QAbstractItemView *itemView);
 
 void select_cells(int ai, int aj, QAbstractItemView *itemView);

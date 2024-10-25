@@ -15,15 +15,21 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent) :
                                         | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
+    //ui->tableView->setSelectionMode(QTableView::SingleSelection);
+    //ui->tableView->setSelectionBehavior(QTableView::SelectItems);
+    //ui->tableView->setSelectionMode(QTableView::MultiSelection);
+
     connect(ui->Cancel_button,&QPushButton::clicked,[=]{
         this->close();
     });
 
-    connect(ui->pushButton,&QPushButton::clicked,[=]{
-        qDebug()<< "auth::" << auth_.db_name_;
-        qDebug()<< "auth::" << auth_.db_driver_;
-        qDebug()<< "auth::" << auth_.host_;
-    });
+//    QPushButton* copy_button{new QPushButton{"copy data"}};
+
+//    connect(copy_button,&QPushButton::clicked,this,[=]{
+//        qDebug() << ui->tableView->model()->index(0,0).data().toString();
+//    });
+
+//    ui->verticalLayout->addWidget(copy_button);
 }
 
 
@@ -38,13 +44,13 @@ void CustomQueryResult::custom_query_slot(QString const & query__, QString const
 
 CustomQueryResult::~CustomQueryResult()
 {
-    qDebug()<<"~CustomQueryResult activated";
+    //qDebug()<<"~CustomQueryResult activated";
     delete ui;
 }
 
 
 void CustomQueryResult::close_window()
 {
-    qDebug()<<"Close custom query form signal handled";
+    //qDebug()<<"Close custom query form signal handled";
     this->close();
 }

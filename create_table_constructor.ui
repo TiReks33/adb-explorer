@@ -247,29 +247,6 @@
       </property>
      </spacer>
     </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
-      <property name="sizeConstraint">
-       <enum>QLayout::SetMinimumSize</enum>
-      </property>
-      <item>
-       <widget class="QLineEdit" name="statusLine_0">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="readOnly">
-         <bool>false</bool>
-        </property>
-        <property name="placeholderText">
-         <string>Status updates here</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="page_2">
@@ -620,9 +597,7 @@
                  <cursorShape>WhatsThisCursor</cursorShape>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;font style=color:gray;&gt;Search function.
-Disabled until some text
-will be entered or some file opened.&lt;/font&gt;</string>
+                 <string>&lt;font style=color:gray;&gt;Attributes description&lt;/font&gt;</string>
                 </property>
                 <property name="text">
                  <string>?</string>
@@ -1044,16 +1019,6 @@ will be entered or some file opened.&lt;/font&gt;</string>
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QLineEdit" name="statusLine_1">
-      <property name="readOnly">
-       <bool>false</bool>
-      </property>
-      <property name="placeholderText">
-       <string>Status updates here</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="page_3">
@@ -1350,13 +1315,6 @@ will be entered or some file opened.&lt;/font&gt;</string>
             </layout>
            </widget>
           </item>
-          <item row="2" column="5">
-           <widget class="QPushButton" name="pushButton">
-            <property name="text">
-             <string>PushButton</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -1408,9 +1366,7 @@ will be entered or some file opened.&lt;/font&gt;</string>
             <cursorShape>WhatsThisCursor</cursorShape>
            </property>
            <property name="toolTip">
-            <string>&lt;font style=color:gray;&gt;Search function.
-Disabled until some text
-will be entered or some file opened.&lt;/font&gt;</string>
+            <string>&lt;font style=color:gray;&gt;Foreign key description&lt;/font&gt;</string>
            </property>
            <property name="text">
             <string>?</string>
@@ -1852,16 +1808,6 @@ will be entered or some file opened.&lt;/font&gt;</string>
       </property>
       <property name="placeholderText">
        <string>Text</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="statusLine_2">
-      <property name="readOnly">
-       <bool>false</bool>
-      </property>
-      <property name="placeholderText">
-       <string>Status updates here</string>
       </property>
      </widget>
     </item>

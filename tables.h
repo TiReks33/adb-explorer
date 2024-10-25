@@ -32,6 +32,8 @@
 
 #include "blinkinbutton.h"
 
+#include "scrolledstatusbar.h"
+
 namespace Ui {
 class Tables;
 }
@@ -50,23 +52,16 @@ public:
 
 public slots:
 
+    // load/reload tables list
     void show_tables();
 
-//    void send_custom_query_slot(QString const&);
-
+    // send result of query from Custom_Query form in 1) separate or 2) main form of 'tables' window
     void send_custom_query_slot(/*QString,*/Custom_Query *);
 
+    //
 
-    void show_table_describe_form(
-            QString const & db_name__,
-            QString const&table_name__,
-            QString const & con_name__ = auth::con_name_,
-            QWidget * parent__ = nullptr,
-            Qt::WindowType window_type_flag__ = Qt::Dialog,
-            Qt::WindowModality window_modality_flag__ = Qt::NonModal
-            ) const;
-
-    void get_information_window(QString const&,QString const&,QWidget* = nullptr);
+//    // [utility func]
+//    void get_information_window(QString const&,QString const&,QWidget* = nullptr);
 
 
 signals:
@@ -74,9 +69,7 @@ signals:
     void db_show();
 
 
-
     void custom_query(auth&,QString const&);
-
 
 
     void custom_query(auth&, QString const&,QTableView*);
@@ -86,14 +79,15 @@ signals:
     void delete_form_request();
 
 
-
     void current_tables_list_signal(QList<QString>);
 
     void close_custom_query_form();
 
-    void constructor_query_success();
+//    void constructor_query_success();
+    void constructor_query_success(QString const&);
 
-    void constructor_query_fails();
+//    void constructor_query_fails();
+    void constructor_query_fails(QString const&);
 
     void tpl_cnstr_upd_tables();
 
@@ -107,62 +101,79 @@ signals:
 
 private slots:
 
+    // empty form for custom query
     void get_custom_query_window_();
 
+    // overload form for custom query with pre-added text
     void get_custom_query_window_(QString const&);
 
+    // SELECT TABLE
     void show_table_content();
 
+    // exec. table interactive constructor
     void get_table_constructor();
 
+    // exec. interactive constructor for adding values to table
     void get_tuple_constructor_instance();
 
-    void /*get_describe_table_instance*/show_table_description();
+    // DESCRIBE TABLE
+    void show_table_description();
 
-protected:
-//    bool event(QEvent* event);
+public:
+
+    bool t_content_wnd = true;
+
+    bool t_describe_wnd = true;
+
+    bool t_query_wnd = true;
+
+    bool BLANK_RESULT = false;
+
+    bool MSG_SHOW_IF_BLANK_RESULT = false;
 
 private:
     Ui::Tables *ui;
+
+    scrolledStatusBar* statusBar;
+
+    QString const query_settings_f_name = adbexplorer::filepath_+"/query.cfg";
+
 
     BlinkinButton* showTable_button;
 
     void init_connections();
 
-//    void disable_select_until_reload();
 
     auth& auth_;
 
     QSqlQueryModel model_;
 
 
-
-
-
     CustomQueryResult* custom_query_result_window_;
 
-    CustomQuerySettings* settings_;
+    QPointer<CustomQuerySettings> settings_;
 
     delete_table* delete_table_window_;
 
     CreateTableConstructor* constructor_;
 
-
-
     int tuples_windows_counter_=0;
 
 
-
+    // preventing application to exit by escape (QDialog close by esc)
     inline void keyPressEvent(QKeyEvent *e) {
         if(e->key() != Qt::Key_Escape)
             QDialog::keyPressEvent(e);
         else {/* minimize */
-            qDebug()<<"escape pressed (tables)";
+            //qDebug()<<"escape pressed (tables)";
             close();
         }
     }
 
 
+    bool read4rom_query_file();
+
+    void write2_query_file();
 
 };
 

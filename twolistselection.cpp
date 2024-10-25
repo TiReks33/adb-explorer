@@ -5,22 +5,21 @@
 TwoListSelection::TwoListSelection(auth& auth__,QDialog *parent) :
     QDialog{parent}
   , auth_(auth__)
-{ //CONSTRUCTOR
+{
     init();
     connections();
 }
 
 TwoListSelection::~TwoListSelection()
 {
-    qDebug() << "~TwoListSelection";
+    //qDebug() << "~TwoListSelection";
 }
 
 void TwoListSelection::addAvailableItems(const QStringList &items) {
     for( QString s : items)
         list_before_changes_.append(s);
     mInput->addItems(items);
-    qDebug() << "list::"<<list_before_changes_;
-
+    //qDebug() << "list::"<<list_before_changes_;
 }
 
 QStringList TwoListSelection::selectedItems() {
@@ -40,13 +39,6 @@ void TwoListSelection::update_doublelist(QString const& query__,QString const& c
     if(db_connection::set_query(query__, this, connection_name__))
         select_cells(0,0,mInput);
 
-}
-
-
-
-void TwoListSelection::update_doublelist_handler()
-{
-    qDebug() << "Update double list handler activated";
 }
 
 
@@ -176,8 +168,9 @@ void TwoListSelection::connections() {
 
     //ADDITIONAL_SIGNALS
 
+    // reset to condition before changes
     connect(reset_button_,&QPushButton::clicked, [=]() {
-            qDebug() << "Reset handler activated";
+            //qDebug() << "Reset handler activated";
             mOutput->clear();
             mInput->clear();
             mInput->addItems(list_before_changes_);
@@ -185,6 +178,7 @@ void TwoListSelection::connections() {
         });
 
     connect(cancel_button_,&QPushButton::clicked, [=]() {
+
             this->close();
     });
 
@@ -192,14 +186,17 @@ void TwoListSelection::connections() {
 
             emit export_list(this->selectedItems());
             this->close();
-
     });
+
+    // disabled export if right (output) list is empty
     connect(mOutput->model(),&QAbstractItemModel::rowsRemoved, [=]() {
             if(mOutput->count()==0)
                  ok_button_->setEnabled(false);
              //else
                  //ok_button_->setEnabled(true);
     });
+
+    // enable export if something being inserted
     connect(mOutput->model(),&QAbstractItemModel::rowsInserted, [=]() {
             //if(mOutput->count()!=0)
                  ok_button_->setEnabled(true);

@@ -1,6 +1,8 @@
 #ifndef SQLDUMP_H
 #define SQLDUMP_H
 
+//******************************DUMPING DATABASE IN STEP-BY-STEP CHAIN***************************************
+
 #include <QDialog>
 #include <QLayout>
 #include <QLabel>
@@ -23,9 +25,16 @@ class Databases;
 
 class SqlDump_settings;
 
+// select user
 class SqlDump_credentials : public QDialog/*QWidget*/
 {
     Q_OBJECT
+
+public slots:
+
+    // not perfect name to method:); show window (form) with another SQL user's credentials
+    void get_another_credentials_window();
+
 public:
     explicit SqlDump_credentials(auth&,/*QWidget*/Databases *parent = nullptr);
     virtual ~SqlDump_credentials();
@@ -41,6 +50,8 @@ private:
 
     auth& auth_;
 
+    QString const alt_con_name = "SqlDump_another_credentials_temp_connection";
+
     QLabel* label_;
     QPushButton* current_credential_button_;
     QPushButton * another_credential_button_;
@@ -48,6 +59,7 @@ private:
 
     void init_form();
     void init_connections();
+
 
     inline void closeEvent(QCloseEvent *event){ emit closed(); event->accept(); }
 
@@ -59,6 +71,7 @@ private:
 class SqlDump_name;
 class SqlDump_db_choose;
 
+// select type of dump (all dbs, select dbs, select tables of db)
 class SqlDump_settings : public QDialog
 {
     Q_OBJECT
@@ -85,10 +98,13 @@ private:
     void init_form();
     void init_connections();
 
+    // depending of what settings you choose, get specific dialog
     void choose_settings_interactive();
 
+    // function for selecting tables from db
     void chose_tables_from_db(QString const&);
 
+    // get final form with db name choose
     void set_dump_name(auth&,QStringList&,QWidget*);
 
     inline void closeEvent(QCloseEvent *event){ emit closed(); event->accept(); }
@@ -103,6 +119,7 @@ private:
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+// final dialog in chain
 class SqlDump_name : public QDialog
 {
     Q_OBJECT
@@ -143,6 +160,7 @@ signals:
 
 public slots:
 
+    // choose specific db before selecting tables in it
     bool show_db();
 
 private:
