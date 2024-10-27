@@ -1,7 +1,7 @@
 #ifndef SQLDUMP_H
 #define SQLDUMP_H
 
-//******************************DUMPING DATABASE IN STEP-BY-STEP CHAIN***************************************
+//******************************DUMPING DATABASE IN STEP-BY-STEP***************************************
 
 #include <QDialog>
 #include <QLayout>
@@ -16,11 +16,11 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QSqlQueryModel>
-
 #include <QCloseEvent>
-#include <twolistselection.h>
 
-//#include "databases.h"
+#include "twolistselection.h"
+#include "reloadbutton.h"
+
 class Databases;
 
 class SqlDump_settings;
@@ -46,16 +46,16 @@ signals:
 
 private:
 
-    Databases* parent_;
+    Databases* parent_ = nullptr;
 
     auth& auth_;
 
     QString const alt_con_name = "SqlDump_another_credentials_temp_connection";
 
-    QLabel* label_;
-    QPushButton* current_credential_button_;
-    QPushButton * another_credential_button_;
-    QPushButton * exit_button_;
+    QLabel* label_ = nullptr;
+    QPushButton* current_credential_button_ = nullptr;
+    QPushButton * another_credential_button_ = nullptr;
+    QPushButton * exit_button_ = nullptr;
 
     void init_form();
     void init_connections();
@@ -84,16 +84,16 @@ signals:
 
 private:
 
-    SqlDump_credentials* parent_;
+    SqlDump_credentials* parent_ = nullptr;
 
     auth& auth_;
-        QLabel* label_;
-    QRadioButton* radio_but_0;
-    QRadioButton* radio_but_1;
-    QRadioButton* radio_but_2;
+    QLabel* label_ = nullptr;
+    QRadioButton* radio_but_0 = nullptr;
+    QRadioButton* radio_but_1 = nullptr;
+    QRadioButton* radio_but_2 = nullptr;
 
-    QPushButton* close_button_;
-    QPushButton* next_button_;
+    QPushButton* close_button_ = nullptr;
+    QPushButton* next_button_ = nullptr;
 
     void init_form();
     void init_connections();
@@ -126,6 +126,7 @@ class SqlDump_name : public QDialog
 public:
     explicit SqlDump_name(auth&,/*QString const&,*/QStringList,QWidget *parent = nullptr);
     virtual ~SqlDump_name();
+
 signals:
     void message(QString const&);
 private:
@@ -133,9 +134,9 @@ private:
 //    QString const args_;
     QStringList args_;
 
-    QLabel* label_;
-    QLineEdit* line_edit_;
-    QDialogButtonBox* button_box_;
+    QLabel* label_ = nullptr;
+    QLineEdit* line_edit_ = nullptr;
+    QDialogButtonBox* button_box_ = nullptr;
 
     void init_form();
     void init_connections();
@@ -169,10 +170,10 @@ private:
 //    QSqlQueryModel* model_;
     QSqlQueryModel model_;
 
-    QLabel* label_;
-    QComboBox* comboBox_;
-    QDialogButtonBox* buttonBox_;
-    QPushButton* reload_button_;
+    QLabel* label_ = nullptr;
+    QComboBox* comboBox_ = nullptr;
+    QDialogButtonBox* buttonBox_ = nullptr;
+    /*QPushButton*/reloadButton* reload_button_ = nullptr;
 
     void init_form();
     void init_connections();

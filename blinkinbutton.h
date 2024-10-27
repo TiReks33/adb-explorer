@@ -12,25 +12,51 @@ class BlinkinButton : public QPushButton
     Q_OBJECT
 
 public:
-    explicit BlinkinButton(QWidget *parent = nullptr);
-    explicit BlinkinButton(const QString &text, QWidget *parent = nullptr);
+
+    explicit BlinkinButton(QWidget *parent = nullptr,const QString &text = NULL);
 
     virtual ~BlinkinButton();
 
+    inline void setStyleSheet(QString const& newSS__){
+
+        dfltStyleSheet_ = newSS__;
+
+        QPushButton::setStyleSheet(newSS__);
+    };
+
+
+    inline void changeBlinkSS(QString const& newBlinkSS__){
+        blinkStyleSheet_ = newBlinkSS__;
+    };
+
+    inline QString const & blinkSS(){
+        return blinkStyleSheet_;
+    };
+
 private slots:
-    void update();
+    virtual void update();
 
 public slots:
-    void start_blinkin(int freq_sec = 1000);
-    void stop_blinkin();
+    void start_blinkin(int freq_sec = 1000, int timelimit = 0);
+    virtual void stop_blinkin();
 
     bool is_active();
 
-private:
+signals:
+
+    void blinkStopped();
+
+protected:
     QPointer<QTimer> timer;
+
     bool buttonState=true;
 
-//    void init_signals();
+private:
+
+    QString dfltStyleSheet_ = "";
+
+    QString blinkStyleSheet_ = "";
+
 };
 
 #endif // BLINKINBUTTON_H

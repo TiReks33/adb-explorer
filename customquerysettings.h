@@ -3,12 +3,11 @@
 
 #include <QDialog>
 #include <QMap>
+#include <QPushButton>
 
 #include "helping_stuff.h"
-
 #include "auth.h"
 
-//class Tables;
 
 namespace Ui {
 class CustomQuerySettings;
@@ -47,8 +46,12 @@ private:
 
     void init_signals();
 
+    void fileOps();
+
+    void formStyle();
+
     //[
-    QString const query_settings_f_name = adbexplorer::filepath_+"/query.cfg";
+    QString const query_settings_f_name = adb_utility::filepath_+"/query.cfg";
 
 //    bool t_content_wnd = true;
 

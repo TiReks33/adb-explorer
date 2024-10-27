@@ -1,16 +1,6 @@
 #include "db_connection.h"
 #include "twolistselection.h"
 
-QString const auth::con_name_="ADBEXPLORER";
-
-
-
-//QString db_connection::get_unique_con_name(const QMetaObject *class_meta_obj__, multi_connection *multi_con__)
-//{
-//    return QString(class_meta_obj__->className()+QString::number(multi_con__->unique_number_));
-//}
-
-
 
 bool db_connection::open(auth &auth__, const QString &con_name__/*, QString const & options__*/)
 {
@@ -34,7 +24,7 @@ bool db_connection::open(auth &auth__, const QString &con_name__/*, QString cons
 
             // set SQL flag to reconnect MySQl/MariaDB connection that already exists in list and opened by QSqlDatabase::open
             // WHEN connection is lost
-            if(auth__.db_driver_=="QMARIADB" || auth__.db_driver_=="QMYSQL" || auth__.db_driver_=="QMYSQL3"){
+            if(auth::SQLdriverMatch(auth__.db_driver_,SQLDBtype::MARIADB) || auth::SQLdriverMatch(auth__.db_driver_,SQLDBtype::MYSQL)){
                 db_connection.setConnectOptions("MYSQL_OPT_RECONNECT=1");
                 qDebug() << "MySQL/MariaDB flag to auto-retrieve the connection when database is gone was set.";
             }
@@ -42,7 +32,7 @@ bool db_connection::open(auth &auth__, const QString &con_name__/*, QString cons
             if(!db_connection.open()){
 
                 ////QMessageBox::warning(0,"SQL connection open failed","(x)Error occured while connect to database by connection ::"+con_name__+":: Error message: "+database.lastError().text(),QMessageBox::Close);
-                qDebug() << ("(x)Error occured while connect to database by connection ::"+con_name__+":: .");
+                qDebug() << ("(x)Error occured while connect to database by connection ::"+con_name__+"::");
                 return false;
 
             } else {
@@ -142,9 +132,35 @@ void db_connection::remove(const QString &con_name_)
 
 
 
+bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, QStringList*stringlist__, QString const & con_name__/*QSqlDatabase const &db__*/) //QListWidget
+{
+    QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
+    QSqlQuery qry = QSqlQuery(database);
 
-bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, QListWidget*list, QString const & con_name__/*QSqlDatabase const &db__*/) //QListWidget
+    if(qry.prepare(query__)){ //MY_SQL_QUERY
+
+        if(qry.exec()){
+            model__.setQuery(qry);
+
+            for(int i = 0; i < model__.rowCount(); ++i){
+
+                stringlist__->append(model__.record(i).value(0).toString());
+            }
+
+            return true;
+        } else {
+        qDebug() << "(x) QSqlQuery execution failed.";
+        }
+    }
+    QString const error_msg = qry.lastError().text();
+//    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
+    adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
+    qDebug() << error_msg;
+    return false;
+}
+
+bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, QListWidget*listWidget__, QString const & con_name__/*QSqlDatabase const &db__*/) //QListWidget
 {
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
@@ -161,7 +177,7 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, Q
             query_2_list.append(model__.record(i).value(0).toString());
         }
 
-        list->addItems(query_2_list);
+        listWidget__->addItems(query_2_list);
 
         return true;
         } else {
@@ -240,7 +256,7 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
 
 
 
-/*static*/bool db_connection::set_query(QString const& query, QSqlQueryModel*model__, QTableView *tableView, QHeaderView::ResizeMode scalemode, QString const & con_name__/*QSqlDatabase const &db__*/)
+/*static*/bool db_connection::set_query(QString const& query, QSqlQueryModel*model__, QTableView *tableView, /*QHeaderView::ResizeMode scalemode, */QString const & con_name__/*QSqlDatabase const &db__*/)
 {
 
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
@@ -255,7 +271,8 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
 
         tableView->setModel(model__);
 
-        tableView->horizontalHeader()->setSectionResizeMode(scalemode); //QHeaderView::Stretch
+        //tableView->horizontalHeader()->setSectionResizeMode(scalemode); //QHeaderView::Stretch
+        //tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
         return true;
         } else {

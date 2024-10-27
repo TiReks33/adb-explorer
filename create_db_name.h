@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QString>
+#include <QPushButton>
 
 #include "helping_stuff.h"
 

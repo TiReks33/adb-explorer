@@ -8,20 +8,15 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
     ui(new Ui::createTupleConstructor)
   , statusBar(new scrolledStatusBar)
   , auth_(auth__)
-
+  , update_tables_button{new reloadButton{0,"darkslategray","snow",true,false,"Update tables list"}}
 {
     ui->setupUi(this);
 
-    ui->verticalLayout->addWidget(statusBar);
-
-    //statusBar->get_line()->setStyleSheet("color:red;");
-
     setWindowIcon(QIcon(":/pic/anthead2.png"));
 
-//    SIGNALS::
+    initForm();
 
-        signals_init();
-
+    signals_init();
 
 }
 
@@ -33,39 +28,81 @@ createTupleConstructor::~createTupleConstructor()
     //qDebug() << "TupleConstr ~Destructor activated";
 }
 
+void createTupleConstructor::initForm()
+{
+    ui->verticalLayout->addWidget(statusBar);
+
+    ui->CancelButton->setText("⌧");
+    ui->CancelButton->setStyleSheet("QPushButton:!disabled {background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;}");//padding-top:1px;padding-bottom:1px;");
+    ui->okButton->setStyleSheet("QPushButton {background:green; color:white;} QPushButton:disabled {background-color:gray;}");
+
+    ui->reloadVerticalLayout->addWidget(update_tables_button);
+
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+            if(obj->objectName()=="reloadButtonObj"){
+//                qobject_cast<reloadButton*>(obj)->setKhakiHighlight();
+                auto reloadButtonObj = qobject_cast<reloadButton*>(obj);
+                reloadButtonObj->setKhakiHighlight();
+
+            }else{
+                obj->setStyleSheet(QStringLiteral("%1 %2")
+                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            }
+
+        }
+
+
+    ui->comboBox->setStyleSheet(adb_style::getComboBoxKhakiHighlightSS("#fffffa","darkslategray"));
+
+
+    ui->frame->setObjectName("whiteFrame0");
+
+    ui->frame->setStyleSheet(" QFrame#whiteFrame0 { background: white; } ");
+
+}
+
 
 void createTupleConstructor::signals_init()
 {
     connect(ui->comboBox,&QComboBox::currentTextChanged, [=](QString const& string_){
-//        auth_.table_name_=string_;
-//        qDebug() << "auth table name after textchanged()"<<auth_.table_name_;
+
         if (string_==""){
+
+            ui->frame->setStyleSheet(" QFrame#whiteFrame0 { background: white; } ");
+
             ui->frame->setEnabled(true);
-            ui->update_tables_button->setEnabled(true);
-            ui->frame->setStyleSheet("background: white");
+
             ui->frame_2->setEnabled(false);
             ui->frame_2->setStyleSheet("background: palette(window)");
             ui->frame_3->setEnabled(false);
             ui->frame_3->setStyleSheet("background: palette(window)");
+
         } else {
+
+            ui->frame->setStyleSheet(" QFrame#whiteFrame0 { background: palette(window); }   ");
+
             ui->frame->setEnabled(false);
-            ui->update_tables_button->setEnabled(false);
-            ui->frame->setStyleSheet("background: palette(window)");
+
+
             ui->frame_2->setEnabled(true);
             ui->frame_2->setStyleSheet("background: white");
         }
+
     });
 
 
     connect(ui->plainTextEdit_2,&QPlainTextEdit::textChanged, [=](){
-        qDebug() << "(✓)columns selected";
+
         if (ui->plainTextEdit_2->toPlainText()!=""){
+            ui->frame_2->setEnabled(false);
+            ui->frame_2->setStyleSheet("background: palette(window)");
+
             ui->frame_3->setEnabled(true);
             ui->frame_3->setStyleSheet("background: white");
             ui->frame_4->setEnabled(true);
             ui->frame_4->setStyleSheet("background: white");
-            ui->frame_2->setEnabled(false);
-            ui->frame_2->setStyleSheet("background: palette(window)");
         }
     });
 
@@ -79,9 +116,9 @@ void createTupleConstructor::signals_init()
 
         if(!tuples_added_){ statusBar->get_line()->setText("You don't add any values to table!");return;}
 
-//        QString final_query = "INSERT INTO "+auth_.table_name_+" ("+ui->plainTextEdit_2->toPlainText()+") "+"VALUES ";
-        QString final_query = QString("INSERT INTO `%1` (`%2`) VALUES ").arg(QString(escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())))
-                                                                        .arg(QString(escape_sql_backticks(ui->plainTextEdit_2->toPlainText())));
+
+        QString final_query = QString("INSERT INTO `%1` (`%2`) VALUES ").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())))
+                                                                        .arg(QString(adb_utility::escape_sql_backticks(ui->plainTextEdit_2->toPlainText())));
 
         int count = tuples_.count();
         for (int i=0;i!=count;++i)
@@ -92,49 +129,57 @@ void createTupleConstructor::signals_init()
 
         final_query+=';';
 
-        this->close();
+//        this->close();
+        emit this->closeNowSig();
 
         qDebug() << "final query::" <<final_query;
+
         emit final_query_sig(final_query);
 
     });
 
 
-    connect(ui->update_tables_button,&QPushButton::clicked,this,&createTupleConstructor::update_tables_list);
+    connect(update_tables_button,&QPushButton::clicked,this,&createTupleConstructor::update_tables_list);
 
     connect(ui->reset_button,&QPushButton::clicked,[=]{
         QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to start"
                                     " adding fields from the beginning? All current progress will be lost.",
                                                                  QMessageBox::Yes|QMessageBox::No);
           if (reply == QMessageBox::Yes) {
-            qDebug() << "Yes was clicked";
-            reset();
+           // qDebug() << "Yes was clicked";
+            resetButtonHandler();
           } else {
-            qDebug() << "cancel";
+            //qDebug() << "cancel";
           }
     });
 
     connect(ui->addColsButton,&QPushButton::clicked,[=]{
         TwoListSelection doublelist{auth_};
-    //    connect(&doublelist,SIGNAL(export_list(QStringList)),this,SLOT(import_list(QStringList)));
+
         connect(&doublelist,&TwoListSelection::export_list,[=](QStringList list__){
-            qDebug() << "List from double list::" << list__;
-            ui->plainTextEdit_2->setPlainText(pack_(list__));
+            ////qDebug() << "List from double list::" << list__;
+            ui->plainTextEdit_2->setPlainText(adb_utility::pack_(list__));
         });
-        QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())));
+        QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())));
         doublelist.update_doublelist(query);
         doublelist.setModal(true);
         doublelist/*list_selection_window_->*/.show();
         doublelist.exec();
     });
 
+    connect(ui->CancelButton,&QPushButton::clicked,this,&createTupleConstructor::close);
+
+    connect(this,&createTupleConstructor::closeNowSig,[this]{
+        closeMessageFlag_=false;
+        close();
+    });
 }
 
 
-void createTupleConstructor::reset()
+void createTupleConstructor::resetButtonHandler()
 {
     ui->frame->setEnabled(true);
-    ui->frame->setStyleSheet("background: white");
+    ui->frame->setStyleSheet("QFrame#whiteFrame0{background: white}");
     ui->frame_2->setEnabled(false);
     ui->frame_2->setStyleSheet("background: palette(window)");
     ui->frame_3->setEnabled(false);
@@ -173,10 +218,35 @@ void createTupleConstructor::update_tables_list()
 
 void createTupleConstructor::closeEvent(QCloseEvent *event)
 {
-    if(describe_form_)describe_form_->close();
-    //emit closed(this->subconnection_name_);
+
+    if(closeMessageFlag_){
+
+        QMessageBox* reply = new QMessageBox(QMessageBox::Warning,"Are you sure?", "Do you want to close constructor window?",QMessageBox::Yes|QMessageBox::No,this);
+
+
+        reply->setAttribute(Qt::WA_DeleteOnClose,true);
+        reply->setWindowModality(Qt::WindowModal);
+
+        QFlag flags = Qt::Window & ~Qt::WindowStaysOnTopHint;
+        reply->setWindowFlags(flags);
+
+        reply->show();
+
+        connect(this,&createTupleConstructor::closeNowSig,reply,&QMessageBox::accept);
+
+        auto answer = reply->exec();
+        if(answer==QMessageBox::No){
+
+
+            event->ignore();
+            return;
+        }
+
         event->accept();
+    }
 }
+
+
 
 void createTupleConstructor::on_addTupleButton_clicked()
 {
@@ -217,11 +287,9 @@ void createTupleConstructor::on_addTupleButton_clicked()
 
 void createTupleConstructor::on_describeButton_clicked()
 {
-    //Tables* window = qobject_cast<Tables *>(parent());
-    //window->show_table_describe_form(auth_.db_name_,ui->comboBox->currentText(),auth::con_name_,this,Qt::Dialog,Qt::WindowModal);
 
     if(describe_form_!=nullptr)
-    describe_form_->close();
+        describe_form_->close();
 
 
     QString table_name = ui->comboBox->currentText();
@@ -236,11 +304,19 @@ void createTupleConstructor::on_describeButton_clicked()
     describe_form_->setWindowTitle(table_name);
 
 
-    describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(escape_sql_backticks(table_name)))/*,subconnection_name_*/);
+    describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(adb_utility::escape_sql_backticks(table_name)))/*,subconnection_name_*/);
 
     describe_form_->setModal(false);
 
-describe_form_->show();
+    describe_form_->show();
 
-//describe_form_-> exec();
+    //describe_form_-> exec();
 }
+
+
+void createTupleConstructor::setCloseMessageFlag(bool state__)
+{
+    closeMessageFlag_=state__;
+}
+
+

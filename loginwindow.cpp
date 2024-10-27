@@ -1,7 +1,7 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
 
-#include "blinkinbutton.h"
+#include "reloadbutton.h"
 
 //int timeout_reconnect = 15000; //60000
 
@@ -18,18 +18,15 @@ loginWindow::loginWindow(QWidget *parent)
 
     signals_init();
 
+    fileOps();
 
-
-    // if no file -- create it and write default settings to it
-    if(!read4rom_recon_opts_file())
-        write2recon_opts_file();
 
 }
 
 void loginWindow::form_init()
 {
     ui->setupUi(this);
-    this->setFixedSize(QSize(600, 325));
+    this->setFixedSize(QSize(600, 360));
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
@@ -43,12 +40,22 @@ void loginWindow::form_init()
                         "/vectors/22949</a></pre>");
     ui->cc_label->setToolTipDuration(60000);
 
+    ui->loginLbl->setStyleSheet("QToolTip {font-family:'Noto Sans','Black';color: yellow;font-weight:bold;background: brown;border:0px;}");
+//    "<span style=\" font-family:'Noto Sans','Black';\"><font style=\"color: yellow;font-weight:bold;background: brown;\">[A]DB_Explorer</font></span>"
 
-    QStringList drivers_list = QSqlDatabase::drivers();
+//    QStringList drivers_list = QSqlDatabase::drivers();
 
-    std::sort(drivers_list.begin(), drivers_list.end());
+//    std::sort(drivers_list.begin(), drivers_list.end());
 
-    ui->driverComboBox->addItems(drivers_list);
+    QStringList drivers_list;
+
+    for(auto it = auth::SQLDBtype2SQLdriver.begin();
+             it!= auth::SQLDBtype2SQLdriver.end();
+           ++it){
+        drivers_list.append(it.key());
+    }
+
+    ui->dbtypeComboBox->addItems(drivers_list);
 
 
 
@@ -60,10 +67,29 @@ void loginWindow::form_init()
     setTabOrder(ui->Host_Form, ui->conOptsButton);
     setTabOrder(ui->conOptsButton, ui->port_checkBox);
     setTabOrder(ui->port_checkBox, ui->portForm);
-    setTabOrder(ui->portForm, ui->driverComboBox);
-    setTabOrder(ui->driverComboBox, ui->pushButton);
+    setTabOrder(ui->portForm, ui->dbtypeComboBox);
+    setTabOrder(ui->dbtypeComboBox, ui->pushButton);
+
+
+
+    ui->dbtypeComboBox->setStyleSheet(/*comboSS*/adb_style::getComboBoxKhakiHighlightSS("","","url(:/pic/adbarrowdwn2.png)"));
+
+    ui->conOptsButton->setStyleSheet(QStringLiteral("QPushButton{%1} %2").arg(ui->conOptsButton->styleSheet()).arg(adb_style::getbuttonKhakiHiglightSS()));
+
+    ui->pushButton->setStyleSheet(QStringLiteral("QPushButton{%1} QPushButton:disabled {color:floralwhite; background:gray;} %2").arg(ui->pushButton->styleSheet()).arg(adb_style::getbuttonKhakiHiglightSS()));
+
+
+    ui->hidePassCheckBoxLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    ui->portCheckBoxVerticalLayout->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+    QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
+        foreach (auto obj, checkBoxInFormlist) {
+
+                obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+        }
 
 }
+
 
 void loginWindow::signals_init()
 {
@@ -80,19 +106,19 @@ void loginWindow::signals_init()
         }
     });
 
-    // wip
-    connect(this,&loginWindow::current_driver_check_,[=]{
+//    // toDo
+//    connect(this,&loginWindow::current_driver_check_,[=]{
 
-        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current SQL driver issue",
-                                                          39+auth_.db_driver_+39+" driver currently not tested.",
-                                                          QMessageBox::Ok,this/*0*/)};
+//        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current SQL driver issue",
+//                                                          39+auth_.db_driver_+39+" driver currently not tested.",
+//                                                          QMessageBox::Ok,this/*0*/)};
 
-        ////connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-        //messageBox->setModal(false);
-        messageBox->show();
+//        ////connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
+//        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+//        //messageBox->setModal(false);
+//        messageBox->show();
 
-    });
+//    });
 
     // start SQL-server alive-check
     connect(this,&loginWindow::start_connection_timer_stuff,[=]{
@@ -110,6 +136,23 @@ void loginWindow::signals_init()
     // write settings changes to file
     connect(this, &loginWindow::reconnect_data_changed, this, &loginWindow:: write2recon_opts_file);
 
+    // toDo
+    connect(ui->dbtypeComboBox,&QComboBox::currentTextChanged,[this](QString const& curText__){
+        if(auth::SQLdriverMatch(auth::SQLDBtype2SQLdriver[curText__],SQLDBtype::PSQL)){
+            ui->pushButton->setEnabled(false);
+            ui->pushButton->setToolTip("*Current version of ADB-Explorer not supported PostgreSQL*");
+        } else{
+            ui->pushButton->setEnabled(true);
+            ui->pushButton->setToolTip("");
+        }
+    });
+}
+
+void loginWindow::fileOps()
+{
+    // if no file -- create it and write default settings to it
+    if(!read4rom_recon_opts_file())
+        write2recon_opts_file();
 }
 
 loginWindow::~loginWindow()
@@ -240,6 +283,21 @@ void loginWindow::gset_connection_options()
 
     QLineEdit* timeout_line = new QLineEdit;
 
+//    QStatusBar* statusBar = new QStatusBar;
+
+    QLabel* statusBarLbl = new QLabel{/*statusbar*/};
+    statusBarLbl->setWordWrap(true);
+    statusBarLbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    statusBarLbl->setAlignment(Qt::AlignCenter);
+
+//    statusBar->addWidget(statusBarLbl);
+
+    connect(options_dialog,&QDialog::destroyed,[statusBarLbl]{ delete statusBarLbl; });
+
+    connect(timeout_line,&QLineEdit::textChanged,[statusBarLbl](){ statusBarLbl->hide(); });
+
+//    connect(statusbar,&QStatusBar::messageChanged,[options_dialog]{ options_dialog->adjustSize();});
+
     rec_timeout_layout->addWidget(timeout_line);
 
     timeout_line->setText(QString::number(timeout_reconnect));
@@ -287,9 +345,9 @@ void loginWindow::gset_connection_options()
 
     status_frame->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 
-    QStatusBar* statusbar = new QStatusBar;
 
-    statusbar->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+
+    statusBarLbl->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 
     QVBoxLayout* statusbar_layout = new QVBoxLayout(status_frame);
 
@@ -301,7 +359,11 @@ void loginWindow::gset_connection_options()
 
     //statusbar->showMessage("aBc");
 
-    statusbar_layout->addWidget(statusbar);
+    statusbar_layout->addWidget(statusBarLbl);
+
+    statusBarLbl->setStyleSheet("color:red; border :2px solid black; border-style : dashed");
+
+    statusBarLbl->hide();
 
     options_layout->addWidget(status_frame);
 
@@ -321,8 +383,19 @@ void loginWindow::gset_connection_options()
             // check correctness for timeout value
             if(timeout_validate!=QValidator::Acceptable){
 
-                statusbar->setStyleSheet("color:red;");
-                statusbar->showMessage("timeout value incorrect.[min. 1000]");
+                statusBarLbl->show();
+
+                auto validMin = int_validator->bottom();
+                auto validMax = int_validator->top();
+                auto min2sec = validMin / 1000;
+                auto max2days = validMax / (8.64 * qPow(10,7));
+
+                statusBarLbl->setText(QStringLiteral("Timeout value is incorrect.\n[min. %1 ms (%2 sec)] - [max. %3 ms (%4 days)]")
+                                      .arg(validMin)
+                                      .arg(min2sec)
+                                      .arg(validMax)
+                                      .arg(max2days));
+
                 return;
             }
 
@@ -335,6 +408,25 @@ void loginWindow::gset_connection_options()
 
             options_dialog->accept();
     });
+
+
+    QList<QPushButton*> ButtonsInFormlist = options_dialog->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+            if(obj==buttonBox->button(QDialogButtonBox::Ok)||obj==buttonBox->button(QDialogButtonBox::Cancel)){
+                obj->setStyleSheet(QStringLiteral("QPushButton { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            } else {
+                obj->setStyleSheet(QStringLiteral("QPushButton {%1} %2")
+                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            }
+        }
+
+    QList<QCheckBox*> checkBoxInFormlist = options_dialog->findChildren<QCheckBox*>();
+        foreach (auto obj, checkBoxInFormlist) {
+
+                obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+        }
 
     options_dialog->setModal(true);
     options_dialog->show();
@@ -355,45 +447,45 @@ void loginWindow::on_pushButton_clicked()
     auth_.login_=this->ui->Login_Form->text();
     auth_.passw_=this->ui->Password_Form->text();
 
-    if(!ui->Host_Form->text().isEmpty())
-        auth_.host_=this->ui->Host_Form->text();
+    QString const hostInf = ui->Host_Form->text();
+    (hostInf.isEmpty()) ? auth_.host_="localhost" : auth_.host_ = hostInf;
 
-    auth_.db_driver_=this->ui->driverComboBox->currentText();
+    auth_.db_driver_=auth::SQLDBtype2SQLdriver[this->ui->dbtypeComboBox->currentText()];
 
     if(ui->port_checkBox->isChecked()&&!ui->portForm->text().isEmpty())
         auth_.port_=this->ui->portForm->text().toInt();
 
 
-        if(!db_connection::open(auth_))
-            ui->statusbar->showMessage("(x)Authorization wrong. Please check your login details.");
-        else{
+    if(!db_connection::open(auth_))
+        ui->statusbar->showMessage("(x)Authorization wrong. Please check your login details and network connection.");
+    else{
 
-            ui->statusbar->showMessage("(✓)Successful authorization");
+        ui->statusbar->showMessage("(✓)Successful authorization");
 
-            if(db_window_->show_databases()){
-                db_window_->setModal(true);
-                db_window_->show();
+        if(db_window_->show_databases()){
+            db_window_->setModal(/*true*/false);
+            db_window_->show();
 
-                // 'Database' window status bar message
-                emit message_to_database_window("SQL database autorization for user ::"+auth_.login_+":: succesfull.");
+            // 'Database' window status bar message
+            emit message_to_database_window("SQL database autorization for user ::"+auth_.login_+":: succesfull.");
 
-                // wip
-                if(auth_.db_driver_!="QMARIADB" && auth_.db_driver_!="QMYSQL" && auth_.db_driver_!="QMYSQL3")
-                    emit current_driver_check_();
+            emit reconnect_data_changed();
 
-                ////QTimer::singleShot(0,this,SLOT(connection_timer_slot()));
 
-                this->hide();
-            } else {
-                ui->statusbar->showMessage(ui->statusbar->currentMessage()
-                                           .append(".. but something goes wrong, and query to SQL DB failed.:("));
-            }
+            ////QTimer::singleShot(0,this,SLOT(connection_timer_slot()));
 
-            // start SQL connection checking
-            if(auth_.host_!="127.0.0.1" && auth_.host_!="localhost")
-                emit start_connection_timer_stuff();
 
+            this->hide();
+        } else {
+            ui->statusbar->showMessage(ui->statusbar->currentMessage()
+                                       .append(".. but something goes wrong, and query to SQL DB failed.:("));
         }
+
+        // start SQL connection checking
+        if(auth_.host_!="127.0.0.1" && auth_.host_!="localhost")
+            emit start_connection_timer_stuff();
+
+    }
 
     this->setCursor(Qt::ArrowCursor);
 }
@@ -415,6 +507,7 @@ void loginWindow::write2recon_opts_file()
     QTextStream textStream(&outFile);
     textStream << "timeout_reconnect" << '=' << QString::number(timeout_reconnect) << Qt::endl;
     textStream << "CONNECTION_LOST_MESSAGE" << '=' << QString::number(CONNECTION_LOST_MESSAGE) << Qt::endl;
+    textStream << "DB_TYPE"<<'='<< QString::number(ui->dbtypeComboBox->currentIndex()) << Qt::endl;
 }
 
 bool loginWindow::read4rom_recon_opts_file()
@@ -422,7 +515,7 @@ bool loginWindow::read4rom_recon_opts_file()
     QMap<QString,int> __settings_map;
 
     // fill the QMap container with key-values pairs
-    if(get_settings_4rom_file(config_f_name,__settings_map)){
+    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map)){
         int temp;
 
         // find necessary settings
@@ -431,6 +524,9 @@ bool loginWindow::read4rom_recon_opts_file()
 
         if((temp = __settings_map.value("CONNECTION_LOST_MESSAGE"))!=-1)
             CONNECTION_LOST_MESSAGE = temp;
+
+        if((temp = __settings_map.value("DB_TYPE"))!=-1)
+            this->ui->dbtypeComboBox->setCurrentIndex(temp);
 
         return true;
     }

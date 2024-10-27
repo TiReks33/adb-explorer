@@ -172,14 +172,16 @@
               </property>
               <property name="font">
                <font>
-                <pointsize>10</pointsize>
+                <pointsize>18</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">background-color: brown; color: white;</string>
+               <string notr="true">background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;</string>
               </property>
               <property name="text">
-               <string>Cancel</string>
+               <string>⌧</string>
               </property>
              </widget>
             </item>
@@ -777,10 +779,12 @@
                    <property name="font">
                     <font>
                      <pointsize>12</pointsize>
+                     <weight>50</weight>
+                     <bold>false</bold>
                     </font>
                    </property>
                    <property name="styleSheet">
-                    <string notr="true">background-color: lightgreen;</string>
+                    <string notr="true">QPushButton:!disabled {background-color: lightgreen;}</string>
                    </property>
                    <property name="text">
                     <string>Add attribute</string>
@@ -912,10 +916,10 @@
           <item>
            <widget class="QPushButton" name="cancel_1">
             <property name="styleSheet">
-             <string notr="true">background-color: brown; color: white</string>
+             <string notr="true">background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;</string>
             </property>
             <property name="text">
-             <string>Cancel</string>
+             <string>⌧</string>
             </property>
            </widget>
           </item>
@@ -955,8 +959,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
-             <string notr="true">background-color: red</string>
+             <string notr="true">background: darkred;color:white;</string>
             </property>
             <property name="text">
              <string>Erase added attributes</string>
@@ -993,6 +1003,8 @@
             <property name="font">
              <font>
               <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
              </font>
             </property>
             <property name="styleSheet">
@@ -1107,8 +1119,14 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="font">
+                <font>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
                <property name="styleSheet">
-                <string notr="true">background-color: lightblue;</string>
+                <string notr="true">QPushButton:!disabled {background: floralwhite; color: darkslategray;padding: 6px;}</string>
                </property>
                <property name="text">
                 <string>Describe table</string>
@@ -1291,28 +1309,14 @@
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QFrame" name="frame_18">
+           <widget class="QFrame" name="reloadFrame_2">
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_20">
-             <item>
-              <widget class="QPushButton" name="reload_con_button_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Reload DB list</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <layout class="QHBoxLayout" name="reloadFrameHorizontalLayout_2"/>
            </widget>
           </item>
          </layout>
@@ -1600,7 +1604,7 @@
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">background-color: lightgreen;</string>
+                 <string notr="true">QPushButton:!disabled {color: black;background-color: lightgreen;}</string>
                 </property>
                 <property name="text">
                  <string>Add foreign key</string>
@@ -1704,10 +1708,10 @@
           <item>
            <widget class="QPushButton" name="cancel_2">
             <property name="styleSheet">
-             <string notr="true">background-color: brown; color:white;</string>
+             <string notr="true">background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;</string>
             </property>
             <property name="text">
-             <string>Cancel</string>
+             <string>⌧</string>
             </property>
            </widget>
           </item>
@@ -1747,8 +1751,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
-             <string notr="true">background-color:red;</string>
+             <string notr="true">background: darkred;color:white;</string>
             </property>
             <property name="text">
              <string>Reset keys</string>

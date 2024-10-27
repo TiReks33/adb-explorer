@@ -23,46 +23,14 @@ CreateTableConstructor::CreateTableConstructor(auth& auth__,/*QWidget*/Tables *p
 
   , parent_(parent)
 
+  , reload_con_button_2{new reloadButton{this,"darkslategray","snow",true,false,"<u>R</u>eload DB list"}}
+
 {
-    ui->setupUi(this);
-
-    ui->page->layout()->addWidget(statusBar_0);
-    ui->page_2->layout()->addWidget(statusBar_1);
-    ui->page_3->layout()->addWidget(statusBar_2);
-
-
-    setWindowIcon(QIcon(":/pic/anthead2.png"));
-
-    ui->atr_type_capacity_1->setMaxLength(5);
-
-    statusBar_0->get_line()->setReadOnly(true);
-    ui->plainTextEdit_1->setReadOnly(true);
-    statusBar_1->get_line()->setReadOnly(true);
-    ui->plainTextEdit_2->setReadOnly(true);
-    statusBar_2->get_line()->setReadOnly(true);
-
-    //"Help buttons"
-       ui->help_button_2->setFixedSize(67,67);
-        QRect rect(0,0,67,67);
-       QRegion region(rect, QRegion::Ellipse);
-       ui->help_button_2->setMask(region);
-        ui->help_button_2->setStyleSheet("border: none;"
-            "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
-                        "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
-                                );
-
-           ui->help_button_1->setFixedSize(67,67);
-            rect=QRect(0,0,67,67);
-           region=QRegion(rect, QRegion::Ellipse);
-           ui->help_button_1->setMask(region);
-            ui->help_button_1->setStyleSheet("border: none;"
-                "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
-                            "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
-                                    );
+    initForm();
 
     //SIGNALs
 
-            signals_init();
+    signals_init();
 
 }
 
@@ -135,6 +103,10 @@ void CreateTableConstructor::signals_init()
                         ui->ref_table_comboBox_2->setToolTip("*empty table*");
                         ui->ref_key_comboBox_2->setToolTip("*no corteges (empty table)*");
 
+                        ui->describe_tbl_button_2->setEnabled(false);
+
+                    } else{
+                        ui->describe_tbl_button_2->setEnabled(true);
                     }
                 }
           ////}
@@ -143,7 +115,7 @@ void CreateTableConstructor::signals_init()
 
     connect(ui->ref_table_comboBox_2,&QComboBox::currentTextChanged, this,[=](QString const&current_table_name__){
 
-            db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(current_table_name__))), &submodel_2_,ui->ref_key_comboBox_2,subconnection_name_);
+            db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(adb_utility::escape_sql_backticks(current_table_name__))), &submodel_2_,ui->ref_key_comboBox_2,subconnection_name_);
 
             ui->ref_table_comboBox_2->setToolTip(current_table_name__);
 
@@ -157,7 +129,7 @@ void CreateTableConstructor::signals_init()
 
 
     connect(ui->send_button,&QPushButton::clicked,[=]{
-        set_cursor_to_end_(this->ui->plainTextEdit_2);
+        adb_utility::set_cursor_to_end_(this->ui->plainTextEdit_2);
 
         ui->plainTextEdit_2->insertPlainText(" );");
         //qDebug() << "SQL FINAL QUERY::" << ui->plainTextEdit_2->toPlainText();
@@ -176,7 +148,7 @@ void CreateTableConstructor::signals_init()
             ui->foreign_key_combobox_2->setCurrentIndex(-1);
 
 
-            //on_reload_con_button_2_clicked();
+            //reloadDatabaseComboBox();
 
 
             this->setCurrentIndex(2);
@@ -255,7 +227,7 @@ void CreateTableConstructor::signals_init()
 
 
     connect(ui->plus_button_2,&QPushButton::clicked,[=]{
-        set_cursor_to_end_(this->ui->plainTextEdit_2);
+        adb_utility::set_cursor_to_end_(this->ui->plainTextEdit_2);
 
         if(add_keys(ui->plainTextEdit_2)){
 
@@ -359,7 +331,52 @@ void CreateTableConstructor::signals_init()
     connect(ui->atr_name_line_1,&QLineEdit::textChanged,statusBar_1->get_line(),&statusLineEdit::clear);
     connect(ui->atr_type_capacity_1,&QLineEdit::textChanged,statusBar_1->get_line(),&statusLineEdit::clear);
 
+    connect(reload_con_button_2,&reloadButton::clicked, this, &CreateTableConstructor::reloadDatabaseComboBox);
 
+}
+
+
+void CreateTableConstructor::initForm()
+{
+    ui->setupUi(this);
+
+    ui->page->layout()->addWidget(statusBar_0);
+    ui->page_2->layout()->addWidget(statusBar_1);
+    ui->page_3->layout()->addWidget(statusBar_2);
+
+
+    setWindowIcon(QIcon(":/pic/anthead2.png"));
+
+    ui->atr_type_capacity_1->setMaxLength(5);
+
+    statusBar_0->get_line()->setReadOnly(true);
+    ui->plainTextEdit_1->setReadOnly(true);
+    statusBar_1->get_line()->setReadOnly(true);
+    ui->plainTextEdit_2->setReadOnly(true);
+    statusBar_2->get_line()->setReadOnly(true);
+
+    //"Help buttons"
+    ui->help_button_2->setFixedSize(67,67);
+    QRect rect(0,0,67,67);
+    QRegion region(rect, QRegion::Ellipse);
+    ui->help_button_2->setMask(region);
+    ui->help_button_2->setStyleSheet("border: none;"
+        "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
+                    "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
+    );
+
+    ui->help_button_1->setFixedSize(67,67);
+    rect=QRect(0,0,67,67);
+    region=QRegion(rect, QRegion::Ellipse);
+    ui->help_button_1->setMask(region);
+    ui->help_button_1->setStyleSheet("border: none;"
+        "background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #e7ebef, stop: 1 #cde3f2);"
+                    "color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #5598c9, stop: 1 #a9d5f5);"
+    );
+
+    ui->reloadFrameHorizontalLayout_2->addWidget(reload_con_button_2);
+
+    reload_con_button_2->setEnabled(false);
 
 }
 
@@ -437,9 +454,7 @@ bool CreateTableConstructor::decimal_type_more_or_eq()
         }
     }
 
-    ////qDebug() << M;
-    ////qDebug() << D;
-    ////qDebug() << "M>=D" << (M>=D);
+
     return (M>=D);
 }
 
@@ -464,7 +479,7 @@ bool CreateTableConstructor::add_attributes(QPlainTextEdit* textEdit)
 
 
 
-    QRegularExpression en(".*["+en_lit+"].*");
+    QRegularExpression en(".*["+adb_utility:: en_lit+"].*");
 
     QRegularExpressionValidator v_en(en, 0);
 
@@ -472,18 +487,18 @@ bool CreateTableConstructor::add_attributes(QPlainTextEdit* textEdit)
     int pos=0;
     if(v_en.validate(str, pos)!=QValidator::Acceptable)
     {
-        statusBar_1->get_line()->setText(QString("Attribute name must consist at least 1 [%1] alphabetic character(lower or APPER case).").arg(en_lit));
+        statusBar_1->get_line()->setText(QString("Attribute name must consist at least 1 [%1] alphabetic character(lower or APPER case).").arg(adb_utility:: en_lit));
         return false;
 
     } else {
 
-        QRegularExpression fi_v("^["+en_lit+digits_lit+spec_chars_lit+"]*$");
+        QRegularExpression fi_v("^["+adb_utility:: en_lit+adb_utility:: digits_lit+adb_utility:: spec_chars_lit+"]*$");
         QRegularExpressionValidator v(fi_v, 0);
         QString str = ui->atr_name_line_1->text();
         int pos=0;
         if(v.validate(str, pos)!=QValidator::Acceptable)
         {
-            statusBar_1->get_line()->setText(QString("Incorrect symbols in attribute name. Please use low and upper [%1] letters, digits or special characters [%2].").arg(en_lit).arg(spec_chars_lit));
+            statusBar_1->get_line()->setText(QString("Incorrect symbols in attribute name. Please use low and upper [%1] letters, digits or special characters [%2].").arg(adb_utility:: en_lit).arg(adb_utility:: spec_chars_lit));
             return false;
         }
 
@@ -598,7 +613,7 @@ bool CreateTableConstructor::add_attributes(QPlainTextEdit* textEdit)
 
 
 
-        set_cursor_to_end_(this->ui->plainTextEdit_1);
+        adb_utility::set_cursor_to_end_(this->ui->plainTextEdit_1);
 
         //attributes_.append(QString("`%1`").arg(ui->atr_name_line_1->text()));
         attributes_.append(ui->atr_name_line_1->text());
@@ -651,9 +666,9 @@ bool CreateTableConstructor::add_keys(QPlainTextEdit *textEdit)
 
     textEdit->insertPlainText(QString(" FOREIGN KEY (`%1`)").arg(QString/*(escape_sql_backticks*/(ui->foreign_key_combobox_2->currentText()/*)*/)));
 
-    textEdit->insertPlainText(QString(" REFERENCES `%1`.`%2`(`%3`)").arg(QString(escape_sql_backticks(ui->ref_DB_comboBox_2->currentText())))
-                              .arg(QString(escape_sql_backticks(ui->ref_table_comboBox_2->currentText())))
-                              .arg(QString(escape_sql_backticks(ui->ref_key_comboBox_2->currentText()))));
+    textEdit->insertPlainText(QString(" REFERENCES `%1`.`%2`(`%3`)").arg(QString(adb_utility::escape_sql_backticks(ui->ref_DB_comboBox_2->currentText())))
+                              .arg(QString(adb_utility::escape_sql_backticks(ui->ref_table_comboBox_2->currentText())))
+                              .arg(QString(adb_utility::escape_sql_backticks(ui->ref_key_comboBox_2->currentText()))));
 
 
     if(ui->on_delete_checkBox_2->isChecked())
@@ -728,9 +743,11 @@ void CreateTableConstructor::foreignkeychecked(int state)
 
         ui->plus_button_2->setEnabled(false);
 
+        reload_con_button_2->setEnabled(false);
+
     } else {
 
-        on_reload_con_button_2_clicked();
+        reloadDatabaseComboBox();
 
         ui->foreign_key_combobox_2->setEnabled(true);
         ui->ref_DB_comboBox_2->setEnabled(true);
@@ -750,6 +767,8 @@ void CreateTableConstructor::foreignkeychecked(int state)
 
         ui->plus_button_2->setEnabled(true);
 
+        reload_con_button_2->setEnabled(true);
+
     }
 }
 
@@ -761,11 +780,11 @@ void CreateTableConstructor::closeEvent(QCloseEvent *event)
     QMessageBox::StandardButton reply = QMessageBox::warning(this, "Are you sure?", "Do you want to close constructor window?",
                                                              QMessageBox::Yes|QMessageBox::No);
       if (reply == QMessageBox::No) {
-        qDebug() << "Create Table constr close:: cancel closing";
+        //qDebug() << "Create Table constr close:: cancel closing";
         event->ignore();
         return;
       } else {
-        qDebug() << "Create Table constr close:: closing accepted";
+        //qDebug() << "Create Table constr close:: closing accepted";
       }
     }
 
@@ -825,7 +844,7 @@ void CreateTableConstructor::on_next_0_clicked()
 
      } else {
 
-        QRegularExpression en(".*["+en_lit+"].*");//(".*[a-zA-Z].*");
+        QRegularExpression en(".*["+adb_utility:: en_lit+"].*");//(".*[a-zA-Z].*");
 
         QRegularExpressionValidator v_en(en, 0);
 
@@ -833,18 +852,18 @@ void CreateTableConstructor::on_next_0_clicked()
         int pos=0;
         if(v_en.validate(str, pos)!=QValidator::Acceptable)
         {
-            statusBar_0->get_line()->setText(QString("Name must consist at least 1 [%1] alphabetic character(lower or APPER case).").arg(en_lit));
+            statusBar_0->get_line()->setText(QString("Name must consist at least 1 [%1] alphabetic character(lower or APPER case).").arg(adb_utility:: en_lit));
             return;
 
         } else{
 
-            QRegularExpression fi_v("^["+en_lit/*+ru_lit+ukr_lit*/+digits_lit+spec_chars_lit+"]*$");
+            QRegularExpression fi_v("^["+adb_utility:: en_lit/*+ru_lit+ukr_lit*/+adb_utility:: digits_lit+adb_utility:: spec_chars_lit+"]*$");
             QRegularExpressionValidator v(fi_v, 0);
             QString str = ui->tbl_name_line_0->text();
             int pos=0;
             if(v.validate(str, pos)!=QValidator::Acceptable)
             {
-                statusBar_0->get_line()->setText(QString("Incorrect symbols in table's name. Please use low and upper [%1] letters, digits or special characters [%2].").arg(en_lit).arg(spec_chars_lit));
+                statusBar_0->get_line()->setText(QString("Incorrect symbols in table's name. Please use low and upper [%1] letters, digits or special characters [%2].").arg(adb_utility:: en_lit).arg(adb_utility:: spec_chars_lit));
                 return;
             }
 
@@ -875,15 +894,15 @@ void CreateTableConstructor::on_next_0_clicked()
 void CreateTableConstructor::describe_table()
 {
 
-    if(describe_form_!=nullptr)//{
-        describe_form_->close();
+    if(!describe_form_.isNull())//{
+        describe_form_.reset();
 
 
     QString const db_name = ui->ref_DB_comboBox_2->currentText();
     QString const table_name = ui->ref_table_comboBox_2->currentText();
     db_connection::close(subconnection_name_2_); //1
 
-    auth* __auth {nullptr}; // not static obj because 'customqueryresult' gets reference of auth, not value (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
+    auth* __auth {nullptr}; // not stack obj because 'customqueryresult' gets reference of auth, not value (without additional exec() local stack obj out-of-range ==>> UB (crashing app)
 qDebug() << (__auth==nullptr);
     __auth = new auth{auth_};
 
@@ -900,7 +919,7 @@ qDebug() << (__auth==nullptr);
 
     auto con1 = connect(this,&CreateTableConstructor::closed,this,[=](){
 
-        if(describe_form_!=nullptr){
+        if(!describe_form_.isNull()){
 
             describe_form_->close();
 
@@ -913,9 +932,10 @@ qDebug() << (__auth==nullptr);
 
 
 
-    connect(describe_form_.data(),&CustomQueryResult::closed_,[=]{
+    connect(describe_form_.data(),&CustomQueryResult::destroyed,[=]{
         delete __auth;
-        describe_form_.reset();
+
+        //describe_form_.reset();
 
         db_connection::close(subconnection_name_2_);
 
@@ -926,9 +946,9 @@ qDebug() << (__auth==nullptr);
 
 describe_form_->setWindowTitle(table_name);
 
-describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(escape_sql_backticks(table_name))),subconnection_name_2_); //3
+describe_form_->custom_query_slot(QString("DESCRIBE `%1`").arg(QString(adb_utility::escape_sql_backticks(table_name))),subconnection_name_2_); //3
 
-describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
+//describe_form_-> setAttribute( Qt::WA_DeleteOnClose, true );
 
 describe_form_->setModal(false);
 
@@ -941,10 +961,10 @@ describe_form_->show();
 }
 
 
-void CreateTableConstructor::on_reload_con_button_2_clicked()
+void CreateTableConstructor::reloadDatabaseComboBox()
 {
     if(!db_connection::open(auth_)){
-        qDebug() << QString("(x)There is error while update tables (connection is not established).");
+        qDebug() << QString("(x)There is error while update database list (connection is not established).");
         return;
     }
 

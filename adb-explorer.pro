@@ -9,6 +9,7 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    auth.cpp \
     blinkinbutton.cpp \
     clickablelabel.cpp \
     create_db_name.cpp \
@@ -21,13 +22,20 @@ SOURCES += \
     db_connection.cpp \
     delete_db.cpp \
     delete_form.cpp \
+    delete_sqldb_user.cpp \
     delete_table.cpp \
+    fontembeddedwidget.cpp \
     helping_stuff.cpp \
+    hidemenu.cpp \
     main.cpp \
     loginwindow.cpp \
+    notifycombobox.cpp \
+    reloadbutton.cpp \
     scrolledstatusbar.cpp \
     select_cells.cpp \
+    signaltableview.cpp \
     sqldump.cpp \
+    sqlusermanagement.cpp \
     tables.cpp \
     twolistselection.cpp
 
@@ -45,12 +53,19 @@ HEADERS += \
     db_connection.h \
     delete_db.h \
     delete_form.h \
+    delete_sqldb_user.h \
     delete_table.h \
+    fontembeddedwidget.h \
     helping_stuff.h \
+    hidemenu.h \
     loginwindow.h \
+    notifycombobox.h \
+    reloadbutton.h \
     scrolledstatusbar.h \
     select_cells.hpp \
+    signaltableview.h \
     sqldump.h \
+    sqlusermanagement.h \
     tables.h \
     twolistselection.h
 

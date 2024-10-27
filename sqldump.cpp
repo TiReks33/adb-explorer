@@ -14,7 +14,7 @@ SqlDump_credentials::SqlDump_credentials(auth& auth__,/*QWidget*/Databases *pare
 
 SqlDump_credentials::~SqlDump_credentials()
 {
-   // qDebug()<<"~SqlDump_credentials";
+//    qDebug()<<"~SqlDump_credentials";
 
 }
 
@@ -22,7 +22,7 @@ void SqlDump_credentials::init_form()
 {
     setWindowTitle("SQL dump");
 
-    setMinimumSize(320,240);
+    setMinimumSize(320,120);
 
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 
@@ -33,6 +33,10 @@ void SqlDump_credentials::init_form()
     label_ = new QLabel;
 
     label_->setText("Please, choose credential for dumping.");
+    label_->setStyleSheet("min-height:16px;color:darkslategray; border :2px solid black; padding: 6px; border-style : dashed");
+
+    label_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
+    label_->setAlignment(Qt::AlignCenter);
 
     layout->addWidget(label_);
 
@@ -54,6 +58,13 @@ void SqlDump_credentials::init_form()
 
     layout->addWidget(exit_button_);
 
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {background: floralwhite; color:darkslategray; font-weight:bold;} %2")
+//                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+        }
 }
 
 void SqlDump_credentials::init_connections()
@@ -109,7 +120,7 @@ void SqlDump_credentials::get_another_credentials_window()
     ac_passw_lbl->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
     /*ac_passw_lay*/ac_layout->addWidget(passw_form,1,1);
 
-    QCheckBox* checkBox = new QCheckBox;
+    QCheckBox* checkBox = new QCheckBox{"hide"};
 
     connect(checkBox,&QCheckBox::stateChanged,[=](int state_arg__){
         if (state_arg__ == Qt::Checked)
@@ -121,13 +132,8 @@ void SqlDump_credentials::get_another_credentials_window()
     checkBox->setChecked(true);
 
 
-    QHBoxLayout* pass_check_lay = new QHBoxLayout;
-    pass_check_lay->addWidget(checkBox);
-    QLabel* pass_check_lbl = new QLabel("hide");
-    pass_check_lay->addWidget(pass_check_lbl);
 
-    ac_layout->addLayout(pass_check_lay,1,2);
-
+    ac_layout->addWidget(checkBox,1,2);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                      | QDialogButtonBox::Cancel);
@@ -138,14 +144,16 @@ void SqlDump_credentials::get_another_credentials_window()
 
     status_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
-    status_lbl->setStyleSheet("color:red;");
+    status_lbl->setStyleSheet("color:red; border :2px solid black; border-style : dashed");
 
     status_lbl->setWordWrap(true);
 
     main_layout->addWidget(status_lbl);
 
-    connect(login_form,&QLineEdit::textChanged,[=]{if(!status_lbl->text().isEmpty()){status_lbl->clear();/*qDebug() << "clear1";*/}});
-    connect(passw_form,&QLineEdit::textChanged,[=]{if(!status_lbl->text().isEmpty()){status_lbl->clear();/*qDebug() << "clear2";*/}});
+    status_lbl->hide();
+
+    connect(login_form,&QLineEdit::textChanged,[=]{if(/*!status_lbl->text().isEmpty()*/status_lbl->isVisible()){status_lbl->hide();ac_dialog->adjustSize();/*status_lbl->clear();*//*qDebug() << "clear1";*/}});
+    connect(passw_form,&QLineEdit::textChanged,[=]{if(/*!status_lbl->text().isEmpty()*/status_lbl->isVisible()){status_lbl->hide();ac_dialog->adjustSize();/*status_lbl->clear();*//*qDebug() << "clear2";*/}});
 
 
     main_layout->setSpacing(3);
@@ -187,10 +195,29 @@ void SqlDump_credentials::get_another_credentials_window()
             qDebug() << "Alt connection not opened.";
             ////QMessageBox::information(ac_dialog,"Logging failed","Error while connecting to SQL Server with entered credentials.",QMessageBox::Ok);
             status_lbl->setText("Error while logging to SQL Server. Please, check entered credentials and try again.");
+            status_lbl->show();
         }
     this->setCursor(Qt::ArrowCursor);
 
     });
+
+
+// Styling
+    QList<QPushButton*> ButtonsInFormlist = ac_dialog->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {background: floralwhite; color:darkslategray; font-weight:bold;} %2")
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+        }
+
+    QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
+        foreach (auto obj, checkBoxInFormlist) {
+
+                obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+        }
+//
+
+    ac_dialog->setWindowTitle("Enter credentials");
 
     ac_dialog->setModal(true);
     ac_dialog->show();
@@ -236,15 +263,26 @@ void SqlDump_settings::init_form()
 
     label_->setWordWrap(true);
 
+    label_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    label_->setAlignment(Qt::AlignCenter);
+    label_->setStyleSheet("color:darkslategray; border :2px solid black; padding: 6px; border-style : dashed");
+
     layout->addWidget(label_);
 
     radio_but_0 = new QRadioButton{"All databases",this};
     radio_but_1 = new QRadioButton{"Choose databases",this};
     radio_but_2 = new QRadioButton{"Select tables from chosen DB",this};
 
-    layout->addWidget(radio_but_0);
-    layout->addWidget(radio_but_1);
-    layout->addWidget(radio_but_2);
+    auto rButtonsSubFrame = new QFrame{this};
+    auto radioSubLay = new QVBoxLayout{rButtonsSubFrame};
+    rButtonsSubFrame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    radioSubLay->addWidget(radio_but_0);
+    radioSubLay->addWidget(radio_but_1);
+    radioSubLay->addWidget(radio_but_2);
+
+
+    layout->addWidget(rButtonsSubFrame);
 
     QHBoxLayout* actions_layout{new QHBoxLayout};
 
@@ -263,6 +301,20 @@ void SqlDump_settings::init_form()
     layout->addLayout(actions_layout);
 
     radio_but_0->setChecked(true);
+
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {background: floralwhite; color:darkslategray; font-weight:bold;} %2")
+//                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+        }
+
+    QList<QRadioButton*> RButtonsInFormlist = this->findChildren<QRadioButton*>();
+        foreach (auto obj, RButtonsInFormlist) {
+
+                obj->setStyleSheet(adb_style::adbRadioStyleSheet);
+        }
 }
 
 void SqlDump_settings::init_connections()
@@ -291,7 +343,7 @@ void SqlDump_settings::choose_settings_interactive()
                // qDebug() << "List from double list::" << list__;
 
         QStringList args;
-                args << "--databases" << escape_sql_backticks( list__ ); //!!!!
+                args << "--databases" << adb_utility::escape_sql_backticks( list__ ); //!!!!
 
                // qDebug()<<"LIST PACKED::"<<args;
 
@@ -299,8 +351,30 @@ void SqlDump_settings::choose_settings_interactive()
 
             });
 
+            double_list->setWindowTitle("Choose databases for dump");
+
             QString const query = QString("SHOW DATABASES");
             double_list->update_doublelist(query);
+
+
+            // styling
+            QList<QPushButton*> ButtonsInDoublelist = double_list->findChildren<QPushButton*>();
+                foreach (auto obj, ButtonsInDoublelist) {
+
+                    obj->setStyleSheet(QStringLiteral("QPushButton:!disabled { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                        .arg(adb_style::getbuttonKhakiHiglightSS()));
+
+                }
+
+            QList<QListWidget*> listsInDoublelist = double_list->findChildren<QListWidget*>();
+                foreach (auto obj, listsInDoublelist) {
+
+                    obj->setAlternatingRowColors(true);
+                    obj->setPalette(QPalette(adb_style::whiteUndGrayColor));
+
+                }
+            //
+
 
             double_list->setModal(true);
             double_list->show();
@@ -309,7 +383,7 @@ void SqlDump_settings::choose_settings_interactive()
         // tables_of_chosen_Db
     } else if(radio_but_2->isChecked()){
 
-        dump_db_choose_window_.reset(new SqlDump_db_choose{auth_});
+        dump_db_choose_window_.reset(new SqlDump_db_choose{auth_,this});//{auth_});
 
                     if(dump_db_choose_window_){
 
@@ -345,7 +419,7 @@ void SqlDump_settings::chose_tables_from_db(const QString &chosen_db__)
             //qDebug() << "List from double list::" << list__;
 
             QStringList args;
-            args << chosen_db__ << escape_sql_backticks(list__);
+            args << chosen_db__ << adb_utility::escape_sql_backticks(list__);
            // qDebug()<<"LIST PACKED::"<< args;
 
             set_dump_name((*auth_temp),args,this);
@@ -353,6 +427,28 @@ void SqlDump_settings::chose_tables_from_db(const QString &chosen_db__)
 
         QString const query = QString("SHOW TABLES");
         double_list_->update_doublelist(query,subconnection_name_);
+
+        double_list_->setWindowTitle("Choose tables from selected database");
+
+
+        // styling
+        QList<QPushButton*> ButtonsInDoublelist = double_list_->findChildren<QPushButton*>();
+            foreach (auto obj, ButtonsInDoublelist) {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton:!disabled { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+
+            }
+
+        QList<QListWidget*> listsInDoublelist = double_list_->findChildren<QListWidget*>();
+            foreach (auto obj, listsInDoublelist) {
+
+                obj->setAlternatingRowColors(true);
+                obj->setPalette(QPalette(adb_style::whiteUndGrayColor));
+
+            }
+        //
+
 
         double_list_->setModal(true);
         double_list_->show();
@@ -418,6 +514,11 @@ void SqlDump_name::init_form()
     label_ = new QLabel;
 
     label_->setText("Set name for dump:");
+    label_->setStyleSheet("min-height:16px;color:darkslategray; border :2px solid black; padding: 6px; border-style : dashed");
+
+    label_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
+    label_->setAlignment(Qt::AlignCenter);
+
 
     layout->addWidget(label_);
 
@@ -430,6 +531,14 @@ void SqlDump_name::init_form()
     button_box_ = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
     layout->addWidget(button_box_);
+
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {background: floralwhite; color:darkslategray; font-weight:bold;} %2")
+//                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+        }
 }
 
 void SqlDump_name::init_connections()
@@ -439,8 +548,6 @@ void SqlDump_name::init_connections()
     });
 
     connect(button_box_, &QDialogButtonBox::accepted,[=]{
-//        emit message("test");
-//        qDebug()<<"testtest";
 
         get_dump();
     });
@@ -449,7 +556,7 @@ void SqlDump_name::init_connections()
 
 void SqlDump_name::get_dump()
 {
-    QProcess dumpProcess(this);
+
     QStringList args_list;
     args_list << QString("-u"+auth_.login_) << QString("-h"+auth_.host_) << QString("-p"+auth_.passw_) << args_/*"--databases"<< "aatest1" << "abitura"*/;
     //qDebug() << "args StringList->>" << args_list << "<--args StringList";
@@ -457,9 +564,53 @@ void SqlDump_name::get_dump()
     // validation of format '.sql' in output file name
     QString output_filename = line_edit_->text().isEmpty() ? "dump.sql" : (line_edit_->text().right(4)==".sql") ? line_edit_->text() : line_edit_->text()+".sql" ;
 
-    output_filename = adbexplorer::filepath_+'/'+output_filename;
+    QString const outputDir = adb_utility::filepath_+'/'+"SQL_dumps";
+
+
+    QDir dir(outputDir);
+    if(!dir.exists())
+        dir.mkpath(".");
+
+
+    output_filename = outputDir+'/'+output_filename;
+
+//    qDebug() << "OUTPUTFILENAME::" << output_filename;
+
+
+    // check if this file name is already exist
+    if(adb_utility::fileExists_(output_filename)){
+
+        adbMessageBox overwriteExistMessageBox{QMessageBox::Warning,"File name already exist", "File with entered name already exist in dump's folder. "
+                                                                                            " Do you want to replace existing dump or choose another name?",
+                                                      /*QMessageBox::Cancel,*/QMessageBox::NoButton,this};
+
+        QAbstractButton* overwriteConfirmButton = overwriteExistMessageBox.addButton("Overwrite existing dump file",QMessageBox::YesRole);
+
+        overwriteConfirmButton->setStyleSheet(QStringLiteral("QPushButton {background: darkred;color:white;font-weight:bold;} %1")
+                                                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+
+        QAbstractButton* cancelButton = overwriteExistMessageBox.addButton("Enter another name",QMessageBox::NoRole);
+
+        cancelButton->setStyleSheet(QStringLiteral("QPushButton { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                                                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+
+        cancelButton->setFocus();
+
+        overwriteExistMessageBox.setModal(true);
+        overwriteExistMessageBox.show();
+        overwriteExistMessageBox.exec();
+
+        if(overwriteExistMessageBox.clickedButton()!=overwriteConfirmButton){
+
+            return;
+        }
+
+    }
+
 
     //qDebug() << "right 4==" << line_edit_->text().right(4);
+
+    QProcess dumpProcess(this);
 
     dumpProcess.setStandardOutputFile(output_filename);
 
@@ -497,8 +648,9 @@ void SqlDump_name::get_dump()
 
             emit message(full_err_message);
 
+            qDebug()<<"readAllStandardOutput::"<<dumpProcess.readAllStandardOutput();
         }
-        qDebug()<<"readAllStandardOutput::"<<dumpProcess.readAllStandardOutput();
+
     });
 
       connect(&dumpProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
@@ -562,6 +714,9 @@ void SqlDump_db_choose::init_form()
     setLayout(layout);
 
     label_ = new QLabel{"Choose database you want dump table/s from."};
+    label_->setStyleSheet("min-height:16px;color:darkslategray; border :2px solid black; padding: 6px; border-style : dashed");
+    label_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
+    label_->setAlignment(Qt::AlignCenter);
 
     layout->addWidget(label_);
 
@@ -569,44 +724,50 @@ void SqlDump_db_choose::init_form()
 
     comboBox_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 
-    QHBoxLayout* connection_layout{new QHBoxLayout};
+    QFrame* connectionSubFrame = new QFrame{this};
+    QHBoxLayout* connection_layout{new QHBoxLayout{connectionSubFrame}};
+    connectionSubFrame->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+    //connectionSubFrame->setContentsMargins(0,0,0,0);
+    //connection_layout->setSpacing(0);
+    connection_layout->setContentsMargins(0,0,0,0);
 
     connection_layout->addWidget(comboBox_);
 
-    reload_button_ = new QPushButton;
 
-    QVBoxLayout* button_rich_text_layout = new QVBoxLayout{reload_button_};
-
-    button_rich_text_layout->setSizeConstraint(QLayout::SetMinimumSize);
-
-    reload_button_->setLayout(button_rich_text_layout);
-
-    QHBoxLayout *button_sublayout = new QHBoxLayout;
-
-    button_rich_text_layout->addLayout(button_sublayout);
-
-    QLabel* button_rich_text_label = new QLabel{"<u>R</u>eload"};
-
-    button_rich_text_label->setAlignment(Qt::AlignVCenter | Qt::AlignVCenter); // or center
-    button_rich_text_label->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    button_rich_text_label->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
-
-    QIcon reload_icon = QApplication::style()->standardIcon(QStyle::SP_BrowserReload);
-
-    QLabel* button_icon_label = new QLabel{};
-    button_icon_label->setPixmap(reload_icon.pixmap(QSize(16,16)));
-    button_sublayout->addWidget(button_icon_label);
-    button_sublayout->addWidget(button_rich_text_label);
-
-    reload_button_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    reload_button_ = new reloadButton{nullptr,"darkslategray","snow",true};
+    reload_button_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     connection_layout->addWidget(reload_button_);
 
-    layout->addLayout(connection_layout);
+//    layout->addLayout(connection_layout);
+    layout->addWidget(connectionSubFrame);
+
+    layout->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Preferred));
 
     buttonBox_ = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok ,this);
 
     layout->addWidget(buttonBox_);
+
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+            // if button is inherited class object -> cast pointer to inherit type
+            if(obj->objectName()=="reloadButtonObj"){
+                auto reloadButtonObj = qobject_cast<reloadButton*>(obj);
+                reloadButtonObj->setKhakiHighlight();
+
+            }else {
+                obj->setStyleSheet(QStringLiteral("QPushButton {%1} %2")
+                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            }
+
+        }
+
+    QList<QComboBox*> comboBoxInFormlist = this->findChildren<QComboBox*>();
+        foreach (auto obj, comboBoxInFormlist) {
+
+                obj->setStyleSheet(adb_style::getComboBoxKhakiHighlightSS("#fffffa","darkslategray"));
+        }
 
 }
 
@@ -619,7 +780,7 @@ void SqlDump_db_choose::init_connections()
     });
 
     connect(buttonBox_,&QDialogButtonBox::accepted,[=]{
-        emit chosen_db_signal(escape_sql_backticks( this->comboBox_->currentText()) );
+        emit chosen_db_signal(adb_utility::escape_sql_backticks( this->comboBox_->currentText()) );
         accept();
     });
 }

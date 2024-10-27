@@ -12,11 +12,12 @@ CustomQuerySettings::CustomQuerySettings(/*Tables*/QWidget *parent) :
 {
     ui->setupUi(this);
 
+    formStyle();
+
     init_signals();
 
-    // set default if read file fails
-    if(!read4rom_query_opts_file())
-        write2query_opts_file();
+    fileOps();
+
 }
 
 CustomQuerySettings::~CustomQuerySettings()
@@ -31,11 +32,10 @@ void CustomQuerySettings::init_signals()
 
     connect(ui->buttonBox,&QDialogButtonBox::accepted,[=]{
 
-
         write2query_opts_file();
 
         ////read4rom_query_opts_file();
-        get_settings_4rom_file(query_settings_f_name,__settings_map);
+        adb_utility::get_settings_4rom_file(query_settings_f_name,__settings_map);
 
         emit settings_changed(__settings_map);
 
@@ -52,6 +52,36 @@ void CustomQuerySettings::init_signals()
         }
     });
 
+}
+
+void CustomQuerySettings::fileOps()
+{
+    // set default if read file fails
+    if(!read4rom_query_opts_file())
+        write2query_opts_file();
+}
+
+void CustomQuerySettings::formStyle()
+{
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+            if(obj==ui->buttonBox->button(QDialogButtonBox::Ok)||obj==ui->buttonBox->button(QDialogButtonBox::Cancel)){
+                obj->setStyleSheet(QStringLiteral("QPushButton { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            } else {
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {%1} %2")
+                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            }
+
+        }
+
+    QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
+        foreach (auto obj, checkBoxInFormlist) {
+
+                obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+        }
 }
 
 
@@ -73,7 +103,7 @@ bool CustomQuerySettings::read4rom_query_opts_file()
 
     __settings_map.clear();
 
-    if(get_settings_4rom_file(query_settings_f_name,__settings_map)){
+    if(adb_utility::get_settings_4rom_file(query_settings_f_name,__settings_map)){
         int temp;
 
         if((temp = __settings_map.value("t_content_wnd"))!=-1)

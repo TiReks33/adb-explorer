@@ -1,16 +1,17 @@
 #ifndef CREATETUPLECONSTRUCTOR_H
 #define CREATETUPLECONSTRUCTOR_H
 
-////#include "inserttupleconfirm.h"
 
 #include <QDialog>
+
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "twolistselection.h"
 #include "helping_stuff.h"
 #include "tables.h"
-
 #include "scrolledstatusbar.h"
+#include "reloadbutton.h"
+
 
 namespace Ui {
 class createTupleConstructor;
@@ -25,10 +26,14 @@ public:
     ~createTupleConstructor();
 
     // clear all entered data from form
-    void reset();
+    void resetButtonHandler();
 
     // overload (show window + tables list query exec)
     void show();
+
+    inline bool getCloseMessageFlag(){ return closeMessageFlag_;}
+
+    void setCloseMessageFlag(bool state__);
 
 private slots:
 
@@ -46,9 +51,11 @@ signals:
 
     void final_query_sig(QString const&);
 
-    void closed();
+    //void closed();
 
-    void closed(QString const &con_name_that_mustBclosed);
+    //void closed(QString const &con_name_that_mustBclosed);
+
+    void closeNowSig();
 
 private:
     Ui::createTupleConstructor *ui;
@@ -56,6 +63,8 @@ private:
     scrolledStatusBar* statusBar;
 
     void signals_init();
+
+    void initForm();
 
     auth& auth_;
 
@@ -67,7 +76,10 @@ private:
     QStringList tuples_;
     QPointer<CustomQueryResult> describe_form_;
 
-//    QString subconnection_name_ = "createTupleConstructor_subconnection";
+
+    bool closeMessageFlag_=true;
+
+    reloadButton* update_tables_button = nullptr;
 };
 
 #endif // CREATETUPLECONSTRUCTOR_H

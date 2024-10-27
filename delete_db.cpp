@@ -11,8 +11,6 @@ delete_db::delete_db(QWidget *parent) :
 
 
 
-
-
 void delete_db::on_buttonBox_accepted()
 {
 

@@ -1,19 +1,129 @@
 #include "databases.h"
 #include "ui_databases.h"
 
-
+int Databases::defaultScaleIndex_ = 0;
+QString Databases::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
 Databases::Databases(auth& auth__, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Databases)
+  , tableView(new signalTableView)
+  , showDB_button{new reloadButton{0,/*"black","red"*/"floralwhite","darkslategray",true,false,"<u>R</u>eload databases list"}}
   , statusBar(new scrolledStatusBar)
-  //, db_connection_(info)
+
   , auth_(auth__)
   , tables_window_(new Tables(auth_))
   , new_db_window_(new create_db_name)
   , delete_db_window_(new delete_db)
+
+  , rescaleBoxWidget(adb_utility::getRescaleBox(tableView))
+  , rescaleDefaultCheckBox{new QCheckBox{"set default"}}
+
+  , createUserButton_{new QPushButton{"Create SQL Server User/Role"}}
+  , getUsersListButton_{new QPushButton{"Users/Roles list"}}
+  , grantPermissionsButton_{new QPushButton{"Grant privileges to SQL Server User/Role"}}
+  , changePassButton_{new QPushButton{}}
+  , deleteUserButton_{new QPushButton{"DELETE USER"}}
+  , quitButton_{new QPushButton("⌧")/*("⮿")*/}
+  , fontWidget_{new fontEmbeddedWidget{tableView}}
+
+  , menuBar_{new QMenuBar{this}}
+  , menuFile_{new /*QMenu*/hideMenu{Qt::Key_F10,menuBar_}}
+  , exitEntrie_{new QAction{"Exit",menuFile_}}
+  //, fontPointSizeSpin_{new QSpinBox{}}
 {
+
     ui->setupUi(this);
+
+    init_form();
+
+    init_signals();
+
+    fileOps();
+
+    defaultSettings();
+
+}
+
+Databases::~Databases()
+{
+    db_connection::close();   // close SQL-connection 'auth::con_name_'
+    db_connection::remove(); // remove SQL-connection 'auth::con_name_'
+    delete ui;
+    delete tableView;
+
+    delete tables_window_;
+    delete new_db_window_;
+    delete delete_db_window_;
+
+    delete rescaleBoxWidget;
+    delete rescaleDefaultCheckBox;
+
+    delete createUserButton_;
+    delete grantPermissionsButton_;
+}
+
+void Databases::keyPressEvent(QKeyEvent *e) {
+    auto key = e->key();
+    if(key == Qt::Key_Escape){
+        close();
+    } else if(key == Qt::Key_Down || key == Qt::Key_Up) {
+        emit tableView->clicked(/*QModelIndex()*/tableView->currentIndex());
+    } /*else if(key == Qt::Key_Enter || key == Qt::Key_Return){
+
+    }*/ else if(key == Qt::Key_F10){
+        if(!menuBar_->isVisible()){
+            menuBar_->show();
+        } else{
+            menuBar_->hide();
+        }
+    } else{
+        QDialog::keyPressEvent(e);
+    }
+}
+
+
+void Databases::closeEvent(QCloseEvent *event)
+{
+
+
+    if(!adb_utility::showExitAppDialog(this)){
+
+        event->ignore();
+        return;
+    }
+
+    close_all_custom_windows_();
+
+    event->accept();
+}
+
+
+void Databases::init_form()
+{
+    ui->mainLayout->insertWidget(0,tableView);
+
+
+    QFrame* reloadFrame = new QFrame;
+    reloadFrame->setFrameShape(QFrame::StyledPanel);
+    reloadFrame->setFrameShadow(QFrame::Raised);
+    QHBoxLayout* reloadLay = new QHBoxLayout{reloadFrame};
+    reloadLay->setContentsMargins(1,1,1,1); reloadLay->setSpacing(0);
+    reloadLay->addWidget(showDB_button);
+    ui->reloadVerticalLayout->addWidget(reloadFrame);
+
+
+    showDB_button->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+    showDB_button->setFontPointSize(12);
+
+    ui->showTables_button->setStyleSheet("background: darkslategray; color: snow; font-weight:bold;");
+
+    // since rescaleBoxWidget added -- it control the tableView's rescale
+    ui->rescaleLayout->addWidget(rescaleBoxWidget);
+    ui->rescaleLayout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+    move(screen()->geometry().center() - frameGeometry().center());
 
     ui->statusBarLayout->addWidget(statusBar);
 
@@ -29,65 +139,177 @@ Databases::Databases(auth& auth__, QWidget *parent) :
                                         | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
-    init_signals();
+    tableView->setSelectionMode(QTableView::SingleSelection);
 
-    ui->tableView->setSelectionMode(QTableView::SingleSelection);
+    QHBoxLayout* sqlUserLay = new QHBoxLayout;
 
-    // get actual configs from files:
+    QFrame* sqlUserSubFrame0 = new QFrame;
+    sqlUserSubFrame0->setFrameShape(QFrame::StyledPanel);
+    sqlUserSubFrame0->setFrameShadow(QFrame::Raised);
 
-    // "databases.cfg"
-    if(!read4rom_settings_file())
-        write2_settings_file();
+    QVBoxLayout* sqlUserSubLay0 = new QVBoxLayout{sqlUserSubFrame0};
+    sqlUserSubLay0->setContentsMargins(1,1,1,1);
+    sqlUserSubLay0->setSpacing(0);
 
-    // "adb_utility.cfg"
-    if(!adb_utility::read4rom_settings_file())
-        adb_utility::write2_settings_file();
+    QFrame* sqlUserSubFrame1 = new QFrame;
+    sqlUserSubFrame1->setFrameShape(QFrame::StyledPanel);
+    sqlUserSubFrame1->setFrameShadow(QFrame::Raised);
+
+    QVBoxLayout* sqlUserSubLay1 = new QVBoxLayout{sqlUserSubFrame1};
+    sqlUserSubLay1->setContentsMargins(1,1,1,1);
+    sqlUserSubLay1->setSpacing(0);
+
+    sqlUserLay->addWidget(sqlUserSubFrame0);//addLayout(sqlUserSubLay0);
+
+    QLabel* sqlUserSeparateLbl = new QLabel{"::"};
+    sqlUserSeparateLbl->setStyleSheet("font-weight:bold;");
+    sqlUserSeparateLbl->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
+    sqlUserLay->addWidget(sqlUserSeparateLbl);
+
+    sqlUserLay->addWidget(sqlUserSubFrame1);//addLayout(sqlUserSubLay1);
+
+    sqlUserSubLay0->addWidget(createUserButton_);
+
+    QFrame* sqlUserSubLay0HLine = new QFrame;
+    sqlUserSubLay0HLine->setFrameShape(QFrame::HLine);
+    sqlUserSubLay0HLine->setFrameShadow(QFrame::Raised);
+    sqlUserSubLay0->addWidget(sqlUserSubLay0HLine);
+
+    createUserButton_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+    sqlUserLay->setContentsMargins(0,0,0,0);
+    ////sqlUserLay->setSpacing(0);
+
+
+    getUsersListButton_->setStyleSheet("background-color:gray; color:white; font-weight:bold; ");//("background:gainsboro; color:darkslategray;font-weight:bold");
+
+    sqlUserSubLay0->addWidget( getUsersListButton_);
+
+
+    sqlUserSubLay1->addWidget(grantPermissionsButton_);
+
+    QFrame* sqlUserSubLay1HLine = new QFrame;
+    sqlUserSubLay1HLine->setFrameShape(QFrame::HLine);
+    sqlUserSubLay1HLine->setFrameShadow(QFrame::Raised);
+    sqlUserSubLay1->addWidget(sqlUserSubLay1HLine);
+
+    grantPermissionsButton_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    grantPermissionsButton_->setStyleSheet("background-color:gray; color:white; font-weight:bold; ");
+
+    ui->ButtonsSubLayout->insertLayout(2,sqlUserLay);
+
+    createUserButton_->setStyleSheet("background-color:gray; color:white; font-weight:bold; ");
+
+
+    ui->rescaleLayout->addWidget(rescaleDefaultCheckBox);
+
+    rescaleDefaultCheckBox->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+
+//    ui->fontLayout->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    ui->fontLayout->addWidget(fontWidget_);
+//    ui->fontLayout->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    fontWidget_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
+
+    deleteUserButton_->setStyleSheet("background-color:darkred;color:white;");
+
+
+    QFrame* deleteUserFrame = new QFrame;
+    deleteUserFrame->setFrameShape(QFrame::StyledPanel);
+    deleteUserFrame->setFrameShadow(QFrame::Raised);
+    QHBoxLayout* backLay = new QHBoxLayout{deleteUserFrame};
+    backLay->setContentsMargins(1,1,1,1); backLay->setSpacing(0);
+    backLay->addWidget(deleteUserButton_);
+    ui->deleteLayout->addWidget(deleteUserFrame);
+
+
+    quitButton_->setStyleSheet("background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;");//padding-top:1px;padding-bottom:1px;");
+
+    QFrame* exitFrame = new QFrame;
+    exitFrame->setFrameShape(QFrame::StyledPanel);
+    exitFrame->setFrameShadow(QFrame::Raised);
+    QHBoxLayout* exitLay = new QHBoxLayout{exitFrame};
+    exitLay->setContentsMargins(1,1,1,1); exitLay->setSpacing(0);
+    exitLay->addWidget(quitButton_);
+    ui->quitLayout->addWidget(exitFrame);
+
+
+    changePassButton_->setStyleSheet("background-color:grey; color:white;font-weight:bold; ");
+    changePassButton_->setText("Manage passwords");
+    sqlUserSubLay1->addWidget(changePassButton_);
+
+
+    auto fontPushButton = fontWidget_->findChild<QPushButton*>("fontButton");
+        fontPushButton->setStyleSheet(QStringLiteral("QPushButton{color: darkslategray; background: #fffffa;} %1").arg(adb_style::getbuttonKhakiHiglightSS()));
+
+
+        auto rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
+        if(rescaleComboBox)
+            rescaleComboBox->setStyleSheet(adb_style::getComboBoxKhakiHighlightSS("#fffffa","darkslategray"));//("background:#fffffa;");
+
+
+
+
+    ui->mainLayout->insertWidget(0,menuBar_);
+
+    menuFile_->setTitle("File");
+    menuFile_->addAction(exitEntrie_);
+
+    exitEntrie_->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCloseButton));
+
+    menuBar_->addMenu(menuFile_);
+
+    menuBar_->hide();
+
+
+    ui->create_db_button->setStyleSheet("background:floralwhite;color:darkslategray; font-weight:bold;padding: 6px; ");
+
+    ui->queryButton->setStyleSheet("background: darkslategray; color: white;padding: 6px; ");
+
+    QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
+        foreach (auto obj, ButtonsInFormlist) {
+
+            // if button is inherited class object -> cast pointer to inherit type
+            if(obj->objectName()=="reloadButtonObj"){
+
+                auto reloadButtonObj = qobject_cast<reloadButton*>(obj);
+                reloadButtonObj->setKhakiHighlight();
+
+            }else if(obj->objectName()!="fontButton"){
+
+                obj->setStyleSheet(QStringLiteral("QPushButton {%1} %2")
+                    .arg(obj->styleSheet())
+                    .arg(adb_style::getbuttonKhakiHiglightSS()));
+            }
+
+        }
+
+        ui->showTables_button->setFocus();
+
+        tableView->setAlternatingRowColors(true);
+
+        tableView->setPalette(QPalette(adb_style::whiteUndGrayColor));
+
+
+
+
+        QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
+            foreach (auto obj, checkBoxInFormlist) {
+
+                    obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+            }
+
 
 }
 
-Databases::~Databases()
-{
-    db_connection::close();   // close SQL-connection 'auth::con_name_'
-    db_connection::remove(); // remove SQL-connection 'auth::con_name_'
-    delete ui;
-    delete tables_window_;
-    delete new_db_window_;
-    delete delete_db_window_;
-}
-
-void Databases::keyPressEvent(QKeyEvent *e) {
-    auto key = e->key();
-    if(key == Qt::Key_Escape){
-        close();
-    } else if(key == Qt::Key_Down || key == Qt::Key_Up) {
-        emit ui->tableView->clicked(/*QModelIndex()*/ui->tableView->currentIndex());
-    } /*else if(key == Qt::Key_Enter || key == Qt::Key_Return){
-
-    }*/ else {
-        QDialog::keyPressEvent(e);
-    }
-}
-
-
-//void Databases::get_information_window(const QString & header_text__, const QString & main_text__, QWidget *parent__, enum QMessageBox::Icon messageBoxType__)
-//{
-//    QPointer <QMessageBox> messageBox{new QMessageBox(messageBoxType__,header_text__,
-//                                                      main_text__,
-//                                                      QMessageBox::Ok,parent__)};
-
-////    connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-//    messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-//    messageBox->setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
-//    messageBox->setModal(false);
-//    messageBox->show();
-//}
 
 
 void Databases::init_signals()
 {
 
     // reload database list
-    connect(ui->showDB_button,&QPushButton::clicked,[=]{
+    connect(showDB_button,&QPushButton::clicked,[=]{
         show_databases();
     });
 
@@ -104,11 +326,10 @@ void Databases::init_signals()
 
         db_connection::open(auth_);
 
-        if(!db_connection::set_query(query__,&model_,ui->tableView,QHeaderView::Stretch)){
+        if(!db_connection::set_query(query__,&model_,tableView/*,QHeaderView::Stretch*/)){
 
             QString const warning_text = QString("Database `%1` is not created. Please check name and try again.").arg(newdb_name__);
 
-            //adb_utility::get_information_window("Database is not created",warning_text, windowFlags(), this,QMessageBox::Warning);
 
             statusBar->get_line()->setText(warning_text);
 
@@ -135,13 +356,22 @@ void Databases::init_signals()
     connect(this,SIGNAL(delete_form_request()),delete_db_window_,SLOT(delete_form_request_slot()));
 
     // reload database list after deletion
-    connect(delete_db_window_,&delete_db::delete_form_send,this,[=](QComboBox* comboBox__){
-        db_connection::open(auth_);
+    connect(delete_db_window_,&delete_db::delete_form_send,this,[this](QComboBox* comboBox__){
 
-        db_connection::set_query("SHOW DATABASES;",&model_,comboBox__);
+        QString const __queryText = "SHOW DATABASES";
 
-        comboBox__->setCurrentIndex(-1); //for blank cell default
+        delete_db_window_->setComboBoxLoadQueryText(__queryText);
 
+        connect(delete_db_window_,&delete_db::reloadSig,[this,comboBox__]{
+
+            db_connection::open(auth_);
+
+            db_connection::set_query(delete_db_window_->comboBoxLoadQueryText(),&model_,comboBox__);
+
+            comboBox__->setCurrentIndex(-1); //for blank cell default
+        });
+
+        delete_db_window_->reload();
     });
 
     // signal-slot chain for delete chosen database(2)
@@ -151,7 +381,7 @@ void Databases::init_signals()
 
             QString const chosen_db = comboBox__->currentText();
 
-            QString const query_text = QString("DROP DATABASE `%1`").arg(QString(escape_sql_backticks(chosen_db)));
+            QString const query_text = QString("DROP DATABASE `%1`").arg(QString(adb_utility::escape_sql_backticks(chosen_db)));
 
 
             if(!db_connection::set_query(query_text,&model_,comboBox__)){
@@ -170,58 +400,83 @@ void Databases::init_signals()
 
     connect(ui->showTables_button,&QPushButton::clicked,[=]{
 
-            if(close_chld_wndws_on_next){
-                auto confirm = QMessageBox::information(this,"Confirm choosing","Are you want to choose database \""+auth_.db_name_+"\" and go to the next form?",
-                                            QMessageBox::Yes | QMessageBox::No);
-                qDebug()<<"After QMessageBox";
-                if(confirm!=QMessageBox::Yes)
-                    return;
+        if(close_chld_wndws_on_next){
+            QPointer <adbMessageBox> quitMessageBox = new adbMessageBox(QMessageBox::Warning,"Confirm choosing","Are you want to choose database \""+auth_.db_name_+"\" and go to the next form?"
+                                                                "<br>Note: <FONT COLOR='#ff0000'>All query windows related to this form (if any) will be closed.</FONT>"
+                                                                    " This behaviour changeable via settings.",
+                                                          QMessageBox::Yes | QMessageBox::No,this);
+
+            quitMessageBox->setAttribute( Qt::WA_DeleteOnClose, true);
+            //connect(quitMessageBox,&adbMessageBox::destroyed,[]{qDebug() << "~adbMessageBox";});
+
+            QList<QPushButton*> ButtonsInFormlist = quitMessageBox->findChildren<QPushButton*>();
+                foreach (auto obj, ButtonsInFormlist) {
+                    obj->setStyleSheet(QStringLiteral("QPushButton { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                        .arg(adb_style::getbuttonKhakiHiglightSS()));
+                }
+
+            quitMessageBox->setModal(true);
+            quitMessageBox->show();
+            int dialogAnswer = quitMessageBox->exec();
+
+            if(dialogAnswer!=QMessageBox::Yes){
+
+              return;
             }
+        }
+        //
+
+//        if(close_chld_wndws_on_next){
+//            auto confirm = QMessageBox::information(this,"Confirm choosing","Are you want to choose database \""+auth_.db_name_+"\" and go to the next form?"
+//                                                            "<br>Note: <FONT COLOR='#ff0000'>All query windows related to this form (if any) will be closed.</FONT>"
+//                                                                " This behaviour changeable via settings.",
+//                                        QMessageBox::Yes | QMessageBox::No);
+//            qDebug()<<"After QMessageBox";
+//            if(confirm!=QMessageBox::Yes)
+//                return;
+//        }
 
         tables_window_->show();
         this->hide();
 
-        // close all queries form/results from 'database' window
-        emit close_all_custom_windows_();
-
-        emit show_tables_signal();
+        if(close_chld_wndws_on_next){
+            // close all queries form/results from 'database' window
+            emit close_all_custom_windows_();
+        }
+            emit show_tables_signal();
     });
 
+
     // mouse double-click handler
-    connect(ui->tableView,&QTableView::activated,[=](const QModelIndex &index){
+    connect(tableView,&QTableView::activated,[=](const QModelIndex &index){
 
-        ////qDebug()<<"ACTIVATED::index=="<<index;
 
-        ////QString val=ui->tableView->model()->data(index).toString();
 
-        ////statusLine->setText("Database activated: "+val);
+        tableView->setCurrentIndex(index);
 
-        ui->tableView->setCurrentIndex(index);
-
-        auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
-        //////ui->showTables_button->click();
     });
 
     // mouse left-click handler
-    connect(ui->tableView,&QTableView::clicked,[=](const QModelIndex &index){
+    connect(tableView,&QTableView::clicked,[=](const QModelIndex &index){
 
-        ui->tableView->setCurrentIndex(index);
+        tableView->setCurrentIndex(index);
 
-        auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
-        ////qDebug() << "CLICKED::::::::::::" << ui->tableView->currentIndex().row() << "::" << auth_.db_name_;
+
     });
 
-    connect(ui->tableView,&QTableView::doubleClicked,[=](const QModelIndex &index){
+    connect(tableView,&QTableView::doubleClicked,[=](const QModelIndex &index){
 
-        ui->tableView->setCurrentIndex(index);
+        tableView->setCurrentIndex(index);
 
-        auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
@@ -239,6 +494,90 @@ void Databases::init_signals()
 
     connect(ui->settingsButton,&QPushButton::clicked, this, &Databases::showSettings);
 
+
+    connect(createUserButton_,&QPushButton::clicked, this, &Databases::createUser);
+
+
+
+    QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
+
+
+    QPointer</*QComboBox*/notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
+
+
+    connect(rescaleComboBox,&notifyComboBox::sameIndexRepeated,[=](){
+        rescaleComboBox->currentIndexChanged(rescaleComboBox->currentIndex());
+    });
+
+    connect(rescaleComboBox,static_cast<void(/*QComboBox*/notifyComboBox::*)(int)>(&/*QComboBox*/notifyComboBox::currentIndexChanged),[=](int newIndex__){
+        if(newIndex__==Databases::defaultScaleIndex_){
+            rescaleDefaultCheckBox->setChecked(true);
+            rescaleDefaultCheckBox->setEnabled(false);
+        } else{
+            rescaleDefaultCheckBox->setChecked(false);
+            rescaleDefaultCheckBox->setEnabled(true);
+        }
+    });
+
+    connect(rescaleDefaultCheckBox,&QCheckBox::stateChanged,[=](int state__){
+        if(state__){
+            int currentBoxIndex = rescaleComboBox->currentIndex();
+            if(currentBoxIndex!=Databases::defaultScaleIndex_){
+                ////tableScaleChanged=true;
+                Databases::defaultScaleIndex_ = currentBoxIndex;
+                rescaleDefaultCheckBox->setEnabled(false);
+
+                write2_settings_file();
+            }
+        }
+    });
+
+    connect(grantPermissionsButton_,&QPushButton::clicked,this,&Databases::grantUserPermissionsButtonHandler);
+
+    connect(quitButton_,&QPushButton::clicked,this,&Databases::close);
+
+    connect(deleteUserButton_,&QPushButton::clicked,this,&Databases::deleteUser);
+
+    connect(getUsersListButton_,&QPushButton::clicked,this,&Databases::getUsersList);
+
+    connect(changePassButton_,&QPushButton::clicked, this, &Databases::getPasswordMgmtForm);
+
+    connect(fontWidget_,&fontEmbeddedWidget::defaultFontChanged,[this](QString const& newDefaultFont_){
+        Databases::defaultFont_=newDefaultFont_;
+        write2_settings_file();
+    });
+
+    connect(menuFile_,&hideMenu::menuHiden,menuBar_,&QMenuBar::hide);
+
+    connect(exitEntrie_, &QAction::triggered,[this]{
+        close();
+    });
+}
+
+
+void Databases::fileOps()
+{
+    // get actual configs from files:
+
+    //->"databases.cfg"
+    if(!read4rom_settings_file())
+        write2_settings_file();
+
+    //->"adb_utility.cfg"
+    if(!adb_utility::config::read4rom_settings_file())
+        adb_utility::config::write2_settings_file();
+}
+
+
+void Databases::defaultSettings()
+{
+    // set default font
+    QFont __font;
+    __font.fromString(Databases::defaultFont_);
+    tableView->setFont(__font);
+
+    // set default settings
+    rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(Databases::defaultScaleIndex_);
 }
 
 
@@ -254,12 +593,12 @@ void Databases::message_to_status(const QString & message__) const
 
     if(db_connection::open(auth_)){
 
-        if(db_connection::set_query("SHOW DATABASES;",&model_,ui->tableView,QHeaderView::Stretch)){
+        if(db_connection::set_query("SHOW DATABASES;",&model_,tableView/*,QHeaderView::Stretch*/)){
 
             // 1st cell in model default selected
-            select_cells(0,0, ui->tableView);
+            select_cells(0,0, tableView);
 
-            auth_.db_name_=ui->tableView->model()->data(ui->tableView->currentIndex()).toString();
+            auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
 
             ////qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
 
@@ -267,7 +606,7 @@ void Databases::message_to_status(const QString & message__) const
 
             if(!auth_.db_name_.isEmpty()){
                 ui->showTables_button->setEnabled(true);
-                ui->showTables_button->setStyleSheet("background: green; color: white;");
+                //ui->showTables_button->setStyleSheet(QStringLiteral("QPushButton {background: darkslategray; color: snow; font-weight:bold;} %1").arg(adb_style::getbuttonKhakiHiglightSS()));
             }
 
             return true;
@@ -279,43 +618,209 @@ void Databases::message_to_status(const QString & message__) const
 
 
 
-void Databases::on_mysqldump_button_clicked()
+void Databases::deleteUser()
 {
-    //wip
-    if(auth_.db_driver_!="QMARIADB"&& auth_.db_driver_!="QMYSQL" && auth_.db_driver_!="QMYSQL3"){
-        QMessageBox::warning(this,"This database dump currently unavailable","ADB Explorer's dump function"
-                                    " doesn't support yet this database server (current driver: \""+auth_.db_driver_+"\").",
-                                    QMessageBox::Ok);
-        qDebug()<<"After QMessageBox";
-        return;
+//    if(auth_.db_driver_!="QMARIADB" && auth_.db_driver_!="QMYSQL" && auth_.db_driver_!="QMYSQL3"){
+//        adb_utility::get_information_window(QMessageBox::Information,"Functional is not available for this driver",
+//                                            QString("This function is not available for this SQL driver: `%1`. "
+//                                                                     "Please, procide user delete queries from `Query to SQL server` form.").arg(auth_.db_driver_),this);
+//        return;
+//    }
+
+    delete_sqldb_user* deleteUserForm = new delete_sqldb_user{this};
+
+    QComboBox* deleteFormComboBox = deleteUserForm->findChild<QComboBox*>();
+
+    QPointer<QSqlQueryModel> __model = new QSqlQueryModel;
+
+    connect(deleteUserForm,&delete_sqldb_user::destroyed,[=]{ delete __model;});
+
+
+    connect(deleteUserForm,&delete_sqldb_user::reloadSig,[this,deleteFormComboBox,deleteUserForm,__model]{
+
+        db_connection::open(auth_);
+
+        db_connection::set_query(deleteUserForm->comboBoxLoadQueryText(),__model,deleteFormComboBox,auth::con_name_);
+
+        deleteFormComboBox->setCurrentIndex(-1); //for blank cell default
+    });
+
+
+    QRadioButton* deleteFormUserRButton = deleteUserForm->findChild<QRadioButton*>("deleteUser");
+
+    connect(deleteFormUserRButton,&QRadioButton::toggled,[this,deleteUserForm](bool state__){
+        if(state__){
+
+            QString __qryTxt = "";
+
+            if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
+                __qryTxt = "select concat(quote(user),'@',quote(host)) from mysql.user where is_role=\'n\';";
+            } else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL)){//db_connection::set_query("select concat(quote(user),'@',quote(host)) from mysql.user where password_expired=\'n\' or account_locked=\'n\';",__model,deleteFormComboBox,auth::con_name_);
+                __qryTxt = "select concat(quote(user),'@',quote(host)) from mysql.user where password_expired=\'n\' or account_locked=\'n\';";
+            }
+
+            deleteUserForm->setComboBoxLoadQueryText(__qryTxt);
+
+            deleteUserForm->reload();
+        }
+    });
+
+    deleteFormUserRButton->setChecked(true);
+
+    QRadioButton* deleteFormRoleRButton = deleteUserForm->findChild<QRadioButton*>("deleteRole");
+
+    connect(deleteFormRoleRButton,&QRadioButton::toggled,[this,deleteUserForm](bool state__){
+        if(state__){
+            QString __qryTxt = "";
+
+            if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
+                __qryTxt = "select quote(user) from mysql.user where is_role=\'y\';";
+            } else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL)){
+                __qryTxt = "select concat(quote(user),'@',quote(host)) from mysql.user where password_expired=\'y\' and account_locked=\'y\';";
+            }
+
+            deleteUserForm->setComboBoxLoadQueryText(__qryTxt);
+
+            deleteUserForm->reload();
+        }
+    });
+
+    connect(deleteUserForm,&delete_sqldb_user::delete_entity,[this,deleteUserForm,deleteFormComboBox,deleteFormUserRButton](/*QComboBox* usersComboBox__*/){
+
+        QString const curUser2drop = deleteFormComboBox->currentText();
+         auto qry = QSqlQuery(QSqlDatabase::database(auth_.con_name_,false));
+
+         QString queryText="";
+         if(deleteFormUserRButton->isChecked()){
+             queryText = QString("DROP USER %1").arg(QString(curUser2drop));
+         } else{
+             queryText = QString("DROP ROLE %1").arg(QString(curUser2drop));
+         }
+
+
+         if(qry.exec(queryText)){
+
+             statusBar->get_line()->setText(QString("User/role record %1 has been successfully deleted from server.").arg(curUser2drop));
+             deleteUserForm->close();
+
+             return;
+         }
+
+         QString const error_msg = qry.lastError().text();
+         adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
+         qDebug() << error_msg;
+
+    });
+
+
+
+    deleteUserForm->setAttribute(Qt::WA_DeleteOnClose,true);
+    deleteUserForm->setModal(true);
+    deleteUserForm->show();
+}
+
+
+
+void Databases::getUsersList()
+{
+    static QPointer<getCredentialRecordsForm> recordsForm;
+
+    if(!recordsForm){
+
+        recordsForm = new getCredentialRecordsForm{auth_,this};
+
+        recordsForm->setAttribute(Qt::WA_DeleteOnClose,true);
+        recordsForm->setModal(false);
+        recordsForm->show();
+
+        connect(this,&Databases::close_all_custom_windows_, recordsForm , &getCredentialRecordsForm::close, Qt::QueuedConnection);
+
+    } else{
+        recordsForm->raise();
     }
 
+}
+
+
+
+void Databases::getPasswordMgmtForm()
+{
+    QPointer<passwordMgmtForm> passwordForm{new passwordMgmtForm{auth_,this}};
+
+    connect(passwordForm,&passwordMgmtForm::message,[this](QString const&message__){
+        this->statusBar->get_line()->setText(message__);
+    });
+
+    passwordForm->setAttribute(Qt::WA_DeleteOnClose,true);
+    passwordForm->setModal(true);
+    passwordForm->show();
+}
+
+
+
+void Databases::createUser()
+{
+    QPointer<createUserForm> createUserFormWndw = new createUserForm(auth_,this);
+
+    connect(createUserFormWndw,&createUserForm::message,[this](QString const& message__){
+        statusBar->get_line()->setText(message__);
+    });
+
+    createUserFormWndw->setAttribute(Qt::WA_DeleteOnClose,true);
+    createUserFormWndw->setModal(true);
+    createUserFormWndw->show();
+}
+
+
+
+
+
+void Databases::grantUserPermissionsButtonHandler()
+{
+
+    QPointer<grantUserPermissionsForm> grantUserPermissionsWndw = new grantUserPermissionsForm(auth_,this);
+
+    connect(grantUserPermissionsWndw,&grantUserPermissionsForm::message,[this](QString const& message__){
+        statusBar->get_line()->setText(message__);
+    });
+
+    grantUserPermissionsWndw->setAttribute(Qt::WA_DeleteOnClose,true);
+    grantUserPermissionsWndw->setModal(true);
+    grantUserPermissionsWndw->show();
+
+
+
+}
+
+
+
+
+
+void Databases::on_mysqldump_button_clicked()
+{
+
     QScopedPointer<SqlDump_credentials> dump{new SqlDump_credentials{auth_,this}};
-//dump->setAttribute(Qt::WA_DeleteOnClose,true);
+
 
     // message with resultation info of successful/unsuccessful dump
     connect(dump.get(),&SqlDump_credentials::message,[&](QString const& message__){
         statusBar->get_line()->setText(message__);
-        qDebug()<<message__;
+        ////qDebug()<<message__;
         dump->close();
     });
+
 
     dump->setModal(true);
     dump->show();
     dump->exec();
 
-//    QEventLoop loop;
-//        connect(dump, &SqlDump_credentials::closed, & loop, &QEventLoop::quit);
-//        loop.exec();
-
     return;
-
 }
 
 void Databases::get_query_wndw()
 {
 
-    QPointer<Custom_Query> custom_query_window{new Custom_Query{this}};
+    QPointer<Custom_Query> custom_query_window{new Custom_Query{nullptr,true}};
 
     if(query2server_note){
         custom_query_window->add_note("*Note: if you need to operate with certain database or tables in it, "
@@ -326,21 +831,31 @@ void Databases::get_query_wndw()
 
     // call overload signal on overload slot
     connect(custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),
-            this,static_cast<void(Databases::*)(/*QString,*/Custom_Query *)>(&Databases::send_custom_query_slot));
+            this,[custom_query_window,this](Custom_Query* customQueryWndw__){
+        custom_query_window->setCheckCloseMessageFlag(false);
+        send_custom_query_slot(customQueryWndw__);
+        custom_query_window->setCheckCloseMessageFlag(true);
+    ;});
 
 
-    if(close_chld_wndws_on_next){
-    // closing all forms by parent signal
-    connect(this,&Databases::close_all_custom_windows_, custom_query_window , &Custom_Query::close, Qt::QueuedConnection);
-    }
+//    if(close_chld_wndws_on_next){
+
+        // closing all forms by parent signal
+        connect(this,&Databases::close_all_custom_windows_, custom_query_window, &Custom_Query::closeNowSig, Qt::QueuedConnection);
+//    }
 
 
-    connect(this,&Databases::window_rise_signal,[=]{
-        // if object exist, raise it in front of other windows
-        if(custom_query_window)
-            custom_query_window->raise();
+//    connect(this,&Databases::window_rise_signal,[=]{
+//        // if object exist, raise it in front of other windows
+//        if(custom_query_window){
+////            custom_query_window->show();
+////            custom_query_window->activateWindow();
+////            custom_query_window->raise();
+//        }
+//    });
 
-    });
+//    QFlag flags = Qt::Window & ~Qt::WindowStaysOnTopHint;
+//    custom_query_window->setWindowFlags(flags);
 
     custom_query_window->setAttribute( Qt::WA_DeleteOnClose, true );
     custom_query_window->setModal(false);
@@ -364,12 +879,12 @@ static int wndw_cnt=0;
 
         auth_copy->copy_(auth_);
 
-        // delete db_name_ for logical reason
+        // remove db_name_ for logical reason
         auth_copy->db_name_.clear();
 
     ////    connect(this,&Databases::destroyed,[&]{delete auth_copy;auth_copy=nullptr;});
 
-        QScopedPointer<CustomQueryResult> new_result_window{new CustomQueryResult{{*auth_copy},this}};
+        QScopedPointer<CustomQueryResult> new_result_window{new CustomQueryResult{{*auth_copy},nullptr,true}};
 
         if(new_result_window.get()){
 
@@ -390,25 +905,25 @@ static int wndw_cnt=0;
             });
 
 
-            if(close_chld_wndws_on_next){
+//            if(close_chld_wndws_on_next){
             //closing all forms by parent signal(2)
-            connect(this,&Databases::close_all_custom_windows_, new_result_window.get() , &CustomQueryResult::close, Qt::QueuedConnection);
-            }
+            connect(this,&Databases::close_all_custom_windows_, new_result_window.get() , &CustomQueryResult::closeNowSig, Qt::QueuedConnection);
+//            }
 
 
             // send query and place result to form of new allocated object
             new_result_window->custom_query_slot(custom_query_window__->get_text(),subconnection_name_);
 
             // check error of query
-            if((new_result_window->ui->tableView->model())!=nullptr) {
+            if((new_result_window->tableView->model())!=nullptr) {
 
-                ////qDebug() << "Number of columns in tableView->model()::"<<new_result_window->ui->tableView->model()->columnCount();
-                ////qDebug() << "Number of rows in tableView->model()::"<<new_result_window->ui->tableView->model()->rowCount();
+                ////qDebug() << "Number of columns in tableView->model()::"<<new_result_window->tableView->model()->columnCount();
+                ////qDebug() << "Number of rows in tableView->model()::"<<new_result_window->tableView->model()->rowCount();
 
                 custom_query_window__->close_window();
 
                 // check if result query is empty
-                if(!new_result_window->ui->tableView->model()->rowCount()){
+                if(!new_result_window->tableView->model()->rowCount()){
 
                     qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
 
@@ -424,7 +939,7 @@ static int wndw_cnt=0;
                 }
 
             } else{
-                // if query exec failed, show form again (to correct query)
+                // if query exec failed, show edit form in front again (to correct query by user)
                 emit window_rise_signal();
             }
 
@@ -495,6 +1010,28 @@ void Databases::showSettings()
 
         main_lay->addWidget(buttonBox);
 
+
+        QList<QCheckBox*> checkBoxInFormlist = settings_dial->findChildren<QCheckBox*>();
+            foreach (auto obj, checkBoxInFormlist) {
+
+                    obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+            }
+
+        QList<QPushButton*> ButtonsInFormlist = settings_dial->findChildren<QPushButton*>();
+            foreach (auto obj, ButtonsInFormlist) {
+                if(obj==buttonBox->button(QDialogButtonBox::Ok)||obj==buttonBox->button(QDialogButtonBox::Cancel)){
+                    obj->setStyleSheet(QStringLiteral("QPushButton { background: floralwhite; color: darkslategray; font-weight:bold;} %1")
+                        .arg(adb_style::getbuttonKhakiHiglightSS()));
+                } else {
+
+                    obj->setStyleSheet(QStringLiteral("QPushButton {%1} %2")
+                        .arg(obj->styleSheet())
+                        .arg(adb_style::getbuttonKhakiHiglightSS()));
+                }
+
+            }
+
+
         connect(buttonBox, &QDialogButtonBox::rejected,settings_dial,&QDialog::reject);
 
         connect(buttonBox, &QDialogButtonBox::accepted,[=]{
@@ -503,7 +1040,7 @@ void Databases::showSettings()
             int temp = errorTimeoutLine->text().toInt(&ok);
             if(ok){
                 /*new*/ adb_utility::_CUSTOM_MESSAGE_BOX_TIMER_ = temp;
-                    adb_utility::write2_settings_file();
+                    adb_utility::config::write2_settings_file();
             }
             write2_settings_file();
 
@@ -519,7 +1056,7 @@ bool Databases::read4rom_settings_file()
 {
     QMap<QString,int> __settings_map;
 
-    if(get_settings_4rom_file(settings_f_name_,__settings_map)){
+    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map)){
         int temp;
 
         if((temp = __settings_map.value("close_chld_wndws_on_next"))!=-1)
@@ -528,11 +1065,30 @@ bool Databases::read4rom_settings_file()
         if((temp = __settings_map.value("query2server_note"))!=-1)
             query2server_note = temp;
 
-        return true;
+        if((temp = __settings_map.value("defaultScaleMode"))!=-1){
+            Databases::defaultScaleIndex_=temp;
+            rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(temp);
+        }
+
+    } else{
+
+        qWarning() << "Error while read from"<<settings_f_name_;
+        return false;
     }
+    //--------------------------------------------------------------------
+    QMap<QString,QString> __settings_map_str;
 
-    qWarning() << "Error while read from"<<settings_f_name_;
+    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map_str)){
+        QString temp_s;
 
+        if((temp_s = __settings_map_str.value("defaultTableFont"))!="")
+            Databases::defaultFont_ = temp_s;
+
+        return true;
+    } else{
+
+        qWarning() << "Error while read from"<<settings_f_name_<<"(Strings)";
+    }
     return false;
 }
 
@@ -543,6 +1099,21 @@ void Databases::write2_settings_file()
     QTextStream textStream(&outFile);
     textStream << "close_chld_wndws_on_next" << '=' << QString::number(close_chld_wndws_on_next) << Qt::endl;
     textStream << "query2server_note" << '=' << QString::number(query2server_note) << Qt::endl;
+    textStream << "defaultScaleMode" << '=' << QString::number(Databases::defaultScaleIndex_) << Qt::endl;
+    textStream << "defaultTableFont" << '=' << '\"'+Databases::defaultFont_+'\"' << Qt::endl;
+}
+
+void Databases::mousePressEvent(QMouseEvent *event)
+{
+    auto key = event->button();
+
+    if(key == Qt::LeftButton){
+
+        statusBar->get_line()->clear();
+
+    }
+
+    QDialog::mousePressEvent(event);
 }
 
 

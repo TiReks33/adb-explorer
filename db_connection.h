@@ -1,12 +1,12 @@
 #ifndef DB_CONNECTION_H
 #define DB_CONNECTION_H
+
 #include <QSqlDatabase>
 #include <QDebug>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QAbstractItemView>
 #include <QTableView>
-#include <QHeaderView>
 #include <QComboBox>
 #include <QSqlError>
 #include <QMessageBox>
@@ -14,12 +14,10 @@
 #include <QSqlRecord>
 
 #include "auth.h"
-
 #include "helping_stuff.h"
 
-////struct multi_connection; // declarations
-class TwoListSelection;
 
+class TwoListSelection;
 
 // main interface that provides connect to qSqlDatabase
 struct db_connection{
@@ -45,6 +43,9 @@ friend class loginWindow;
 
 // group of overloaded static functions that places result of sql query exec. to various forms[
 
+// QStringList
+static bool set_query(QString const&, QSqlQueryModel&model__,QStringList*,QString const & = auth::con_name_); //*qStringList
+
 // QListWidget
 static bool set_query(QString const&, QSqlQueryModel&model__,QListWidget*,QString const & = auth::con_name_); //*qlistwidget
 
@@ -55,7 +56,7 @@ static bool set_query(QString const&, /*QSqlQueryModel&model__,*/TwoListSelectio
 static bool set_query(QString const&, QSqlQueryModel*model__,QAbstractItemView*, QString const & = auth::con_name_);
 
 // QTableView
-static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,QHeaderView::ResizeMode scalemode=QHeaderView::Stretch,QString const & = auth::con_name_);
+static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,/*QHeaderView::ResizeMode scalemode=QHeaderView::Stretch,*/QString const & = auth::con_name_);
 
 // QComboBox
 static bool set_query(QString const&, QSqlQueryModel*model__,QComboBox*, QString const & = auth::con_name_);

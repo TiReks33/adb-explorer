@@ -2,7 +2,7 @@
 #include "db_connection.h"
 
 
-TwoListSelection::TwoListSelection(auth& auth__,QDialog *parent) :
+TwoListSelection::TwoListSelection(auth& auth__,QWidget *parent) :
     QDialog{parent}
   , auth_(auth__)
 {

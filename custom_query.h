@@ -3,11 +3,13 @@
 
 #include <QDialog>
 #include <QDebug>
+#include <QFontDialog>
 
 #include "helping_stuff.h"
 #include "clickablelabel.h"
-
 #include "auth.h"
+#include "fontembeddedwidget.h"
+
 
 namespace Ui {
 class Custom_Query;
@@ -18,11 +20,15 @@ class Custom_Query : public QDialog
     Q_OBJECT
 
 public:
-    explicit Custom_Query(QWidget *parent = nullptr, QFont=QFont());
-    ~Custom_Query();
+    explicit Custom_Query(QWidget *parent = nullptr, bool closeMessage = false/*, QFont=QFont()*/);
+    virtual ~Custom_Query();
 
     // returns current entered form text
     QString const get_text() const;
+
+    inline bool getCheckCloseMessageFlag(){ return checkCloseMessageFlag_;}
+
+    void setCheckCloseMessageFlag(bool state__);
 
 signals:
 
@@ -33,6 +39,8 @@ signals:
     void dont_show_note();
 
     void font_changes();
+
+    void closeNowSig();
 
 public slots:
     void close_window();
@@ -46,24 +54,29 @@ public slots:
 private:
     Ui::Custom_Query *ui;
 
-    QString const settings_f_name=adbexplorer::filepath_+"/font.cfg";
+    void fileOps();
 
-//    QString font_family = "Noto Sans";
+    void connections_init();
 
-//    int font_pointSize = 10;
+    void form_init();
 
-//    int font_weight = -1;
+    QPointer<fontEmbeddedWidget> defaultFontWidget_;
 
-//    bool font_italic = false;
+    QString const settings_f_name_=adb_utility::filepath_+"/writeQuery.cfg";
 
-    QString font_;
+
+    static QString font_;
+    static bool settingsFileReady_;
 
     bool read4rom_settings_file();
 
     void write2_settings_file();
 
+    void reject();
 
-    void connections_init();
+    static bool askBeforeClose_;
+    bool checkCloseMessageFlag_ = false;
+
 };
 
 #endif // CUSTOM_QUERY_H

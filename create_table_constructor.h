@@ -9,23 +9,18 @@
 #include <QList>
 #include <QSqlError>
 #include <QScrollArea>
+#include <QPointer>
 
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "db_connection.h"
 #include "helping_stuff.h"
-////#include "multi_connection.h"
-#include "QPointer"
-
 #include "scrolledstatusbar.h"
+#include "reloadbutton.h"
+
 
 //#include "tables.h"
 class Tables;
-//enum class safe_close
-//{
-//    no_ = 0,
-//    yes_ = 1
-//};
 
 
 namespace Ui {
@@ -79,7 +74,7 @@ private slots:
     void describe_table();
 
     // reload current connection
-    void on_reload_con_button_2_clicked();
+    void reloadDatabaseComboBox();
 
     void /*QDialog **/ get_help_window(QPointer<QDialog>&,QString const&,QString const&,QWidget* = nullptr);
 
@@ -99,6 +94,8 @@ private:
     scrolledStatusBar* statusBar_2;
 
     void signals_init();
+
+    void initForm();
 
     bool first_attribute_;
     bool first_key_;
@@ -132,15 +129,17 @@ private:
 
     QString subconnection_name_2_ = "CreateTableConstructor_subconnection2";
 
-    QString const en_lit = "a-zA-Z";
+//    QString const en_lit = "a-zA-Z";
 
-    QString const digits_lit = "0-9";
+//    QString const digits_lit = "0-9";
 
-    QString const spec_chars_lit = "_$";
+//    QString const spec_chars_lit = "_$";
 
     //auth* __auth;
 
     QString current_t_name_ = "";
+
+    reloadButton* reload_con_button_2 = nullptr;
 
 };
 

@@ -15,7 +15,6 @@ public:
     explicit delete_table(QWidget *parent = nullptr);
 
 
-//private slots:
 protected slots:
     void on_buttonBox_accepted();
 };

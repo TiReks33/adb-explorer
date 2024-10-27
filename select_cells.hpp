@@ -1,5 +1,6 @@
 #ifndef SELECT_CELLS_H
 #define SELECT_CELLS_H
+
 #include <QItemSelectionModel>
 #include <QAbstractItemView>
 

@@ -16,6 +16,8 @@
 #include <QLabel>
 #include <QGraphicsEffect>
 #include <QElapsedTimer>
+#include <QScreen>
+#include <QMenuBar>
 
 #include "auth.h"
 #include "db_connection.h"
@@ -29,10 +31,12 @@
 #include "create_table_constructor.h"
 #include <customqueryresult.h>
 #include <ui_customqueryresult.h>
-
-#include "blinkinbutton.h"
-
+#include "reloadbutton.h"
 #include "scrolledstatusbar.h"
+#include "signaltableview.h"
+#include "fontembeddedwidget.h"
+#include "hidemenu.h"
+
 
 namespace Ui {
 class Tables;
@@ -81,7 +85,7 @@ signals:
 
     void current_tables_list_signal(QList<QString>);
 
-    void close_custom_query_form();
+    ////void close_custom_query_form();
 
 //    void constructor_query_success();
     void constructor_query_success(QString const&);
@@ -99,13 +103,12 @@ signals:
 
     void empty_set();
 
+
 private slots:
 
-    // empty form for custom query
-    void get_custom_query_window_();
 
-    // overload form for custom query with pre-added text
-    void get_custom_query_window_(QString const&);
+    // form for user custom query (pre-added text optional)
+    void get_custom_query_window_(QString const& = "", bool closeMessage=false);
 
     // SELECT TABLE
     void show_table_content();
@@ -134,22 +137,29 @@ public:
 private:
     Ui::Tables *ui;
 
+    signalTableView* tableView;
+
     scrolledStatusBar* statusBar;
 
-    QString const query_settings_f_name = adbexplorer::filepath_+"/query.cfg";
+    QString const settings_f_name_ = adb_utility ::filepath_+"/tablesQuery.cfg";
 
 
-    BlinkinButton* showTable_button;
+    /*BlinkinButton*/reloadButton* showTable_button = nullptr;
 
     void init_connections();
 
+    void init_form();
+
+    void fileOps();
+
+    void defaultSettings();
 
     auth& auth_;
 
     QSqlQueryModel model_;
 
 
-    CustomQueryResult* custom_query_result_window_;
+    //CustomQueryResult* custom_query_result_window_;
 
     QPointer<CustomQuerySettings> settings_;
 
@@ -157,24 +167,34 @@ private:
 
     CreateTableConstructor* constructor_;
 
-    int tuples_windows_counter_=0;
+    ////int tuples_windows_counter_=0;
 
 
     // preventing application to exit by escape (QDialog close by esc)
-    inline void keyPressEvent(QKeyEvent *e) {
-        if(e->key() != Qt::Key_Escape)
-            QDialog::keyPressEvent(e);
-        else {/* minimize */
-            //qDebug()<<"escape pressed (tables)";
-            close();
-        }
-    }
+    void keyPressEvent(QKeyEvent *e);
 
 
-    bool read4rom_query_file();
+    bool read4rom_settings_file();
 
-    void write2_query_file();
+    void write2_settings_file();
 
+    void mousePressEvent(QMouseEvent* event);
+
+    // rescale stuff
+    QWidget* rescaleBoxWidget;
+    ////bool tableScaleChanged = false;
+    QPointer<QCheckBox>rescaleDefaultCheckBox;
+    static int defaultScaleIndex_;
+
+    QPushButton* backButton_ = nullptr;
+
+    QPointer<fontEmbeddedWidget> fontWidget_;
+    static QString defaultFont_;
+
+    QMenuBar* menuBar_ = nullptr;
+    hideMenu* menuFile_ = nullptr;
+    QAction* exitEntrie_ = nullptr;
+    QAction* prevEntrie_ = nullptr;
 };
 
 #endif // TABLES_H

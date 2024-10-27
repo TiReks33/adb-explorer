@@ -10,17 +10,15 @@
 #include <QCloseEvent>
 
 #include "auth.h"
-
 #include "select_cells.hpp"
-
-//#include "multi_connection.h"
 #include "helping_stuff.h"
+
 
 // Custom form to iterate trough 2x lists
 class TwoListSelection : public QDialog {
   Q_OBJECT
 public:
-  explicit TwoListSelection(auth& auth__,QDialog *parent = nullptr);
+  explicit TwoListSelection(auth& auth__,QWidget *parent = nullptr);
     virtual ~TwoListSelection();
 
   // save previous elements and adding new to the left (input) list
@@ -30,7 +28,7 @@ public:
   QStringList selectedItems();
 
   // clear all
-  void clear(){ mOutput->clear();mInput->clear();list_before_changes_.clear();}
+  inline void clear(){ mOutput->clear();mInput->clear();list_before_changes_.clear();}
 
   // set query result as input list
   void update_doublelist(QString const&,QString const& = auth::con_name_);
@@ -38,7 +36,7 @@ public:
 signals:
 
     // transfer right (output) list to external object
-    void export_list(QStringList);
+    void export_list(QStringList const&);
 
 private:
   void init();

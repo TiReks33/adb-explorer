@@ -7,17 +7,16 @@
 #include <QLineEdit>
 #include <QDebug>
 #include <QPushButton>
-
 #include <QSlider>
 #include <QSpinBox>
 #include <cmath>
-
 #include <QMouseEvent>
+
+#include "helping_stuff.h"
 
 //QT_BEGIN_NAMESPACE
 //namespace Ui { class scrolledStatusBar; }
 //QT_END_NAMESPACE
-
 
 class statusLineEdit : public QLineEdit
 {
@@ -28,14 +27,18 @@ public:
 
     ////inline void set_default(){ setPlaceholderText(default_str_); };
 
+    void setText(QString const&);
+
 private slots:
     void mousePressEvent(QMouseEvent *e);
+
+    void keyPressEvent(QKeyEvent *e);
 
 signals:
     void rightClicked();
 
-private:
-    QString const default_str_ = "Status information";
+//private:
+//    QString const default_str_ = "Status information";
 };
 
 
@@ -60,6 +63,9 @@ public slots:
 private:
     statusLineEdit* statusLine;
     QScrollBar* hor_scrollbar;
+
+
+//    void keyPressEvent(QKeyEvent *e);
 
     int maximum=0;
     int width=0;

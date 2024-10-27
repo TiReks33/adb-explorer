@@ -9,5 +9,12 @@
         <file>pic/adb_exp.png</file>
         <file>pic/anthead.png</file>
         <file>pic/anthead2.png</file>
+        <file>pic/adbarrowdwn.png</file>
+        <file>pic/adbarrowdwn2.png</file>
+        <file>pic/adbarrowdwn3.png</file>
+        <file>pic/check-mark-true.png</file>
+        <file>pic/check-mark-true_disable.png</file>
+        <file>pic/check-mark-true_darkslategray.png</file>
+        <file>pic/check-mark-true_darkgoldenrod.png</file>
     </qresource>
 </RCC>

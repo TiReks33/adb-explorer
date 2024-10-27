@@ -4,20 +4,43 @@
 statusLineEdit::statusLineEdit(QWidget *parent) :
     QLineEdit(parent)
 {
-    ////set_default();
-    setPlaceholderText(default_str_);
+    setPlaceholderText("Status information places here. Also see logs in::"+adb_utility::currentLogFileName);
 }
 
 void statusLineEdit::mousePressEvent(QMouseEvent *e)
 {
     if(e->button()==Qt::RightButton){
-        //setCursorPosition(text().size()-1);
-        selectAll();
+
+        end(false); //true?
         selectAll();
         emit rightClicked();
-    } else
-    QLineEdit::mousePressEvent(e);
+    } else{
+        QLineEdit::mousePressEvent(e);
+    }
 }
+
+
+
+void statusLineEdit::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_A and e->modifiers() == Qt::ControlModifier){
+        qDebug() << "ctrl+A";
+
+        end(false); //true?
+        selectAll();
+    } else if(e->key() == Qt::Key_C and e->modifiers() == Qt::ControlModifier){
+        copy();
+    } else{
+        QWidget::keyPressEvent(e);
+    }
+}
+
+void statusLineEdit::setText(const QString & str__)
+{
+    QLineEdit::setText(str__);
+    home(false); // true?
+}
+
 
 
 scrolledStatusBar::scrolledStatusBar(QWidget *parent)
@@ -29,6 +52,8 @@ scrolledStatusBar::scrolledStatusBar(QWidget *parent)
 
     setLayout(main_lay);
 
+    main_lay->setContentsMargins(0,0,0,0);
+
     statusLine->setTextMargins(0,0,0,0);
 
     main_lay->addWidget(statusLine);
@@ -37,7 +62,7 @@ scrolledStatusBar::scrolledStatusBar(QWidget *parent)
     statusLine->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     hor_scrollbar->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
-    main_lay->setSizeConstraint(QLayout::SetMinimumSize);
+    main_lay->setSizeConstraint(QLayout::SetDefaultConstraint);
 
     this->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
@@ -68,7 +93,8 @@ scrolledStatusBar::scrolledStatusBar(QWidget *parent)
      hor_scrollbar->setMaximum(statusLine->text().length());
      connect(hor_scrollbar, &QScrollBar::valueChanged,
              statusLine, &QLineEdit::setCursorPosition);
-     //this can also ben done on textChanged, however for the price
+
+     // this can also ben done on textChanged, however for the price
      //of more frequent execution...
      connect(statusLine, &QLineEdit::cursorPositionChanged,
              hor_scrollbar, [&](int, int n) {
@@ -79,7 +105,6 @@ scrolledStatusBar::scrolledStatusBar(QWidget *parent)
              });
 
      hor_scrollbar->hide();
-
 
 
      statusLine->setReadOnly(true);

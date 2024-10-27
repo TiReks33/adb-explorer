@@ -3,16 +3,19 @@
 #include <QString>
 #include <QDebug>
 
-#include <QDir>
 
-namespace adbexplorer
-{
-    QString const filepath_ = QDir::homePath()+"/.adb-explorer";
-}
+enum SQLDBtype{
+    MARIADB,
+    MYSQL,
+    PSQL
+};
 
 // credential structure (cross-window transer solution)
 struct auth{
-    auth(){}
+
+
+
+    auth();
 
     ~auth(){
         ////qDebug() << "~auth destructor called";
@@ -54,6 +57,11 @@ struct auth{
         return *this;
     }
 
+    static QMap<QString,QString> SQLDBtype2SQLdriver;
+
+    static QMap<QString,int> SQLdriver2SQLDBtype;
+
+    static bool SQLdriverMatch(QString const&, SQLDBtype);
 };
 
 

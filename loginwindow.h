@@ -8,11 +8,14 @@
 #include <QScreen>
 #include <QCloseEvent>
 #include <QToolTip>
+#include <QPainter>
+#include <QtMath>
 
 #include "databases.h"
 #include "tables.h"
 #include "auth.h"
 #include "db_connection.h"
+#include "blinkinbutton.h"
 
 #include <iostream>
 
@@ -42,7 +45,7 @@ signals:
 
     void message_to_database_window(QString const&);
 
-    void current_driver_check_();
+//    void current_driver_check_();
 
     void start_connection_timer_stuff();
 
@@ -69,7 +72,7 @@ private:
     auth auth_;
 
     //[ .cfg file variables
-    QString const config_f_name = adbexplorer::filepath_+"/rec.cfg";
+    QString const config_f_name = adb_utility::filepath_+"/rec.cfg";
 
     //30 sec
     int timeout_reconnect = 30000;
@@ -82,8 +85,10 @@ private:
 
     void signals_init();
 
+    void fileOps();
+
     // child (after login -->> main window in ierarchy, this->hide)
-    Databases* db_window_;
+    Databases* db_window_ = nullptr;
 
     QPointer<QTimer> timer;
 

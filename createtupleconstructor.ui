@@ -20,7 +20,7 @@
       <bool>true</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: white</string>
+      <string notr="true"/>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -96,12 +96,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="update_tables_button">
-        <property name="text">
-         <string>Update tables
-list</string>
+       <layout class="QVBoxLayout" name="reloadVerticalLayout">
+        <property name="spacing">
+         <number>0</number>
         </property>
-       </widget>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -181,11 +180,17 @@ list</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>
         <property name="text">
-         <string>add attributes</string>
+         <string>Add attributes</string>
         </property>
        </widget>
       </item>
@@ -332,6 +337,12 @@ list</string>
           <height>0</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Describe table</string>
         </property>
@@ -443,6 +454,12 @@ list</string>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Add tuple</string>
         </property>
@@ -513,6 +530,15 @@ list</string>
       </item>
       <item>
        <widget class="QPushButton" name="reset_button">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:!disabled {background: darkred; color: white;}</string>
+        </property>
         <property name="text">
          <string>Reset</string>
         </property>
@@ -585,14 +611,13 @@ list</string>
        </property>
        <property name="font">
         <font>
-         <pointsize>17</pointsize>
          <weight>75</weight>
          <italic>false</italic>
          <bold>true</bold>
         </font>
        </property>
        <property name="text">
-        <string>::</string>
+        <string>: :</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -617,6 +642,13 @@ list</string>
      </item>
      <item>
       <widget class="QPushButton" name="okButton">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>OK</string>
        </property>
