@@ -15,7 +15,7 @@
 
 #include "twolistselection.h"
 #include "auth.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "db_connection.h"
 #include "blinkinbutton.h"
 #include "customqueryresult.h"

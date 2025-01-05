@@ -1,5 +1,5 @@
-#ifndef HELPING_STUFF_H
-#define HELPING_STUFF_H
+#ifndef ADB_EXP_UTILITY_H
+#define ADB_EXP_UTILITY_H
 
 #include <QString>
 #include <QStringList>
@@ -160,6 +160,6 @@ extern QString const adbCheckBoxStyleSheet;
 
 
 
-#endif // HELPING_STUFF_H
+#endif // ADB_EXP_UTILITY_H
 
 

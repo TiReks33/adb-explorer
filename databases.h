@@ -21,7 +21,7 @@
 #include "db_connection.h"
 #include "create_db_name.h"
 #include "delete_db.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "sqldump.h"
 #include "clickablelabel.h"
 #include "scrolledstatusbar.h"

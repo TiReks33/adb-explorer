@@ -11,7 +11,7 @@
 
 #include "auth.h"
 #include "select_cells.hpp"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 
 // Custom form to iterate trough 2x lists

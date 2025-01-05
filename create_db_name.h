@@ -5,7 +5,7 @@
 #include <QString>
 #include <QPushButton>
 
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 namespace Ui {
 class create_db_name;

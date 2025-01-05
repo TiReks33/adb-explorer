@@ -17,11 +17,14 @@
 #include "db_connection.h"
 #include "blinkinbutton.h"
 
+#include "adbcrypt.h"
+
 #include <iostream>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class loginWindow; }
 QT_END_NAMESPACE
+
 
 
 class loginWindow : public QMainWindow
@@ -65,6 +68,12 @@ private slots:
     // .cfg file synchronize(2)
     bool read4rom_recon_opts_file();
 
+    // get login list from cryptoModule by keyboard
+    void keyPressEvent(QKeyEvent *event);
+
+    // get login list from cryptoModule by mouse
+    bool eventFilter(QObject *object, QEvent *event);
+
 private:
     Ui::loginWindow *ui;
 
@@ -87,10 +96,14 @@ private:
 
     void fileOps();
 
+    void cryptoModuleInit();
+
     // child (after login -->> main window in ierarchy, this->hide)
     Databases* db_window_ = nullptr;
 
     QPointer<QTimer> timer;
+
+    AdbCrypt* cryptoModule_ = nullptr;
 
 };
 #endif // LOGINWINDOW_H

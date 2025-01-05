@@ -1,4 +1,4 @@
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 int adb_utility::_CUSTOM_MESSAGE_BOX_TIMER_=15000;
 QString const adb_utility:: filepath_ = QDir::homePath()+"/.adb-explorer";
@@ -452,7 +452,7 @@ void adb_utility::customMessageHandler(QtMsgType type, const QMessageLogContext 
    QByteArray bytes = txt.toUtf8();
    int length = bytes.size(); //Number of bytes
 
-   if(outFile.size()+length>=5242880/*200*/){ //5mb file size limit
+   if(outFile.size()+length>=5242880/*2000*/){ //5mb file size limit
        QString const backup_file_name = adb_utility:: currentLogFileName+".old";
 
        if (QFile::exists(backup_file_name))

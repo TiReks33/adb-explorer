@@ -12,6 +12,7 @@ loginWindow::loginWindow(QWidget *parent)
     , ui(new Ui::loginWindow)
     , db_window_(new Databases(auth_))
     , timer{new QTimer{this}}
+//    , cryptoModule_{AdbCrypt::data(ui->Login_Form,ui->Password_Form,adb_utility::filepath_)}
 {
 
     form_init();
@@ -20,6 +21,7 @@ loginWindow::loginWindow(QWidget *parent)
 
     fileOps();
 
+    cryptoModuleInit();
 
 }
 
@@ -146,6 +148,7 @@ void loginWindow::signals_init()
             ui->pushButton->setToolTip("");
         }
     });
+
 }
 
 void loginWindow::fileOps()
@@ -153,6 +156,14 @@ void loginWindow::fileOps()
     // if no file -- create it and write default settings to it
     if(!read4rom_recon_opts_file())
         write2recon_opts_file();
+}
+
+void loginWindow::cryptoModuleInit()
+{
+
+    cryptoModule_ = AdbCrypt::data(ui->Login_Form,ui->Password_Form,adb_utility::filepath_);
+    ui->Login_Form->installEventFilter(this);
+
 }
 
 loginWindow::~loginWindow()
@@ -323,6 +334,27 @@ void loginWindow::gset_connection_options()
 
     warning_message_lay->addWidget(warning_message_checkbox);
 
+    //
+    QHBoxLayout* clearDataSubLay = new QHBoxLayout{};
+    QPushButton* clearDataButton = new QPushButton{"Clear users data cache"};
+    clearDataButton->setStyleSheet("font-weight:bold;");
+    clearDataButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    clearDataSubLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    clearDataSubLay->addWidget(clearDataButton);
+    clearDataSubLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    options_layout->addLayout(clearDataSubLay);
+
+    connect(clearDataButton,&QPushButton::clicked,[this, options_dialog]{
+        if(cryptoModule_){
+            auto answer = QMessageBox::warning(options_dialog,"Clear users data", "Are you sure want to remove all saved passwords? This action is irreversible.",QMessageBox::Ok | QMessageBox::Cancel);
+
+            if(answer==QMessageBox::Ok){
+                cryptoModule_->reCreate();
+            }
+        }
+    });
+    //
+
     if(CONNECTION_LOST_MESSAGE)
         warning_message_checkbox->setChecked(true);
     else
@@ -462,6 +494,10 @@ void loginWindow::on_pushButton_clicked()
 
         ui->statusbar->showMessage("(✓)Successful authorization");
 
+        // saveLoginEncrypted
+        if(cryptoModule_)
+            cryptoModule_->encryptCredentials2File();
+
         if(db_window_->show_databases()){
             db_window_->setModal(/*true*/false);
             db_window_->show();
@@ -473,6 +509,7 @@ void loginWindow::on_pushButton_clicked()
 
 
             ////QTimer::singleShot(0,this,SLOT(connection_timer_slot()));
+
 
 
             this->hide();
@@ -508,10 +545,34 @@ void loginWindow::write2recon_opts_file()
     textStream << "timeout_reconnect" << '=' << QString::number(timeout_reconnect) << Qt::endl;
     textStream << "CONNECTION_LOST_MESSAGE" << '=' << QString::number(CONNECTION_LOST_MESSAGE) << Qt::endl;
     textStream << "DB_TYPE"<<'='<< QString::number(ui->dbtypeComboBox->currentIndex()) << Qt::endl;
+    QString const __host = (ui->Host_Form->text().isEmpty())? "localhost" : ui->Host_Form->text();
+    textStream << "HOSTNAME"<<'='<< '\"'+__host+'\"' << Qt::endl;
 }
 
 bool loginWindow::read4rom_recon_opts_file()
 {
+//    QMap<QString,int> __settings_map;
+
+//    // fill the QMap container with key-values pairs
+//    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map)){
+//        int temp;
+
+//        // find necessary settings
+//        if((temp = __settings_map.value("timeout_reconnect"))!=-1)
+//            timeout_reconnect = temp;
+
+//        if((temp = __settings_map.value("CONNECTION_LOST_MESSAGE"))!=-1)
+//            CONNECTION_LOST_MESSAGE = temp;
+
+//        if((temp = __settings_map.value("DB_TYPE"))!=-1)
+//            this->ui->dbtypeComboBox->setCurrentIndex(temp);
+
+//        return true;
+//    }
+
+//    qWarning() << "Error while read from"<<config_f_name;
+
+//    return false;
     QMap<QString,int> __settings_map;
 
     // fill the QMap container with key-values pairs
@@ -528,14 +589,50 @@ bool loginWindow::read4rom_recon_opts_file()
         if((temp = __settings_map.value("DB_TYPE"))!=-1)
             this->ui->dbtypeComboBox->setCurrentIndex(temp);
 
-        return true;
+        //return true;
+    } else{
+
+        qWarning() << "Error while read from"<<config_f_name;
+        return false;
     }
+    //------------------------------------------------------------------
+    QMap<QString,QString> __settings_map_str;
 
-    qWarning() << "Error while read from"<<config_f_name;
+    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map_str)){
+        QString temp_s;
 
+        if((temp_s = __settings_map_str.value("HOSTNAME"))!="")
+            this->ui->Host_Form->setText(temp_s);
+
+        return true;
+    } else{
+
+        qWarning() << "Error while read from"<<config_f_name<<"(Strings)";
+    }
     return false;
 }
 
 
+
+void loginWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
+
+        if(cryptoModule_)
+            cryptoModule_->getSavedLogins();
+     }
+        QMainWindow::keyPressEvent(event);
+}
+
+bool loginWindow::eventFilter(QObject *object, QEvent *event)
+{
+        if(object == ui->Login_Form && event->type() == QEvent::MouseButtonPress) {
+
+            if(cryptoModule_)
+                cryptoModule_->getSavedLogins();
+        }
+
+        return QMainWindow::eventFilter(object,event);
+}
 
 

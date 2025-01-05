@@ -10,7 +10,7 @@
 #include <QDebug>
 
 #include "blinkinbutton.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 
 enum ReloadButtonState {

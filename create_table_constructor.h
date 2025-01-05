@@ -14,7 +14,7 @@
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "db_connection.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "scrolledstatusbar.h"
 #include "reloadbutton.h"
 

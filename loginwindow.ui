@@ -94,7 +94,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>v.1.1</string>
+           <string>v.1.1c</string>
           </property>
          </widget>
         </item>
@@ -547,7 +547,7 @@ Hostname/IP-address</string>
      <x>0</x>
      <y>0</y>
      <width>615</width>
-     <height>30</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

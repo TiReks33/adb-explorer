@@ -5,7 +5,7 @@
 #include <QMap>
 #include <QPushButton>
 
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "auth.h"
 
 

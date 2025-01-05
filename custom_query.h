@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QFontDialog>
 
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "clickablelabel.h"
 #include "auth.h"
 #include "fontembeddedwidget.h"

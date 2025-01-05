@@ -7,7 +7,7 @@
 #include "customqueryresult.h"
 #include "ui_customqueryresult.h"
 #include "twolistselection.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 #include "tables.h"
 #include "scrolledstatusbar.h"
 #include "reloadbutton.h"

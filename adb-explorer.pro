@@ -8,7 +8,12 @@ CONFIG += c++11
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += "/home/alexander/qtcreator_proj/adb-crypt" #for headers; not neccessary if dynamic lib used
+
+LIBS += -L"/home/alexander/qtcreator_proj/build-adb-crypt-Desktop-Release" -ladb-crypt
+
 SOURCES += \
+    adb-exp-utility.cpp \
     auth.cpp \
     blinkinbutton.cpp \
     clickablelabel.cpp \
@@ -25,7 +30,6 @@ SOURCES += \
     delete_sqldb_user.cpp \
     delete_table.cpp \
     fontembeddedwidget.cpp \
-    helping_stuff.cpp \
     hidemenu.cpp \
     main.cpp \
     loginwindow.cpp \
@@ -40,6 +44,7 @@ SOURCES += \
     twolistselection.cpp
 
 HEADERS += \
+    adb-exp-utility.h \
     auth.h \
     blinkinbutton.h \
     clickablelabel.h \
@@ -56,7 +61,6 @@ HEADERS += \
     delete_sqldb_user.h \
     delete_table.h \
     fontembeddedwidget.h \
-    helping_stuff.h \
     hidemenu.h \
     loginwindow.h \
     notifycombobox.h \
@@ -88,3 +92,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     img.qrc
+
+DISTFILES += \
+    CopyrightNoticeOfUsedSources

@@ -14,7 +14,7 @@
 #include <QSqlRecord>
 
 #include "auth.h"
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 
 class TwoListSelection;

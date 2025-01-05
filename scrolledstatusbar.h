@@ -12,7 +12,7 @@
 #include <cmath>
 #include <QMouseEvent>
 
-#include "helping_stuff.h"
+#include "adb-exp-utility.h"
 
 //QT_BEGIN_NAMESPACE
 //namespace Ui { class scrolledStatusBar; }
