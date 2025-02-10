@@ -16,5 +16,7 @@
         <file>pic/check-mark-true_disable.png</file>
         <file>pic/check-mark-true_darkslategray.png</file>
         <file>pic/check-mark-true_darkgoldenrod.png</file>
+        <file>pic/penf.png</file>
+        <file>pic/adb-explorer_logo.png</file>
     </qresource>
 </RCC>

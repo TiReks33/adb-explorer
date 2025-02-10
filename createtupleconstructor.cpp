@@ -12,7 +12,7 @@ createTupleConstructor::createTupleConstructor(auth& auth__,QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowIcon(QIcon(":/pic/anthead2.png"));
+    setWindowIcon(QIcon(":/pic/adb-explorer_logo.png"));
 
     initForm();
 
@@ -132,7 +132,7 @@ void createTupleConstructor::signals_init()
 //        this->close();
         emit this->closeNowSig();
 
-        qDebug() << "final query::" <<final_query;
+        std::cout << "final query::" <<final_query.toStdString() << std::endl;
 
         emit final_query_sig(final_query);
 

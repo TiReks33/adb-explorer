@@ -1,7 +1,7 @@
 #include "custom_query.h"
 #include "ui_custom_query.h"
 
-QString Custom_Query::font_ = "";
+QString Custom_Query::font_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
 bool Custom_Query::settingsFileReady_ = true;
 
@@ -112,8 +112,8 @@ void Custom_Query::form_init()
 
     ui->buttonsLayout->insertWidget(0,fontWidgetFrame);
 
-    ui->Cancel_button->setText("⌧");
-    ui->Cancel_button->setStyleSheet("background-color:darkred;color:white;font-size:16pt;padding-top:1px;padding-bottom:1px;");//padding-top:1px;padding-bottom:1px;");
+    ui->Cancel_button->setText(/*"⌧"*/QString::fromUtf8("\U00002715"));
+    ui->Cancel_button->setStyleSheet("background-color:darkred;color:white;font-size:14pt;padding-top:1px;padding-bottom:1px;");//padding-top:1px;padding-bottom:1px;");
 
     ClickableLabel* dotLbl = new ClickableLabel{": :"};
     dotLbl->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
@@ -130,7 +130,7 @@ void Custom_Query::form_init()
 
     // set default font
     QFont __font;
-    qDebug() << "STATIC FONT:" <<Custom_Query::font_;
+
     __font.fromString(Custom_Query::font_);
     ui->plainTextEdit->setFont(__font);
 
@@ -283,7 +283,7 @@ bool Custom_Query::read4rom_settings_file()
 
     if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map)){
         QString temp_s;
-qDebug() << __settings_map;
+
         if((temp_s = __settings_map.value("font_"))!="")
             Custom_Query::font_ = temp_s;
 

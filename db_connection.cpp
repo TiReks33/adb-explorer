@@ -1,6 +1,7 @@
 #include "db_connection.h"
 #include "twolistselection.h"
 
+#define __CH " Check log for more info."
 
 bool db_connection::open(auth &auth__, const QString &con_name__/*, QString const & options__*/)
 {
@@ -26,21 +27,30 @@ bool db_connection::open(auth &auth__, const QString &con_name__/*, QString cons
             // WHEN connection is lost
             if(auth::SQLdriverMatch(auth__.db_driver_,SQLDBtype::MARIADB) || auth::SQLdriverMatch(auth__.db_driver_,SQLDBtype::MYSQL)){
                 db_connection.setConnectOptions("MYSQL_OPT_RECONNECT=1");
-                qDebug() << "MySQL/MariaDB flag to auto-retrieve the connection when database is gone was set.";
+                std::cout << "MySQL/MariaDB flag to auto-retrieve connection when database is gone was set." << std::endl;
             }
 
             if(!db_connection.open()){
 
                 ////QMessageBox::warning(0,"SQL connection open failed","(x)Error occured while connect to database by connection ::"+con_name__+":: Error message: "+database.lastError().text(),QMessageBox::Close);
-                qDebug() << ("(x)Error occured while connect to database by connection ::"+con_name__+"::");
+                auto errorText = "(x)Error occured while connect to database by connection ::"+con_name__+"::"+__CH;
+                qDebug() << errorText;
+                std::cout << errorText.toStdString() << std::endl;
+                qDebug() << db_connection.lastError().text();
+
                 return false;
 
             } else {
-                qDebug()<<("(✓)Database by connection ::"+con_name__ +"::successfully connected.");
+
+                auto successCon = "(✓)SQL Server connection ::"+con_name__ +":: successfully established.";
+                qDebug()<< successCon;
+                std::cout << successCon.toStdString() << std::endl;
                 return true;
             }
         }
-            qDebug()<<("(✓)Server ::"+auth__.db_driver_+":: from connection ::"+con_name__+":: already connected.");
+            auto alreadyCon = "(✓)SQL Server connection ::"+con_name__+":: already established by driver ::"+auth__.db_driver_+":: .";
+            //qDebug()<<alreadyCon;
+            std::cout << alreadyCon.toStdString() << std::endl;
             return true;
 }
 
@@ -48,20 +58,32 @@ bool db_connection::open(auth &auth__, const QString &con_name__/*, QString cons
 
 bool db_connection::try_to_reopen(auth &auth__,const QString & con_name__)
 {
+    auto stdCon = con_name__.toStdString();
+
         if(db_connection::reopen_exist(con_name__)){
-            qDebug() << QString("(✓)Connection ::"+con_name__+":: successfully reopened.");
+
+            std::cout << "(✓)Connection ::"+stdCon+":: successfully reopened." << std::endl;
             return true;
+
         } else {
-            qDebug() << QString("(x)Connection ::"+con_name__+":: failed to reopen. Trying to remove and re-establish connection to SQL DB.");
+
+            std::cout << "(x)Connection ::"+stdCon+":: failed to reopen. Trying to remove and re-establish connection to SQL DB." << std::endl;
             db_connection::remove(con_name__);
+
         }
+
         if(db_connection::open(auth__,con_name__)){
-            qDebug() << QString("(✓)Connection ::"+con_name__+":: successfully re-established.");
+
+            std::cout << "(✓)Connection ::"+stdCon+":: successfully re-established." << std::endl;
             return true;
+
         } else {
-            qDebug() << "(x)Connection ::"+con_name__+":: failed to open.";
-            //return false;
+            auto failMsg = "(x)Connection ::"+con_name__+":: failed to open by scratch.";
+            qDebug() << failMsg;
+            std::cout << failMsg.toStdString() << std::endl;
+
         }
+
     return false;
 }
 
@@ -69,28 +91,41 @@ bool db_connection::try_to_reopen(auth &auth__,const QString & con_name__)
 
 /*private*/bool db_connection::reopen_exist(const QString &con_name_)
 {
+    auto stdCon = con_name_.toStdString();
+
     if(QSqlDatabase::contains(con_name_)){
-        qDebug() << "(✓)Connection ::"+con_name_+":: exist in QSqlDatabase list.";
+
+        std::cout << "(✓)Connection ::"+stdCon+":: exist in QSqlDatabase list." << std::endl;
         QSqlDatabase database = QSqlDatabase::database(con_name_,false);
         //qDebug() << "DATABASE DEBUG::"<<database;
         if(!database.isOpen()){
 
             if(database.open()){
-                qDebug()<<"(✓)Connection ::"+con_name_+":: successful reopened.";
+
+                std::cout << "(✓)Connection ::"+stdCon+":: successful reopened." << std::endl;
                 return true;
+
             } else {
-                qDebug()<<"(x)Connection ::"+con_name_+":: failed to reopen.";
+
+                auto errConMsg = "(x)Connection ::"+con_name_+":: failed to reopen."+__CH;
+                qDebug()<<errConMsg;
+                std::cout << errConMsg.toStdString() << std::endl;
+
                 return false;
+
             }
 
         } else {
-            qDebug()<<"(✓)Connection ::"+con_name_+":: already opened.";
+
+            std::cout <<"(✓)Connection ::"+stdCon+":: already opened." << std::endl;
             return true;
         }
 
     } else {
-        qDebug() << "(x)Connection ::"+con_name_+":: is not exist in QSqlDatabase list.";
+
+        std::cout << "(x)Connection ::"+stdCon+":: is not exist in QSqlDatabase list." << std::endl;
     }
+
     return false;
 }
 
@@ -98,19 +133,23 @@ bool db_connection::try_to_reopen(auth &auth__,const QString & con_name__)
 
 void db_connection::close/*_con*/(const QString &con_name_)
 {
+    auto stdCon = con_name_.toStdString();
     if(QSqlDatabase::contains(con_name_))
     {
         //{
 
             QSqlDatabase db = QSqlDatabase::database(con_name_,false);
 
-            if(db.isOpen()){db.close(); qDebug() << con_name_+" connection was closed.";}
+            if(db.isOpen()){db.close();
+                std::cout << stdCon+" connection was closed." << std::endl;
+            }
         //}
 
         //QSqlDatabase::removeDatabase( con_name_/*QSqlDatabase::database().connectionName()*/ );
 
     }   else {
-            qDebug() << con_name_+" connection is not exist in QSql connections list. Nothing to close.";
+
+            std::cout << stdCon+" connection is not exist in QSql connections list. Nothing to close." << std::endl;
         }
 }
 
@@ -118,11 +157,13 @@ void db_connection::close/*_con*/(const QString &con_name_)
 
 void db_connection::remove(const QString &con_name_)
 {
+    auto stdCon = con_name_.toStdString();
     if(QSqlDatabase::contains(con_name_)){
+
         QSqlDatabase::removeDatabase( con_name_ );
-        qDebug() << con_name_+" connection was removed from the QSql connections list.";
+        std::cout << stdCon+" connection was removed from the QSql connections list." << std::endl;
     } else {
-        qDebug() << con_name_+" connection is not exist in QSql connections list. May be it was removed from it earlier.";
+        std::cout << stdCon+" connection is not exist in QSql connections list. May be it was removed from it earlier." << std::endl;
     }
 }
 
@@ -141,6 +182,7 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, Q
     if(qry.prepare(query__)){ //MY_SQL_QUERY
 
         if(qry.exec()){
+
             model__.setQuery(qry);
 
             for(int i = 0; i < model__.rowCount(); ++i){
@@ -149,14 +191,18 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, Q
             }
 
             return true;
+
         } else {
-        qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
     }
+
     QString const error_msg = qry.lastError().text();
 //    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 
@@ -169,6 +215,7 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, Q
     if(qry.prepare(query__)){ //MY_SQL_QUERY
 
     if(qry.exec()){
+
         model__.setQuery(qry);
 
         QStringList query_2_list;
@@ -180,14 +227,17 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel &model__, Q
         listWidget__->addItems(query_2_list);
 
         return true;
+
         } else {
-        qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
     }
+
     QString const error_msg = qry.lastError().text();
-//    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 
@@ -200,6 +250,7 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
     if(qry.prepare(query__)){ //MY_SQL_QUERY
 
         if(qry.exec()){
+
             QSqlQueryModel model;
             model.setQuery(qry);
 
@@ -213,15 +264,16 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
         return true;
 
         } else {
-            qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
 
     }
 
     QString const error_msg = qry.lastError().text();
-//    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 
@@ -233,16 +285,19 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
     QSqlQuery qry = QSqlQuery(database);
 
     if(qry.prepare(query)){ //MY_SQL_QUERY
-        qDebug() << "(✓) QSqlQuery prepare successful.";
+
+        //qDebug() << "(✓) QSqlQuery prepare successful.";
         if(qry.exec()){
-            qDebug() << "(✓) QSqlQuery execution successful.";
+            //qDebug() << "(✓) QSqlQuery execution successful.";
         model__->setQuery(qry);
 
         itemView->setModel(model__);
 
         return true;
+
         } else {
-            qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
 
     }
@@ -251,6 +306,7 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
 //    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 
@@ -264,9 +320,10 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
     QSqlQuery qry = QSqlQuery(database);
 
     if(qry.prepare(query)){//; //MY_SQL_QUERY
-        qDebug() << "(✓) QSqlQuery prepare successful.";
+
+        //qDebug() << "(✓) QSqlQuery prepare successful.";
         if(qry.exec()){
-            qDebug() << "(✓) QSqlQuery execution successful.";
+            //qDebug() << "(✓) QSqlQuery execution successful.";
         model__->setQuery(qry);
 
         tableView->setModel(model__);
@@ -275,8 +332,10 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
         //tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
         return true;
+
         } else {
-            qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
     }
 
@@ -284,6 +343,7 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
 //    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 
@@ -298,17 +358,20 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel *model__, Q
     QSqlQuery qry = QSqlQuery(database);
 
     if(qry.prepare(query__)){ //MY_SQL_QUERY
-        qDebug() << "(✓) QSqlQuery prepare successful.";
+
+        //qDebug() << "(✓) QSqlQuery prepare successful.";
         if(qry.exec()){
-            qDebug() << "(✓) QSqlQuery execution successful.";
+            //qDebug() << "(✓) QSqlQuery execution successful.";
 
         model__->setQuery(qry);
 
         comboBox->setModel(model__);
 
         return true;
+
         } else {
-            qDebug() << "(x) QSqlQuery execution failed.";
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
         }
     }
 
@@ -316,6 +379,7 @@ bool db_connection::set_query(QString const& query__, QSqlQueryModel *model__, Q
 //    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
     adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
     qDebug() << error_msg;
+
     return false;
 }
 

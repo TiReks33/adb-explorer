@@ -24,7 +24,7 @@ Databases::Databases(auth& auth__, QWidget *parent) :
   , grantPermissionsButton_{new QPushButton{"Grant privileges to SQL Server User/Role"}}
   , changePassButton_{new QPushButton{}}
   , deleteUserButton_{new QPushButton{"DELETE USER"}}
-  , quitButton_{new QPushButton("⌧")/*("⮿")*/}
+  , quitButton_{new QPushButton(/*"⌧"*//*"✕"*/QString::fromUtf8("\U00002715"))/*("⮿")*/}
   , fontWidget_{new fontEmbeddedWidget{tableView}}
 
   , menuBar_{new QMenuBar{this}}
@@ -129,7 +129,7 @@ void Databases::init_form()
 
     statusBar->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
-    setWindowIcon(QIcon(":/pic/anthead2.png"));
+    setWindowIcon(QIcon(":/pic/adb-explorer_logo.png"));
 
     statusBar->get_line()->setReadOnly(true);
 
@@ -224,11 +224,12 @@ void Databases::init_form()
     ui->deleteLayout->addWidget(deleteUserFrame);
 
 
-    quitButton_->setStyleSheet("background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;");//padding-top:1px;padding-bottom:1px;");
+    quitButton_->setStyleSheet("background-color:darkred;color:white;font-size:14pt;padding-left:6px;padding-right:6px;");//padding-top:1px;padding-bottom:1px;");
 
     QFrame* exitFrame = new QFrame;
     exitFrame->setFrameShape(QFrame::StyledPanel);
     exitFrame->setFrameShadow(QFrame::Raised);
+    exitFrame->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     QHBoxLayout* exitLay = new QHBoxLayout{exitFrame};
     exitLay->setContentsMargins(1,1,1,1); exitLay->setSpacing(0);
     exitLay->addWidget(quitButton_);
@@ -328,11 +329,21 @@ void Databases::init_signals()
 
         if(!db_connection::set_query(query__,&model_,tableView/*,QHeaderView::Stretch*/)){
 
-            QString const warning_text = QString("Database `%1` is not created. Please check name and try again.").arg(newdb_name__);
+            QString const warning_text = QStringLiteral("Database `%1` is not created. Please check selected name and permissions and try again.").arg(newdb_name__);
 
+            qDebug() << warning_text;
+
+            std::cout << warning_text.toStdString() << std::endl;
 
             statusBar->get_line()->setText(warning_text);
 
+        } else{
+
+            auto SucCreate = QStringLiteral("Database `%1` successfully created!").arg(newdb_name__);
+            qDebug() << SucCreate;
+            std::cout << SucCreate.toStdString() << std::endl;
+
+            statusBar->get_line()->setText(SucCreate);
         }
 
         show_databases();
@@ -499,7 +510,7 @@ void Databases::init_signals()
 
 
 
-    QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
+    //QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
 
 
     QPointer</*QComboBox*/notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
@@ -573,6 +584,7 @@ void Databases::defaultSettings()
 {
     // set default font
     QFont __font;
+
     __font.fromString(Databases::defaultFont_);
     tableView->setFont(__font);
 
@@ -754,6 +766,8 @@ void Databases::getPasswordMgmtForm()
     passwordForm->setAttribute(Qt::WA_DeleteOnClose,true);
     passwordForm->setModal(true);
     passwordForm->show();
+
+    std::cout << auth_.login_.toStdString() << "::" << auth_.host_.toStdString() << std::endl;
 }
 
 

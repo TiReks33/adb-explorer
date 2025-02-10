@@ -653,22 +653,84 @@ void SqlDump_name::get_dump()
 
     });
 
+
+      QString __dumpProgramName = "";
+
+      if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
+
+          __dumpProgramName = "mariadb-dump";
+
+      } else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL)){
+
+          __dumpProgramName = "mysqldump";
+
+      }
+
       connect(&dumpProcess, &QProcess::errorOccurred, [=](QProcess::ProcessError error)
       {
-          qWarning() << "Occured error: " << error ;
+          qWarning() << "(x)Dumping Error occured: " << error ;
+
+          QString __packagesHelpMsgDeb = "deb-based distributions:",
+                  __packagesHelpMsgRpm = "rpm-based distributions:",
+                  __additionalHelpInfo = "";
+
+          if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
+
+              __packagesHelpMsgDeb += " <b>mariadb-client</b> / <b>mariadb-server</b> ";
+
+              __packagesHelpMsgRpm += " <b>mariadb</b> / <b>mariadb-server</b> ";
+
+          } else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL)){
+
+              __packagesHelpMsgDeb += " <b>default-mysql-client</b>/ <b>default-mysql-server</b> ";
+
+              __packagesHelpMsgRpm += " <b>community-mysql</b> / <b>community-mysql-server</b> ";
+
+              __additionalHelpInfo = QStringLiteral("Note: you can download standalone MySQL installation meta-package manually from website (not from your distro's repo), "
+                                      "that contains neccessary [<b>%1</b>] program binary. "
+                                       "Download link: [<b>https://dev.mysql.com/downloads/</b>].").arg(__dumpProgramName);
+
+          } //else if(...){...;}
+
+          QString __messageText = QStringLiteral("Dumping process cannot start. "
+           "Check that neccessary package with dumping program binary [<b>%1</b>] is installed on your system, "
+            "or dependend symlink is valid or presented in '/bin' folder. "
+             "On various package-managing systems this can be provided by next 'meta' packages, 4ex.:<br>%2<br>%3<br>%4")
+                  .arg(__dumpProgramName)
+                  .arg(__packagesHelpMsgDeb)
+                  .arg(__packagesHelpMsgRpm)
+                  .arg(__additionalHelpInfo);
+
+          std::cout << __messageText.toStdString() << std::endl;
+          qWarning() << __messageText;
+
+          QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Critical,"Process cannot start", __messageText,
+                                                            QMessageBox::Ok,this)};
+
+          /*connect(messageBox,&QMessageBox::destroyed,[&](){
+              //qDebug() << "~messageBox activated (destroyed).";
+              emit message("(x)Dumping Error occured. Check log for additional info.");
+          });*/
+
+          messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+          messageBox->show();
+          //messageBox->exec();
+
       });
 
       dumpProcess.setReadChannel(QProcess::StandardOutput);
 
       connect(&dumpProcess, &QProcess::readyReadStandardError,[=](){});
 
+
+      dumpProcess.start(__dumpProgramName, args_list);
+
+
       this->setCursor(Qt::WaitCursor);
 
-      dumpProcess.start("mysqldump", args_list);
       dumpProcess.waitForFinished();
 
       this->setCursor(Qt::ArrowCursor);
-
 
 }
 

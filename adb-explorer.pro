@@ -9,8 +9,11 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += "/home/alexander/qtcreator_proj/adb-crypt" #for headers; not neccessary if dynamic lib used
+DEPENDPATH += "/home/alexander/qtcreator_proj/build-adb-crypt-Desktop-Release"
 
 LIBS += -L"/home/alexander/qtcreator_proj/build-adb-crypt-Desktop-Release" -ladb-crypt
+
+#DEFINES += QT_NO_CAST_TO_ASCII
 
 SOURCES += \
     adb-exp-utility.cpp \

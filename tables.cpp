@@ -5,7 +5,7 @@
 
 int Tables::defaultScaleIndex_ = 0;
 
-QString Tables::defaultFont_ = "";
+QString Tables::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
 Tables::Tables(auth& auth__,QWidget *parent) :
     QDialog(parent),
@@ -105,8 +105,7 @@ void Tables::init_form()
 
     statusBar->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
-    setWindowIcon(QIcon(":/pic/anthead2.png"));
-
+    setWindowIcon(QIcon(":/pic/adb-explorer_logo.png"));
 //    ui->reloadLayout->addItem(new QSpacerItem(10, 20, QSizePolicy::Preferred, QSizePolicy::Expanding));
 
     ui->reloadLayout->addWidget(showTable_button);
@@ -155,7 +154,7 @@ void Tables::init_form()
 
     rescaleDefaultCheckBox->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 
-    backButton_->setStyleSheet("color:white;background-color:green;font-size:18pt;padding-left:6px;padding-right:6px;");
+    backButton_->setStyleSheet("color:white;background-color:green;font-size:14pt;padding-left:6px;padding-right:6px;");
 
     QFrame* backFrame = new QFrame;
     backFrame->setFrameShape(QFrame::StyledPanel);
@@ -259,6 +258,7 @@ void Tables::defaultSettings()
 {
     // set default font
     QFont __font;
+
     __font.fromString(Tables::defaultFont_);
     tableView->setFont(__font);
 
@@ -493,7 +493,7 @@ void Tables::init_connections()
     });
 
 
-    QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Tables::ui->rescaleLayout::rescaleDefaultCheckBox"; });
+    //QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Tables::ui->rescaleLayout::rescaleDefaultCheckBox"; });
 
 
     QPointer</*QComboBox*/notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();

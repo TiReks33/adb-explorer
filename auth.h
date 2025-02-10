@@ -2,7 +2,7 @@
 #define AUTH_H
 #include <QString>
 #include <QDebug>
-
+#include <iostream>
 
 enum SQLDBtype{
     MARIADB,

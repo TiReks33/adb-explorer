@@ -6,7 +6,7 @@ bool CustomQueryResult::headerCopy_ = false;
 int CustomQueryResult::defaultScaleIndex_ = 0;
 bool CustomQueryResult::settingsFileReady_ = true;
 
-QString CustomQueryResult::defaultFont_ = "";
+QString CustomQueryResult::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
 bool CustomQueryResult::askBeforeClose_ = true;
 
@@ -95,7 +95,7 @@ void CustomQueryResult::init_form()
 
 
 
-    QFrame* exportButtonsFrame = new QFrame{this};
+    QFrame* exportButtonsFrame = new QFrame{/*this*/};
     exportButtonsFrame->setFrameShape(QFrame::StyledPanel);
     exportButtonsFrame->setFrameShadow(QFrame::Raised);
 
@@ -217,7 +217,9 @@ void CustomQueryResult::init_form()
 
     ui->rescaleLayout->addWidget(rescaleDefaultCheckBox);
 
-    ui->Cancel_button->setStyleSheet("background-color:darkred;color:white;font-size:18pt;padding-left:6px;padding-right:6px;");
+    ui->Cancel_button->setStyleSheet("background-color:darkred;color:white;font-size:14pt;padding-left:6px;padding-right:6px;");
+
+    ui->Cancel_button->setText(QString::fromUtf8("\U00002715"));
 
     export_button_->setDefault(true);
 
@@ -293,7 +295,7 @@ void CustomQueryResult::init_signals()
 
 
 
-    QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
+    //QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
 
 
     QPointer</*QComboBox*/notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
@@ -355,6 +357,7 @@ void CustomQueryResult::defaultSettings()
 
     // set default font
     QFont __font;
+
     __font.fromString(CustomQueryResult::defaultFont_);
     tableView->setFont(__font);
 }
@@ -586,7 +589,7 @@ bool CustomQueryResult::read4rom_settings_file()
 
         if((temp = __settings_map_int.value("closeQuestion"))!=-1)
             CustomQueryResult::askBeforeClose_ = temp;
-qDebug() << "111111" << askBeforeClose_;
+
     } else{
 
         qWarning() << "Error while read from"<<settings_f_name_;

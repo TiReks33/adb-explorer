@@ -206,8 +206,8 @@ adb_utility::getRescaleBox(/*QTableView*/QPointer<signalTableView>sourceTableVie
         comboBox->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
 
 
-        QObject::connect(main_widget,&QWidget::destroyed,[=]{ /*delete comboBox;*/ qDebug() << "~getRescaleBox()::main_widget";});
-        QObject::connect(comboBox,&/*QComboBox*/notifyComboBox::destroyed,[=]{ qDebug() << "~getRescaleBox()::comboBox";});
+//        QObject::connect(main_widget,&QWidget::destroyed,[=]{ /*delete comboBox;*/ qDebug() << "~getRescaleBox()::main_widget";});
+//        QObject::connect(comboBox,&/*QComboBox*/notifyComboBox::destroyed,[=]{ qDebug() << "~getRescaleBox()::comboBox";});
 
         comboBox->insertItem(0,"Padding to fit page");
         comboBox->insertItem(1,"Interactive resize");

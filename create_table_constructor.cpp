@@ -345,7 +345,7 @@ void CreateTableConstructor::initForm()
     ui->page_3->layout()->addWidget(statusBar_2);
 
 
-    setWindowIcon(QIcon(":/pic/anthead2.png"));
+    setWindowIcon(QIcon(":/pic/adb-explorer_logo.png"));
 
     ui->atr_type_capacity_1->setMaxLength(5);
 

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
         dir.mkpath(".");
 
     loginWindow w;
-    w.setWindowIcon(QIcon(":/pic/anthead2.png"));
+    w.setWindowIcon(QIcon(":/pic/adb-explorer_logo.png"));
     w.show();
 
 

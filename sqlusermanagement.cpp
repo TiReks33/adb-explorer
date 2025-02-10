@@ -1621,6 +1621,32 @@ void passwordMgmtForm::formAccepted()
                 emit message( text_success);
                 qDebug() << text_success;
 
+                qry.prepare("SELECT concat(quote(SUBSTRING_INDEX(current_user(),"
+                            "'@',1)),'@',quote(SUBSTRING_INDEX(current_user(),'@',-1)))");
+
+                if(qry.exec()){
+
+                    qry.first();
+                    auto curentUser = qry.value(0).toString();
+                    qDebug() << "curentUser:->" <<curentUser;
+
+                    // update password info for QSqlDatabase.open()
+                    if(curentUser==__curUsr){
+                        auth_.passw_=__curPassw;
+                    }
+
+                }
+
+
+
+                std::cout << "CURUSR::"<< __curUsr.toStdString() << std::endl;
+                std::cout << "CURPASSW::"<< __curPassw.toStdString() << std::endl;
+
+
+                std::cout << "auth_login_==" << auth_.login_.toStdString() << std::endl;
+                std::cout << "auth_host_==" << auth_.host_.toStdString() << std::endl;
+                std::cout << "auth_passw_==" << auth_.passw_.toStdString() << std::endl;
+
                 this->close();
                 return;
             }

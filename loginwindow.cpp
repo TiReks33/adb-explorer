@@ -28,7 +28,7 @@ loginWindow::loginWindow(QWidget *parent)
 void loginWindow::form_init()
 {
     ui->setupUi(this);
-    this->setFixedSize(QSize(600, 360));
+    //this->setFixedSize(QSize(615, 362));
     move(screen()->geometry().center() - frameGeometry().center());
     ui->checkBox->setText("Hide");
     ui->checkBox->setChecked(true);
@@ -489,7 +489,8 @@ void loginWindow::on_pushButton_clicked()
 
 
     if(!db_connection::open(auth_))
-        ui->statusbar->showMessage("(x)Authorization wrong. Please check your login details and network connection.");
+        ui->statusbar->showMessage("(x)Authorization wrong. Please check credentials and server connection.");
+
     else{
 
         ui->statusbar->showMessage("(✓)Successful authorization");

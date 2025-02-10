@@ -1,6 +1,6 @@
 Copyright notice of used source.
 //
-This software uses mine .so module "ADBCrypt" (for encrypt user credentials), the encryption algorithm of which was based on the open solution "SimpleCrypt", protected by the following copyright.
+This software uses .so module "ADBCrypt" (for encrypt user credentials), the encryption algorithm of which was based on "SimpleCrypt" solution, protected by the following copyright.
 //
 Copyright (c) 2011, Andre Somers
 All rights reserved.
