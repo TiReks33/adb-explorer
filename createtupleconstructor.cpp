@@ -114,18 +114,40 @@ void createTupleConstructor::signals_init()
 
     connect(ui->okButton,&QPushButton::clicked,[=]{
 
-        if(!tuples_added_){ statusBar->get_line()->setText("You don't add any values to table!");return;}
+        if(!tuples_added_){
+            statusBar->get_line()->setText("You don't add any values to table!");
+            return;
+        }
 
 
-        QString final_query = QString("INSERT INTO `%1` (`%2`) VALUES ").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())))
-                                                                        .arg(QString(adb_utility::escape_sql_backticks(ui->plainTextEdit_2->toPlainText())));
+//        QString final_query = QString("INSERT INTO `%1` (%2) VALUES ").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())))
+//                                                                        .arg(QString(adb_utility::escape_sql_backticks(ui->plainTextEdit_2->toPlainText())));
 
-        int count = tuples_.count();
-        for (int i=0;i!=count;++i)
+//        int count = tuples_.count();
+//        for (int i=0;i!=count;++i)
+//        {
+//            final_query+= '(' + tuples_.at(i) + ')';
+//            if (i!=count-1) final_query+=", ";
+//        }
+
+        QString final_query = QString("INSERT INTO `%1` (").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())));
+
+        int count = chosenAttributes_.count();
+        for (auto i=0;i!=count;++i)
+        {
+            final_query+='`'+chosenAttributes_.at(i)+'`';
+            if (i!=count-1) final_query+=", ";
+        }
+
+        final_query+=") VALUES ";
+
+        count = tuples_.count();
+        for (auto i=0;i!=count;++i)
         {
             final_query+= '(' + tuples_.at(i) + ')';
             if (i!=count-1) final_query+=", ";
         }
+
 
         final_query+=';';
 
@@ -156,10 +178,12 @@ void createTupleConstructor::signals_init()
     connect(ui->addColsButton,&QPushButton::clicked,[=]{
         TwoListSelection doublelist{auth_};
 
-        connect(&doublelist,&TwoListSelection::export_list,[=](QStringList list__){
+        connect(&doublelist,&TwoListSelection::export_list,[=](QStringList const & list__){
             ////qDebug() << "List from double list::" << list__;
+            chosenAttributes_=list__;
             ui->plainTextEdit_2->setPlainText(adb_utility::pack_(list__));
         });
+
         QString const query = QString("SHOW COLUMNS FROM `%1`").arg(QString(adb_utility::escape_sql_backticks(/*auth_.table_name_*/ui->comboBox->currentText())));
         doublelist.update_doublelist(query);
         doublelist.setModal(true);
@@ -190,6 +214,7 @@ void createTupleConstructor::resetButtonHandler()
     ui->label_amount->setText(QString::number(0));
     tuples_added_=0;
     tuples_.clear();
+    chosenAttributes_.clear();
     ui->comboBox->setCurrentIndex(-1);
     ui->plainTextEdit->clear();
 }
@@ -266,15 +291,23 @@ void createTupleConstructor::on_addTupleButton_clicked()
             return;
         } else{
 
-            int input_commas = ui->plainTextEdit_2->toPlainText().count(',');
+            ////int input_commas = ui->plainTextEdit_2->toPlainText().count(',');
+            auto attributesCount = chosenAttributes_.count()-1;
+                //qDebug() << "chosenAttributes::" << attributesCount;
             //qDebug() << "number of commas input::"<< input_commas;
             int tuple_commas = ui->plainTextEdit->toPlainText().count(',');
             //qDebug() << "number of commas in tuple::"<<tuple_commas;
-                if(input_commas!=tuple_commas)
-                {
-                        statusBar->get_line()->setText("Number of elements in tuple does not match to number of selected attributes.");
-                    return;
-                }
+
+            if(/*input_commas*/attributesCount!=tuple_commas){
+                statusBar->get_line()->setText("Number of elements in tuple does not match to number of selected attributes.");
+                return;
+            }
+
+            if(ui->plainTextEdit->toPlainText().simplified().back()==','){
+                statusBar->get_line()->setText("Unnecessary comma or missing data after/before comma.");
+                return;
+            }
+
         }
     }
 

@@ -255,13 +255,14 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
             model.setQuery(qry);
 
             QStringList query_2_list;
+
             for(int i = 0; i < model.rowCount(); ++i){
                 query_2_list.append(model.record(i).value(0).toString());
-        }
+            }
 
-        double_list->addAvailableItems(query_2_list);
+            double_list->addAvailableItems(query_2_list);
 
-        return true;
+            return true;
 
         } else {
 

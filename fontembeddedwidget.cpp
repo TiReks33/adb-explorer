@@ -95,7 +95,7 @@ void fontEmbeddedWidget::initForm()
     //        __buttonFont.setBold(true);
     //        setFontButton_->setFont(__buttonFont);
 
-    qDebug() << "BUTTON FONT::" << setFontButton_->font() ;
+    ////qDebug() << "BUTTON FONT::" << setFontButton_->font() ;
 
     mainLay->addWidget(setFontButton_);
 

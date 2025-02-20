@@ -73,6 +73,8 @@ private:
 
 
     int tuples_added_=0;
+
+    QStringList chosenAttributes_;
     QStringList tuples_;
     QPointer<CustomQueryResult> describe_form_;
 
