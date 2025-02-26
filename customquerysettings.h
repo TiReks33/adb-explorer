@@ -8,6 +8,14 @@
 #include "adb-exp-utility.h"
 #include "auth.h"
 
+enum tblQuerSet{
+    separate_content_window,
+    separate_describe_window,
+    separate_query_window,
+    BLANK_RESULT,
+    MSG_SHOW_IF_BLANK_RESULT,
+    MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL
+};
 
 namespace Ui {
 class CustomQuerySettings;
@@ -21,47 +29,35 @@ public:
     explicit CustomQuerySettings(QWidget/*Tables*/ *parent = nullptr);
     ~CustomQuerySettings();
 
+    void setForeignSettingsOnForm(QMap<QString,int>); ////
+
+    static QMap<int,QString> paramEnumToStr;
 
 
     //friend class Tables;
 
-private slots:
-
-    // write settings to file
-    void write2query_opts_file();
-
-    // read settings from file
-    bool read4rom_query_opts_file();
 
 signals:
 
-    void settings_changed(QMap<QString,int>);
+    void settingsExportSig(QMap<QString,int>,bool); ////
 
 private:
     Ui::CustomQuerySettings *ui;
 
-    QMap<QString,int> __settings_map;
 
 //    Tables* parent_;
 
     void init_signals();
 
-    void fileOps();
-
     void formStyle();
 
-    //[
-    QString const query_settings_f_name = adb_utility::filepath_+"/query.cfg";
 
-//    bool t_content_wnd = true;
+    bool changes_ = false;
 
-//    bool t_query_wnd = true;
-
-//    bool MSG_SHOW_IF_BLANK_RESULT = false;
-
-    //]
-
+    void settings2Export(QMap<QString,int>&);
 
 };
 
 #endif // CUSTOMQUERYSETTINGS_H
+
+

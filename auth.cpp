@@ -22,6 +22,23 @@ auth::auth(){
     SQLdriver2SQLDBtype[_POSTGRESQLdrv] = SQLDBtype::PSQL;
 }
 
+auth &auth::copy_(const auth &auth__)
+{
+    if(this!=&auth__){
+
+        db_driver_=auth__.db_driver_;
+        host_=auth__.host_;
+        port_=auth__.port_;
+
+        login_=auth__.login_;
+        passw_=auth__.passw_;
+
+        db_name_=auth__.db_name_;
+
+    }
+    return *this;
+}
+
 bool auth::SQLdriverMatch(const QString &curDrvName__, SQLDBtype matchedSQLDB__)
 {
     return (auth::SQLdriver2SQLDBtype[curDrvName__]==matchedSQLDB__);

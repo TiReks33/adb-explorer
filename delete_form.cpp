@@ -11,7 +11,7 @@ delete_form::delete_form(QWidget *parent,QString const &entity_name__) :
     ui->comboBox->setCurrentIndex(-1);
 
     connect(ui->comboBox,&QComboBox::textActivated,[=](const QString & cur_text__){
-        qDebug() <<QString("%0 to delete:: %1").arg(entity_name_).arg(cur_text__);
+        /*qDebug()*/std::cout << QStringLiteral("%0 to delete:: %1").arg(entity_name_).arg(cur_text__).toStdString() << std::endl;
     });
 
     ui->label->setText("Choose "+entity_name_+ " to <font style=\"color: black;background: red; font-weight:bold;\">DELETE</font>");

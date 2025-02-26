@@ -27,6 +27,9 @@
 #include "auth.h"
 #include "signaltableview.h"
 #include "notifycombobox.h"
+#include "iqtplugins.h"
+
+#include "clickablelabel.h"
 
 ////int const _CUSTOM_MESSAGE_BOX_TIMER_=15000;
 
@@ -59,6 +62,10 @@ namespace adb_utility
 {
     extern int _CUSTOM_MESSAGE_BOX_TIMER_;
     extern QString const filepath_;
+    //
+//    extern QString const cfgFilepath_;
+//    extern QString const cryptFilepath_;
+    //
     extern QString const currentLogFileName;
     extern QString const settings_f_name_;
 //    extern bool _INTERACTIVE_RESIZE_;
@@ -68,8 +75,10 @@ namespace adb_utility
 
 
 
-    // get custom QMessageBox
+    // get custom QMessageBox{1}
     void get_information_window(enum QMessageBox::Icon messageBoxType__, QString const&,QString const&, QWidget* = nullptr, bool stayOnTop__ = false);
+    // {1}non-static version
+    QPointer<adbMessageBox>/*void*/ get_separate_information_window(enum QMessageBox::Icon messageBoxType__, QString const&,QString const&, QWidget* = nullptr, bool stayOnTop__ = false, bool timer = false);
 
     QWidget* getRescaleBox(/*QTableView*/QPointer<signalTableView>);
 
@@ -95,7 +104,7 @@ namespace adb_utility
     QString pack_(QStringList const& list, QString const& separator=", ");
 
     // QString->QStringList by separator
-    QStringList unpack_(QString const& string, QString const& separator=", ");
+    QStringList unpack_(QString const& string, QString const& separator=", ", bool removeEmptyElements = false);
 
     // replaces all entries of pattern in string with some text (std::string)
     void replace_all( std::string& s, std::string const& toReplace, std::string const& replaceWith);
@@ -121,9 +130,24 @@ namespace adb_utility
 
     // insert numeric parameters from file to QMap
     bool get_settings_4rom_file(QString const&,QMap<QString,int>&);
+    inline bool intMapSettingExist(int&tempVal__,
+            QMap<QString,int> const & qMap2check__,
+            QString const& settingName__)
+    {
+        tempVal__ = qMap2check__.value(settingName__);
+        return (tempVal__ != -1);
+    };
 
     // insert string parameters (key="..") from file to QMap
     bool get_settings_4rom_file(QString const&,QMap<QString,QString>&);
+    inline bool QStringMapSettingExist(QString&tempVal__,
+            QMap<QString,QString> const & qMap2check__,
+            QString const& settingName__)
+    {
+        tempVal__ = qMap2check__.value(settingName__);
+        return (tempVal__ != "");
+    };
+
 
     bool showExitAppDialog(QWidget* parent = nullptr, bool khakiHighlightStyle = true);
 
@@ -135,6 +159,9 @@ namespace adb_utility
         }
         return true;
     };
+
+    // add notification on window
+    ////QFrame* add_note(QWidget* parent,QString const&);
 }
 
 
@@ -158,6 +185,12 @@ extern QString const adbCheckBoxStyleSheet;
 
 }
 
+
+namespace plugins {
+
+extern ICryptoPlugin* cryptoModule;
+
+}
 
 
 #endif // ADB_EXP_UTILITY_H

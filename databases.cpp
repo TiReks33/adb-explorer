@@ -1,13 +1,15 @@
 #include "databases.h"
 #include "ui_databases.h"
 
+#include "custom_query.h"
+
 int Databases::defaultScaleIndex_ = 0;
 QString Databases::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
 Databases::Databases(auth& auth__, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Databases)
-  , tableView(new signalTableView)
+  , tableView_(new signalTableView)
   , showDB_button{new reloadButton{0,/*"black","red"*/"floralwhite","darkslategray",true,false,"<u>R</u>eload databases list"}}
   , statusBar(new scrolledStatusBar)
 
@@ -16,7 +18,7 @@ Databases::Databases(auth& auth__, QWidget *parent) :
   , new_db_window_(new create_db_name)
   , delete_db_window_(new delete_db)
 
-  , rescaleBoxWidget(adb_utility::getRescaleBox(tableView))
+  , rescaleBoxWidget(adb_utility::getRescaleBox(tableView_))
   , rescaleDefaultCheckBox{new QCheckBox{"set default"}}
 
   , createUserButton_{new QPushButton{"Create SQL Server User/Role"}}
@@ -25,7 +27,7 @@ Databases::Databases(auth& auth__, QWidget *parent) :
   , changePassButton_{new QPushButton{}}
   , deleteUserButton_{new QPushButton{"DELETE USER"}}
   , quitButton_{new QPushButton(/*"⌧"*//*"✕"*/QString::fromUtf8("\U00002715"))/*("⮿")*/}
-  , fontWidget_{new fontEmbeddedWidget{tableView}}
+  , fontWidget_{new fontEmbeddedWidget{tableView_}}
 
   , menuBar_{new QMenuBar{this}}
   , menuFile_{new /*QMenu*/hideMenu{Qt::Key_F10,menuBar_}}
@@ -50,7 +52,7 @@ Databases::~Databases()
     db_connection::close();   // close SQL-connection 'auth::con_name_'
     db_connection::remove(); // remove SQL-connection 'auth::con_name_'
     delete ui;
-    delete tableView;
+    delete tableView_;
 
     delete tables_window_;
     delete new_db_window_;
@@ -68,7 +70,7 @@ void Databases::keyPressEvent(QKeyEvent *e) {
     if(key == Qt::Key_Escape){
         close();
     } else if(key == Qt::Key_Down || key == Qt::Key_Up) {
-        emit tableView->clicked(/*QModelIndex()*/tableView->currentIndex());
+        emit tableView_->clicked(/*QModelIndex()*/tableView_->currentIndex());
     } /*else if(key == Qt::Key_Enter || key == Qt::Key_Return){
 
     }*/ else if(key == Qt::Key_F10){
@@ -93,7 +95,7 @@ void Databases::closeEvent(QCloseEvent *event)
         return;
     }
 
-    close_all_custom_windows_();
+    emit close_all_custom_windows_();
 
     event->accept();
 }
@@ -101,7 +103,7 @@ void Databases::closeEvent(QCloseEvent *event)
 
 void Databases::init_form()
 {
-    ui->mainLayout->insertWidget(0,tableView);
+    ui->mainLayout->insertWidget(0,tableView_);
 
 
     QFrame* reloadFrame = new QFrame;
@@ -139,7 +141,7 @@ void Databases::init_form()
                                         | Qt::WindowCloseButtonHint;
     this->setWindowFlags(flags);
 
-    tableView->setSelectionMode(QTableView::SingleSelection);
+    tableView_->setSelectionMode(QTableView::SingleSelection);
 
     QHBoxLayout* sqlUserLay = new QHBoxLayout;
 
@@ -288,9 +290,9 @@ void Databases::init_form()
 
         ui->showTables_button->setFocus();
 
-        tableView->setAlternatingRowColors(true);
+        tableView_->setAlternatingRowColors(true);
 
-        tableView->setPalette(QPalette(adb_style::whiteUndGrayColor));
+        tableView_->setPalette(QPalette(adb_style::whiteUndGrayColor));
 
 
 
@@ -327,7 +329,7 @@ void Databases::init_signals()
 
         db_connection::open(auth_);
 
-        if(!db_connection::set_query(query__,&model_,tableView/*,QHeaderView::Stretch*/)){
+        if(!db_connection::set_query(query__,&model_,tableView_/*,QHeaderView::Stretch*/)){
 
             QString const warning_text = QStringLiteral("Database `%1` is not created. Please check selected name and permissions and try again.").arg(newdb_name__);
 
@@ -435,17 +437,7 @@ void Databases::init_signals()
               return;
             }
         }
-        //
 
-//        if(close_chld_wndws_on_next){
-//            auto confirm = QMessageBox::information(this,"Confirm choosing","Are you want to choose database \""+auth_.db_name_+"\" and go to the next form?"
-//                                                            "<br>Note: <FONT COLOR='#ff0000'>All query windows related to this form (if any) will be closed.</FONT>"
-//                                                                " This behaviour changeable via settings.",
-//                                        QMessageBox::Yes | QMessageBox::No);
-//            qDebug()<<"After QMessageBox";
-//            if(confirm!=QMessageBox::Yes)
-//                return;
-//        }
 
         tables_window_->show();
         this->hide();
@@ -459,35 +451,35 @@ void Databases::init_signals()
 
 
     // mouse double-click handler
-    connect(tableView,&QTableView::activated,[=](const QModelIndex &index){
+    connect(tableView_,&QTableView::activated,[=](const QModelIndex &index){
 
 
 
-        tableView->setCurrentIndex(index);
+        tableView_->setCurrentIndex(index);
 
-        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
+        auth_.db_name_=tableView_->model()->data(tableView_->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
     });
 
     // mouse left-click handler
-    connect(tableView,&QTableView::clicked,[=](const QModelIndex &index){
+    connect(tableView_,&QTableView::clicked,[=](const QModelIndex &index){
 
-        tableView->setCurrentIndex(index);
+        tableView_->setCurrentIndex(index);
 
-        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
+        auth_.db_name_=tableView_->model()->data(tableView_->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
 
     });
 
-    connect(tableView,&QTableView::doubleClicked,[=](const QModelIndex &index){
+    connect(tableView_,&QTableView::doubleClicked,[=](const QModelIndex &index){
 
-        tableView->setCurrentIndex(index);
+        tableView_->setCurrentIndex(index);
 
-        auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
+        auth_.db_name_=tableView_->model()->data(tableView_->currentIndex()).toString();
 
         statusBar->get_line()->clear();
 
@@ -563,6 +555,15 @@ void Databases::init_signals()
     connect(exitEntrie_, &QAction::triggered,[this]{
         close();
     });
+
+    connect(this,&Databases::emptySet,[=]{
+        if(MSG_SHOW_IF_BLANK_RESULT)
+        {
+            adb_utility::get_information_window(QMessageBox::Information,"Empty set","(✓) [Note] :: Query result not contain/doesn't imply"
+                                   " contain of displayable result.", this);
+        }
+    });
+
 }
 
 
@@ -586,7 +587,7 @@ void Databases::defaultSettings()
     QFont __font;
 
     __font.fromString(Databases::defaultFont_);
-    tableView->setFont(__font);
+    tableView_->setFont(__font);
 
     // set default settings
     rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(Databases::defaultScaleIndex_);
@@ -605,12 +606,12 @@ void Databases::message_to_status(const QString & message__) const
 
     if(db_connection::open(auth_)){
 
-        if(db_connection::set_query("SHOW DATABASES;",&model_,tableView/*,QHeaderView::Stretch*/)){
+        if(db_connection::set_query("SHOW DATABASES;",&model_,tableView_/*,QHeaderView::Stretch*/)){
 
             // 1st cell in model default selected
-            select_cells(0,0, tableView);
+            select_cells(0,0, tableView_);
 
-            auth_.db_name_=tableView->model()->data(tableView->currentIndex()).toString();
+            auth_.db_name_=tableView_->model()->data(tableView_->currentIndex()).toString();
 
             ////qDebug() << "Number of existinf DBs::" <<(model_.rowCount());
 
@@ -632,12 +633,6 @@ void Databases::message_to_status(const QString & message__) const
 
 void Databases::deleteUser()
 {
-//    if(auth_.db_driver_!="QMARIADB" && auth_.db_driver_!="QMYSQL" && auth_.db_driver_!="QMYSQL3"){
-//        adb_utility::get_information_window(QMessageBox::Information,"Functional is not available for this driver",
-//                                            QString("This function is not available for this SQL driver: `%1`. "
-//                                                                     "Please, procide user delete queries from `Query to SQL server` form.").arg(auth_.db_driver_),this);
-//        return;
-//    }
 
     delete_sqldb_user* deleteUserForm = new delete_sqldb_user{this};
 
@@ -767,7 +762,7 @@ void Databases::getPasswordMgmtForm()
     passwordForm->setModal(true);
     passwordForm->show();
 
-    std::cout << auth_.login_.toStdString() << "::" << auth_.host_.toStdString() << std::endl;
+    //std::cout << auth_.login_.toStdString() << "::" << auth_.host_.toStdString() << std::endl;
 }
 
 
@@ -837,11 +832,24 @@ void Databases::get_query_wndw()
     QPointer<Custom_Query> custom_query_window{new Custom_Query{nullptr,true}};
 
     if(query2server_note){
-        custom_query_window->add_note("*Note: if you need to operate with certain database or tables in it, "
+        noteFrame* query2server_note_ptr = custom_query_window->add_note("*Note: if you need to operate with certain database or tables in it, "
                          "you must choose database from 'Database' window and click 'Show tables in selected database'.");
 
-        connect(custom_query_window,&Custom_Query::dont_show_note,[=]{ query2server_note=false; write2_settings_file();  });
+        ////connect(custom_query_window,&Custom_Query::dont_show_note,[=]{ query2server_note=false; write2_settings_file();  });
+        connect(query2server_note_ptr,&noteFrame::dontShowNoteAgainSig,[this]{
+            query2server_note = false;
+            write2_settings_file();
+        });
     }
+
+
+//    if(test_note){
+//        noteFrame* test_ptr = custom_query_window->add_note("*testNote: blah-blah-blah mr. Freeman");
+
+//        connect(test_ptr,&noteFrame::dontShowNoteAgainSig,[this]{
+//            test_note = false;
+//        });
+//    }
 
     // call overload signal on overload slot
     connect(custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),
@@ -859,18 +867,6 @@ void Databases::get_query_wndw()
 //    }
 
 
-//    connect(this,&Databases::window_rise_signal,[=]{
-//        // if object exist, raise it in front of other windows
-//        if(custom_query_window){
-////            custom_query_window->show();
-////            custom_query_window->activateWindow();
-////            custom_query_window->raise();
-//        }
-//    });
-
-//    QFlag flags = Qt::Window & ~Qt::WindowStaysOnTopHint;
-//    custom_query_window->setWindowFlags(flags);
-
     custom_query_window->setAttribute( Qt::WA_DeleteOnClose, true );
     custom_query_window->setModal(false);
     custom_query_window->show();
@@ -881,83 +877,161 @@ void Databases::get_query_wndw()
 
 void Databases::send_custom_query_slot(Custom_Query *custom_query_window__)
 {
-// dummy counter for multiply windows
+// dummy counter to multiply windows (for removing SQL-Server subconnection when all gone)
 static int wndw_cnt=0;
-//wndw_cnt++;
 
-    // dynamic allocated copy of parent auth for preventing dangling (when local var goes out of scope)
-    ////auth* auth_copy{new auth};
-    std::unique_ptr<auth> auth_copy{new (std::nothrow) auth};
+    auto QueryRawText = custom_query_window__->get_text();
 
-    if(auth_copy.get()){
+    auto QueriesList = adb_utility::unpack_(QueryRawText,";",true);
 
-        auth_copy->copy_(auth_);
+    // not close form if some errors in queries occures
+    auto queryFailFlag = false;
 
-        // remove db_name_ for logical reason
-        auth_copy->db_name_.clear();
+    auto skipAfterFail = false;
 
-    ////    connect(this,&Databases::destroyed,[&]{delete auth_copy;auth_copy=nullptr;});
+    for(auto i=0;i!=QueriesList.size();++i){
 
-        QScopedPointer<CustomQueryResult> new_result_window{new CustomQueryResult{{*auth_copy},nullptr,true}};
+        if(skipAfterFail){
+            custom_query_window__->save_query(QUERYSTATUS::NOTSENDED,QueriesList.at(i));
+            continue;
+        }
 
-        if(new_result_window.get()){
-
-            wndw_cnt++;
-
-            connect(new_result_window.get(),&CustomQueryResult::destroyed,[&]{
-
-    ////            delete auth_copy;
-    ////            auth_copy = nullptr;
-
-                // if all windows was closed -- close and remove sub-connection to SQL server
-                if(!(--wndw_cnt)){
-                    db_connection::close(subconnection_name_);
-                    db_connection::remove(subconnection_name_);
-                }
-//                qDebug() << "wndw_cnt" << wndw_cnt;
-//                qDebug()<< "~new_result_window (destructor)";
-            });
+//        std::cout << QueriesList.at(i).toStdString() << " ";// << std::endl;
+        //qDebug() << QueriesList.at(i);
+//        std::cout << QueriesList.at(i).toStdString().size() << std::endl;
 
 
-//            if(close_chld_wndws_on_next){
-            //closing all forms by parent signal(2)
-            connect(this,&Databases::close_all_custom_windows_, new_result_window.get() , &CustomQueryResult::closeNowSig, Qt::QueuedConnection);
-//            }
+        // dynamic allocated copy of parent auth for preventing dangling (when local var goes out of scope)
+        auth* auth_copy{new (std::nothrow) auth};
+
+        if(auth_copy){
 
 
-            // send query and place result to form of new allocated object
-            new_result_window->custom_query_slot(custom_query_window__->get_text(),subconnection_name_);
+            auth_copy->copy_(auth_);
 
-            // check error of query
-            if((new_result_window->tableView->model())!=nullptr) {
 
-                ////qDebug() << "Number of columns in tableView->model()::"<<new_result_window->tableView->model()->columnCount();
-                ////qDebug() << "Number of rows in tableView->model()::"<<new_result_window->tableView->model()->rowCount();
+            // remove db_name_ entry (for design reason)
+            auth_copy->db_name_.clear();
 
-                custom_query_window__->close_window();
 
-                // check if result query is empty
-                if(!new_result_window->tableView->model()->rowCount()){
+            QPointer<CustomQueryResult> new_result_window{new (std::nothrow) CustomQueryResult{{*auth_copy}/*{*__newOwner}*/,nullptr,true}};
 
-                    qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+            if(!new_result_window){
 
-                    statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
-                                            " contain of displayable result.");
+                delete auth_copy;
+                auth_copy=nullptr;
+
+            } else{
+
+                wndw_cnt++;
+
+                auto newTitle = this->metaObject()->className() + QStringLiteral("::") + new_result_window->windowTitle()+QStringLiteral(" № %1").arg(i);
+
+                new_result_window->setWindowTitle(newTitle);
+
+                new_result_window->setAttribute(Qt::WA_DeleteOnClose, true);
+
+                connect(new_result_window,&CustomQueryResult::destroyed,[=]{
+
+                    delete auth_copy;
+                    //auth_copy = nullptr;
+
+                    // if all windows was closed -- close and remove sub-connection to SQL server
+                    if(!(--wndw_cnt)){
+                        db_connection::close(subconnection_name_);
+                        db_connection::remove(subconnection_name_);
+                    }
+    //                qDebug() << "wndw_cnt" << wndw_cnt;
+    //                qDebug()<< "~new_result_window (destructor)";
+                });
+
+
+
+                //closing all forms by parent signal(2)
+                connect(this,&Databases::close_all_custom_windows_, new_result_window , &CustomQueryResult::closeNowSig, Qt::QueuedConnection);
+
+
+
+                // send query and place result to form of new allocated object
+                new_result_window->custom_query_slot(QueriesList.at(i),subconnection_name_);
+
+                // check error of query
+                if((new_result_window->tableView->model())!=nullptr) {
+
+
+                    // add query to encrypt bin. file (with success status)
+                    custom_query_window__->save_query(QUERYSTATUS::SUCCESS,QueriesList.at(i));
+
+
+                    // check if result query is empty
+                    if(!new_result_window->tableView->model()->rowCount()&&!BLANK_RESULT){
+
+                        //qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+
+                        statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                                " contain of displayable result.");
+
+                        emit emptySet();
+
+                        new_result_window->deleteLater();
+
+                    } else{
+
+                        statusBar->get_line()->clear();
+
+                        new_result_window->show();
+                        //new_result_window->exec();
+                    }
 
                 } else{
 
-                    statusBar->get_line()->clear();
+                    custom_query_window__->save_query(QUERYSTATUS::FAILED,QueriesList.at(i));
 
-                    new_result_window->show();
-                    new_result_window->exec();
+                    // if query exec failed, show edit form in front again (to correct query by user)
+                    //emit window_rise_signal();
+                    queryFailFlag = true;
+
+                    if(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL){
+                        //break;
+                        skipAfterFail = true;
+                        continue;
+                    }
                 }
 
-            } else{
-                // if query exec failed, show edit form in front again (to correct query by user)
-                emit window_rise_signal();
             }
 
         }
+
+    }
+
+    if(QueriesList.size()){
+
+        if(!queryFailFlag){
+            custom_query_window__->close();
+
+        }else{
+
+            if(queryFailNote){
+
+                auto previousFailNote = custom_query_window__->findChild<noteFrame*>("failNote");
+
+                // delete previous (duplicate) fail note to prevent window's notes-spamming
+                if(previousFailNote)
+                    previousFailNote->close();
+
+                QPointer<noteFrame> failNotePtr = custom_query_window__->add_note("*Note: Error/s occurred while proceed your SQL transaction/s.");
+
+                failNotePtr->setObjectName("failNote");
+
+                /*auto sig = */connect(failNotePtr,&noteFrame::dontShowNoteAgainSig,[this]{
+                    queryFailNote = false;
+                    write2_settings_file();
+                });
+
+            }
+
+        }
+
     }
 }
 
@@ -969,17 +1043,27 @@ void Databases::showSettings()
 
         settings_dial->setAttribute(Qt::WA_DeleteOnClose,true);
 
-        settings_dial->setWindowTitle("Settings");
+        settings_dial->setWindowTitle("Databases::Settings");
 
         QVBoxLayout* main_lay = new QVBoxLayout;
 
         settings_dial->setLayout(main_lay);
 
+        QLabel* settingsNameSubLabel = new QLabel{"SQL queries:"};
+
+        auto lblFont = settingsNameSubLabel->font();
+
+        lblFont.setBold(true);
+
+        settingsNameSubLabel->setFont(lblFont);
+
+        main_lay->addWidget(settingsNameSubLabel);
+
         QHBoxLayout* closeNonModal_lay = new QHBoxLayout;
 
         main_lay->addLayout(closeNonModal_lay);
 
-        QCheckBox* closeNonModalCB = new QCheckBox;
+        QCheckBox* closeNonModalCB = new QCheckBox{};
         closeNonModalCB->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
         ClickableLabel* CloseNonModalCB_lbl = new ClickableLabel("Close all query forms after database chosing");
@@ -991,8 +1075,9 @@ void Databases::showSettings()
 
         closeNonModalCB->setChecked(close_chld_wndws_on_next);
 
-        connect(CloseNonModalCB_lbl,&ClickableLabel::clicked,[=]{
-            closeNonModalCB->setChecked(!closeNonModalCB->isChecked());
+        connect(CloseNonModalCB_lbl,&ClickableLabel::clicked,[closeNonModalCB]{
+            if(closeNonModalCB && closeNonModalCB->isEnabled())
+                closeNonModalCB->setChecked(!closeNonModalCB->isChecked());
         });
 
 
@@ -1005,7 +1090,7 @@ void Databases::showSettings()
         errorTimeoutLay->addWidget(errorTimeoutLbl);
 
         QLineEdit* errorTimeoutLine = new QLineEdit;
-        errorTimeoutLine->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+        errorTimeoutLine->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
         // only digits validation
         QIntValidator* int_validator = new QIntValidator(1000, 2073600000);
@@ -1019,6 +1104,91 @@ void Databases::showSettings()
         errorTimeoutLine->setText(QString::number(adb_utility::_CUSTOM_MESSAGE_BOX_TIMER_));
 
         main_lay->addLayout(errorTimeoutLay);
+
+
+        QHBoxLayout* showBlankResultLay = new QHBoxLayout;
+
+        main_lay->addLayout(showBlankResultLay);
+
+        QCheckBox* showBlankResultCB = new QCheckBox;
+        showBlankResultCB->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+
+        ClickableLabel* showBlankResultCB_lbl = new ClickableLabel("Display empty query result");
+        showBlankResultCB_lbl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        showBlankResultCB_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+        showBlankResultLay->addWidget(showBlankResultCB);
+        showBlankResultLay->addWidget(showBlankResultCB_lbl);
+
+
+        QCheckBox* messageIfBlankResultCB = new QCheckBox;
+        ClickableLabel* messageIfBlankResultCB_lbl = new ClickableLabel("Show message if result of SQL query\ndoesn't imply contain of displayable result");
+
+
+        connect(messageIfBlankResultCB_lbl,&ClickableLabel::clicked,[messageIfBlankResultCB]{
+            if(messageIfBlankResultCB && messageIfBlankResultCB->isEnabled())
+                messageIfBlankResultCB->setChecked(!messageIfBlankResultCB->isChecked());
+        });
+
+        connect(showBlankResultCB,&QCheckBox::stateChanged,[messageIfBlankResultCB,messageIfBlankResultCB_lbl](int state__){
+            if(state__){
+                messageIfBlankResultCB->setChecked(false);
+                messageIfBlankResultCB->setEnabled(false);
+                messageIfBlankResultCB_lbl->setEnabled(false);
+            } else{
+                messageIfBlankResultCB->setEnabled(true);
+                messageIfBlankResultCB_lbl->setEnabled(true);
+            }
+        });
+
+        connect(showBlankResultCB_lbl,&ClickableLabel::clicked,[showBlankResultCB]{
+            if(showBlankResultCB && showBlankResultCB->isEnabled())
+                showBlankResultCB->setChecked(!showBlankResultCB->isChecked());
+        });
+
+
+        messageIfBlankResultCB->setChecked(MSG_SHOW_IF_BLANK_RESULT);
+
+        showBlankResultCB->setChecked(BLANK_RESULT);
+
+
+        QHBoxLayout* messageIfBlankResultLay = new QHBoxLayout;
+
+        main_lay->addLayout(messageIfBlankResultLay);
+
+
+        messageIfBlankResultCB->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+
+        messageIfBlankResultCB_lbl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        messageIfBlankResultCB_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+        messageIfBlankResultLay->addWidget(messageIfBlankResultCB);
+        messageIfBlankResultLay->addWidget(messageIfBlankResultCB_lbl);
+
+
+
+        QHBoxLayout* terminate_lay = new QHBoxLayout;
+
+        main_lay->addLayout(terminate_lay);
+
+        QCheckBox* terminateCB = new QCheckBox{};
+        terminateCB->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+
+        ClickableLabel* terminateCB_lbl = new ClickableLabel("Terminate execution of user custom SQL queries list after first failed query");
+        terminateCB_lbl->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        terminateCB_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+
+        terminate_lay->addWidget(terminateCB);
+        terminate_lay->addWidget(terminateCB_lbl);
+
+        terminateCB->setChecked(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL);
+
+        connect(terminateCB_lbl,&ClickableLabel::clicked,[terminateCB]{
+            if(terminateCB && terminateCB->isEnabled())
+                terminateCB->setChecked(!terminateCB->isChecked());
+        });
+
+
 
         QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
@@ -1056,6 +1226,13 @@ void Databases::showSettings()
                 /*new*/ adb_utility::_CUSTOM_MESSAGE_BOX_TIMER_ = temp;
                     adb_utility::config::write2_settings_file();
             }
+
+            BLANK_RESULT = showBlankResultCB->isChecked();
+
+            MSG_SHOW_IF_BLANK_RESULT = messageIfBlankResultCB->isChecked();
+
+            MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = terminateCB->isChecked();
+
             write2_settings_file();
 
             settings_dial->accept();
@@ -1073,16 +1250,28 @@ bool Databases::read4rom_settings_file()
     if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map)){
         int temp;
 
-        if((temp = __settings_map.value("close_chld_wndws_on_next"))!=-1)
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"close_chld_wndws_on_next")) // "close_chld_wndws_on_next"
             close_chld_wndws_on_next = temp;
 
-        if((temp = __settings_map.value("query2server_note"))!=-1)
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"query2server_note"))//if((temp = __settings_map.value("query2server_note"))!=-1)
             query2server_note = temp;
 
-        if((temp = __settings_map.value("defaultScaleMode"))!=-1){
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"defaultScaleMode")){
             Databases::defaultScaleIndex_=temp;
             rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(temp);
         }
+
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"BLANK_RESULT"))
+            BLANK_RESULT = temp;
+
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"MSG_SHOW_IF_BLANK_RESULT"))
+            MSG_SHOW_IF_BLANK_RESULT = temp;
+
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL"))
+            MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = temp;
+
+        if(adb_utility::intMapSettingExist(temp,__settings_map,"queryFailNote"))
+            queryFailNote = temp;
 
     } else{
 
@@ -1095,7 +1284,7 @@ bool Databases::read4rom_settings_file()
     if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map_str)){
         QString temp_s;
 
-        if((temp_s = __settings_map_str.value("defaultTableFont"))!="")
+        if(adb_utility::QStringMapSettingExist(temp_s,__settings_map_str,"defaultTableFont")) //defaultTableFont
             Databases::defaultFont_ = temp_s;
 
         return true;
@@ -1115,6 +1304,10 @@ void Databases::write2_settings_file()
     textStream << "query2server_note" << '=' << QString::number(query2server_note) << Qt::endl;
     textStream << "defaultScaleMode" << '=' << QString::number(Databases::defaultScaleIndex_) << Qt::endl;
     textStream << "defaultTableFont" << '=' << '\"'+Databases::defaultFont_+'\"' << Qt::endl;
+    textStream << "BLANK_RESULT" << '=' << QString::number(BLANK_RESULT) << Qt::endl;
+    textStream << "MSG_SHOW_IF_BLANK_RESULT" << '=' << QString::number(MSG_SHOW_IF_BLANK_RESULT) << Qt::endl;
+    textStream << "MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL" << '=' << QString::number(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL) << Qt::endl;
+    textStream << "queryFailNote" << '=' << QString::number(queryFailNote) << Qt::endl;
 }
 
 void Databases::mousePressEvent(QMouseEvent *event)

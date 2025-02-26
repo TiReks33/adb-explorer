@@ -151,6 +151,8 @@ QString const adb_style::adbCheckBoxStyleSheet = "QCheckBox:!disabled {/*backgro
 ;
 
 
+ICryptoPlugin* plugins::cryptoModule{nullptr};
+
 
 void adb_utility::get_information_window(enum QMessageBox::Icon messageBoxType__, const QString & header_text__, const QString & main_text__,  QWidget *parent__, bool stayOnTop__)
 {
@@ -180,6 +182,40 @@ void adb_utility::get_information_window(enum QMessageBox::Icon messageBoxType__
     messageBox->setWindowFlags(flags);
     messageBox->setModal(IsModal);
     messageBox->show();
+}
+
+QPointer<adbMessageBox>/*void*/ adb_utility::get_separate_information_window(enum QMessageBox::Icon messageBoxType__, const QString & header_text__, const QString & main_text__,  QWidget *parent__, bool stayOnTop__,bool timer__)
+{
+
+    QPointer <adbMessageBox> messageBox;
+
+    if(!timer__){
+
+        messageBox = new adbMessageBox(messageBoxType__,header_text__,
+                                                          main_text__,
+                                                          QMessageBox::Ok,parent__);
+    } else {
+
+    messageBox = new adbMessageBox(messageBoxType__,header_text__,
+                                                      main_text__,
+                                                      _CUSTOM_MESSAGE_BOX_TIMER_,
+                                                      QMessageBox::Ok,parent__);
+    }
+
+    messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
+
+    QFlag flags = 0; bool IsModal = false;
+    if(!stayOnTop__){
+        flags = QFlag(Qt::Window & ~Qt::WindowStaysOnTopHint);
+    }else{
+        flags = QFlag(Qt::Dialog);
+        IsModal = true;
+    }
+    messageBox->setWindowFlags(flags);
+    messageBox->setModal(IsModal);
+    messageBox->show();
+
+    return messageBox;
 }
 
 QWidget*
@@ -296,9 +332,25 @@ QString adb_utility::pack_(const QStringList &list, QString const& separator)
 }
 
 
-QStringList adb_utility::unpack_(const QString &string, QString const& separator)
+QStringList adb_utility::unpack_(const QString &string, QString const& separator, bool removeEmptyElem__)
 {
-    return string.split(separator);
+    if(!removeEmptyElem__)
+        return string.split(separator);
+    else{
+        auto clearList = string.split(separator);
+
+        auto i = std::begin(clearList);
+
+        while (i != std::end(clearList)) {
+            // Do some stuff
+            if (i->simplified().isEmpty())
+                i = clearList.erase(i);
+            else
+                ++i;
+        }
+
+        return clearList;
+    }
 }
 
 
@@ -470,6 +522,7 @@ void adb_utility::customMessageHandler(QtMsgType type, const QMessageLogContext 
    textStream << txt << Qt::endl;
 }
 
+
 // parsing of file with different key-values pairs
 bool adb_utility::get_settings_4rom_file(QString const& file_name__,QMap<QString, int> &settings_map__)
 {
@@ -504,8 +557,6 @@ bool adb_utility::get_settings_4rom_file(QString const& file_name__,QMap<QString
                       settings_map__.insert(name,-1);
                }
                cFile.close();
-
-               //qDebug() << settings_map__;
 
                return true;
     }
@@ -553,7 +604,6 @@ bool adb_utility::get_settings_4rom_file(const QString &file_name__, QMap<QStrin
                                .remove(delimiterPos+1,firstbracket-1-delimiterPos)
                                .mid(delimiterPos+1)
                                .remove("\"");
-//qDebug() << "VALUE"<<value;
 
                        settings_map__.insert(name,value);
 
@@ -672,5 +722,57 @@ bool adb_utility::showExitAppDialog(QWidget *parent__, bool khakiHighlightStyle_
 
     return true;
 }
+
+
+
+//QFrame* adb_utility::add_note(QWidget* parent__,const QString & message__)
+//{
+
+//    QFrame* style_frame = new QFrame{parent__};
+
+//    style_frame->setAttribute(Qt::WA_DeleteOnClose, true);
+
+//    QHBoxLayout* dynamic_note_lay = new QHBoxLayout;
+
+//    style_frame->setLayout(dynamic_note_lay);
+
+//    style_frame->setFrameShape(QFrame::StyledPanel);
+//    style_frame->setFrameShadow(QFrame::Raised);
+
+
+//    ClickableLabel* dyn_note_lbl = new ClickableLabel(message__);
+//    dyn_note_lbl->setObjectName("NOTELABEL");
+//    dyn_note_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+//    dyn_note_lbl->setWordWrap(true);
+//    QPushButton* dyn_note_hide_button = new QPushButton("hide");
+//    dyn_note_hide_button->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+//    QPushButton* dyn_note_disable_button = new QPushButton("Don't show again");
+//    dyn_note_disable_button->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+//    dynamic_note_lay->addWidget(dyn_note_lbl);
+//    dynamic_note_lay->addWidget(dyn_note_hide_button);
+//    dynamic_note_lay->addWidget(dyn_note_disable_button);
+
+////    QList<QPushButton*> ButtonsInFormlist = style_frame->findChildren<QPushButton*>();
+////        foreach (auto obj, ButtonsInFormlist){
+
+////            obj->setStyleSheet(QStringLiteral("QPushButton{%1} %2")
+////                .arg(obj->styleSheet())
+////                .arg(adb_style::getbuttonKhakiHiglightSS()));
+
+////        }
+
+//    QObject::connect(dyn_note_hide_button,&QPushButton::clicked,[style_frame]{
+//        //delete style_frame;
+//        style_frame->close();
+//    });
+
+//    QObject::connect(dyn_note_disable_button,&QPushButton::clicked,[style_frame]{
+//        //delete style_frame;
+//        style_frame->close();
+//        //emit dont_show_note();
+//    });
+
+//    return style_frame;
+//}
 
 

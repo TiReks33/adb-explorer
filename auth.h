@@ -13,13 +13,9 @@ enum SQLDBtype{
 // credential structure (cross-window transer solution)
 struct auth{
 
-
-
     auth();
 
-    ~auth(){
-        ////qDebug() << "~auth destructor called";
-    }
+    ~auth(){}
 
 
     QString db_driver_="";
@@ -39,23 +35,8 @@ struct auth{
     // debug overload
     friend QDebug operator<<(QDebug stream__, auth const &auth__);
 
-    // copy object data to other
-    auth& copy_(auth const& auth__)
-    {
-        if(this!=&auth__){
-
-            db_driver_=auth__.db_driver_;
-            host_=auth__.host_;
-            port_=auth__.port_;
-
-            login_=auth__.login_;
-            passw_=auth__.passw_;
-
-            db_name_=auth__.db_name_;
-
-        }
-        return *this;
-    }
+    // copy object data to the other
+    auth &copy_(auth const& originalAuthObjToBCopied);
 
     static QMap<QString,QString> SQLDBtype2SQLdriver;
 
@@ -64,6 +45,14 @@ struct auth{
     static bool SQLdriverMatch(QString const&, SQLDBtype);
 };
 
+//QDebug operator<<(QDebug stream__, auth const &auth__){
+//    stream__ << "db_server::" << auth__.db_driver_
+//             << "host::" << auth__.host_
+//             << "db_name::" << auth__.db_name_
+////             << "table_name::" << auth__.table_name_
+//                ;
+//    return stream__;
+//}
 
 
 #endif // AUTH_H

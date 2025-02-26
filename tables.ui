@@ -792,7 +792,7 @@
                   <string notr="true">color: darkslategray;</string>
                  </property>
                  <property name="text">
-                  <string>Query settings</string>
+                  <string>Settings</string>
                  </property>
                 </widget>
                </item>

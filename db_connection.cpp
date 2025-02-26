@@ -7,7 +7,6 @@ bool db_connection::open(auth &auth__, const QString &con_name__/*, QString cons
 {
     QSqlDatabase database = QSqlDatabase::database(con_name__,false);
 
-        //if(!QSqlDatabase::database(QSqlDatabase::database(con_name__).connectionName()).isOpen()){
         if(!database.isOpen()){
 
             QSqlDatabase db_connection = QSqlDatabase::addDatabase(auth__.db_driver_,con_name__);
@@ -342,12 +341,46 @@ bool db_connection::set_query(QString const& query__, /*QSqlQueryModel &model__,
 
     QString const error_msg = qry.lastError().text();
 //    QMessageBox::warning(0,"Query to DB failed",qry.lastError().text(),QMessageBox::Close);
-    adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
+    ////adb_utility::get_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,true);
+    adb_utility::get_separate_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,false,true);
     qDebug() << error_msg;
 
     return false;
 }
 
+
+
+/*static*/bool db_connection::set_query(QString const& query, QSqlQueryModel*model__, QTableView *tableView, QPointer<adbMessageBox>& warningWindow__ ,QString const & con_name__/*QSqlDatabase const &db__*/)
+{
+
+    QSqlDatabase database = QSqlDatabase::database(con_name__,false);
+
+    QSqlQuery qry = QSqlQuery(database);
+
+    if(qry.prepare(query)){
+
+        if(qry.exec()){
+
+        model__->setQuery(qry);
+
+        tableView->setModel(model__);
+
+        return true;
+
+        } else {
+
+            std::cout << "(x) QSqlQuery execution failed." << __CH <<std::endl;
+        }
+    }
+
+    QString const error_msg = qry.lastError().text();
+
+    warningWindow__ = adb_utility::get_separate_information_window(QMessageBox::Warning,"Query to DB failed",error_msg,0,false,true);
+
+    qDebug() << error_msg;
+
+    return false;
+}
 
 
 

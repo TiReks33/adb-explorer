@@ -154,7 +154,7 @@ void createTupleConstructor::signals_init()
 //        this->close();
         emit this->closeNowSig();
 
-        std::cout << "final query::" <<final_query.toStdString() << std::endl;
+        //std::cout << "final query::" <<final_query.toStdString() << std::endl;
 
         emit final_query_sig(final_query);
 

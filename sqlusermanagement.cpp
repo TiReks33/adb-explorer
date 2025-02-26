@@ -613,12 +613,12 @@ void grantUserPermissionsForm::initForm()
 
     specificPermissionsRButton_->setText("Select certain permissions");
     specificPermissionsRButton_->setObjectName("specificPermissions");
-    std::cout << specificPermissionsRButton_->objectName().toStdString() << std::endl;
+    //std::cout << specificPermissionsRButton_->objectName().toStdString() << std::endl;
 
 
     allPermissionsRButton_->setText("Grant ALL permissions");
     allPermissionsRButton_->setObjectName("allPermissions");
-    std::cout << allPermissionsRButton_->objectName().toStdString() << std::endl;
+    //std::cout << allPermissionsRButton_->objectName().toStdString() << std::endl;
 
     grantPermissionsLay->addWidget(specificPermissionsRButton_);
 
@@ -697,7 +697,7 @@ void grantUserPermissionsForm::initForm()
     GrantOptCheckBox_->setText( "with GRANT option");
 
     GrantOptCheckBox_->setObjectName("grantOption");
-    std::cout << GrantOptCheckBox_->objectName().toStdString() << std::endl;
+    //std::cout << GrantOptCheckBox_->objectName().toStdString() << std::endl;
 
     mainLay->addLayout(grantOptionSubLay);
 
@@ -1317,9 +1317,6 @@ void getCredentialRecordsForm::initForm()
 
 
 
-
-
-
     recordChooseLay->addWidget(roleRB_,0,Qt::AlignCenter);
 
     recordTypeMainLay->addWidget(recordChooseFrame);
@@ -1639,13 +1636,13 @@ void passwordMgmtForm::formAccepted()
 
 
 
-                std::cout << "CURUSR::"<< __curUsr.toStdString() << std::endl;
-                std::cout << "CURPASSW::"<< __curPassw.toStdString() << std::endl;
+//                std::cout << "CURUSR::"<< __curUsr.toStdString() << std::endl;
+//                std::cout << "CURPASSW::"<< __curPassw.toStdString() << std::endl;
 
 
-                std::cout << "auth_login_==" << auth_.login_.toStdString() << std::endl;
-                std::cout << "auth_host_==" << auth_.host_.toStdString() << std::endl;
-                std::cout << "auth_passw_==" << auth_.passw_.toStdString() << std::endl;
+//                std::cout << "auth_login_==" << auth_.login_.toStdString() << std::endl;
+//                std::cout << "auth_host_==" << auth_.host_.toStdString() << std::endl;
+//                std::cout << "auth_passw_==" << auth_.passw_.toStdString() << std::endl;
 
                 this->close();
                 return;

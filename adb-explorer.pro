@@ -8,10 +8,7 @@ CONFIG += c++11
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += "/home/alexander/qtcreator_proj/adb-crypt" #for headers; not neccessary if dynamic lib used
-DEPENDPATH += "/home/alexander/qtcreator_proj/build-adb-crypt-Desktop-Release"
-
-LIBS += -L"/home/alexander/qtcreator_proj/build-adb-crypt-Desktop-Release" -ladb-crypt
+INCLUDEPATH += "/home/alexander/qtcreator_proj/interfaces"
 
 #DEFINES += QT_NO_CAST_TO_ASCII
 
@@ -32,10 +29,12 @@ SOURCES += \
     delete_form.cpp \
     delete_sqldb_user.cpp \
     delete_table.cpp \
+    dynamicbool.cpp \
     fontembeddedwidget.cpp \
     hidemenu.cpp \
     main.cpp \
     loginwindow.cpp \
+    noteframe.cpp \
     notifycombobox.cpp \
     reloadbutton.cpp \
     scrolledstatusbar.cpp \
@@ -47,6 +46,7 @@ SOURCES += \
     twolistselection.cpp
 
 HEADERS += \
+    ../interfaces/iqtplugins.h \
     adb-exp-utility.h \
     auth.h \
     blinkinbutton.h \
@@ -63,9 +63,11 @@ HEADERS += \
     delete_form.h \
     delete_sqldb_user.h \
     delete_table.h \
+    dynamicbool.h \
     fontembeddedwidget.h \
     hidemenu.h \
     loginwindow.h \
+    noteframe.h \
     notifycombobox.h \
     reloadbutton.h \
     scrolledstatusbar.h \

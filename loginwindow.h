@@ -10,6 +10,7 @@
 #include <QToolTip>
 #include <QPainter>
 #include <QtMath>
+#include <QCompleter>
 
 #include "databases.h"
 #include "tables.h"
@@ -17,7 +18,8 @@
 #include "db_connection.h"
 #include "blinkinbutton.h"
 
-#include "adbcrypt.h"
+//#include "adbcrypt.h"
+#include "iqtplugins.h"
 
 #include <iostream>
 
@@ -25,7 +27,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class loginWindow; }
 QT_END_NAMESPACE
 
+//class AdbCrypt;
 
+#define _TIMEOUT_RECON_DFLT_ 30000
+#define _CON_LOST_MSG_DFLT_ true
 
 class loginWindow : public QMainWindow
 {
@@ -44,6 +49,10 @@ public slots:
     // initialization of settings dialog
     void gset_connection_options();
 
+    // remove SQL queries history encrypted file
+//    QString const & getQueriesHistoryFFilePath();
+//    bool removeQueriesHistoryFile();
+
 signals:
 
     void message_to_database_window(QString const&);
@@ -53,6 +62,8 @@ signals:
     void start_connection_timer_stuff();
 
     void reconnect_data_changed();
+
+    void setCustomSettings();
 
 private slots:
 
@@ -68,8 +79,8 @@ private slots:
     // .cfg file synchronize(2)
     bool read4rom_recon_opts_file();
 
-    // get login list from cryptoModule by keyboard
-    void keyPressEvent(QKeyEvent *event);
+//    // get login list from cryptoModule by keyboard
+//    void keyPressEvent(QKeyEvent *event);
 
     // get login list from cryptoModule by mouse
     bool eventFilter(QObject *object, QEvent *event);
@@ -84,9 +95,9 @@ private:
     QString const config_f_name = adb_utility::filepath_+"/rec.cfg";
 
     //30 sec
-    int timeout_reconnect = 30000;
+    int timeout_reconnect = _TIMEOUT_RECON_DFLT_;
 
-    bool CONNECTION_LOST_MESSAGE = true;
+    bool CONNECTION_LOST_MESSAGE = _CON_LOST_MSG_DFLT_;
     //]
 
     // window initialization (.ui design file+code)
@@ -98,12 +109,13 @@ private:
 
     void cryptoModuleInit();
 
+
     // child (after login -->> main window in ierarchy, this->hide)
     Databases* db_window_ = nullptr;
 
     QPointer<QTimer> timer;
 
-    AdbCrypt* cryptoModule_ = nullptr;
-
 };
 #endif // LOGINWINDOW_H
+
+
