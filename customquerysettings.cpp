@@ -3,6 +3,19 @@
 
 //#include "tables.h"
 
+QMap<int,QString> CustomQuerySettings::paramEnumToStr{
+    {tblQuerSet::separate_content_window, "separate_content_window"},
+    {tblQuerSet::separate_describe_window, "separate_describe_window"},
+    {tblQuerSet::separate_query_window, "separate_query_window"},
+    {tblQuerSet::BLANK_RESULT, "BLANK_RESULT"},
+    {tblQuerSet::MSG_SHOW_IF_BLANK_RESULT, "MSG_SHOW_IF_BLANK_RESULT"},
+    {tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL, "MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL"}
+};
+
+
+
+
+
 CustomQuerySettings::CustomQuerySettings(/*Tables*/QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CustomQuerySettings)
@@ -16,14 +29,71 @@ CustomQuerySettings::CustomQuerySettings(/*Tables*/QWidget *parent) :
 
     init_signals();
 
-    fileOps();
-
 }
 
 CustomQuerySettings::~CustomQuerySettings()
 {
     delete ui;
 }
+
+//void CustomQuerySettings::enumFill()
+//{
+////    paramEnumToStr[tblQuerSet::separate_content_window] = "separate_content_window";
+////    paramEnumToStr[tblQuerSet::separate_describe_window] = "separate_describe_window";
+////    paramEnumToStr[tblQuerSet::separate_query_window] = "separate_query_window";
+////    paramEnumToStr[tblQuerSet::BLANK_RESULT] = "BLANK_RESULT";
+////    paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT] = "MSG_SHOW_IF_BLANK_RESULT";
+////    paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL] = "MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL";
+
+//    qDebug() << "paramEnumToStr.value(tblQuerSet::separate_content_window)::" << paramEnumToStr.value(tblQuerSet::separate_content_window);
+
+//}
+
+
+void CustomQuerySettings::setForeignSettingsOnForm(QMap<QString, int> settings_map__)
+{
+    bool changes_before = changes_;
+    int temp = 0;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_content_window]))!=-1)
+        ui->select_checkbox->setChecked(temp);
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_describe_window]))!=-1)
+        ui->describeCheckBox->setChecked(temp);
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_query_window]))!=-1)
+        ui->custom_checkbox->setChecked(temp);
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::BLANK_RESULT]))!=-1)
+        ui->emptySetCheckBox->setChecked(temp);
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT]))!=-1)
+        ui->emptySetNotifyCheckBox->setChecked(temp);
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL]))!=-1)
+        ui->terminateCheckBox->setChecked(temp);
+
+
+    if(!changes_before)
+        changes_=false;
+}
+
+void CustomQuerySettings::settings2Export(QMap<QString, int> & __settings_map)
+{
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_content_window]] = ui->select_checkbox->isChecked();
+
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_describe_window]] = ui->describeCheckBox->isChecked();
+
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_query_window]] = ui->custom_checkbox->isChecked();
+
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::BLANK_RESULT]] = ui->emptySetCheckBox->isChecked();
+
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT]] = ui->emptySetNotifyCheckBox->isChecked();
+
+    __settings_map[CustomQuerySettings::paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL]] = ui->terminateCheckBox->isChecked();
+
+}
+
 
 void CustomQuerySettings::init_signals()
 {
@@ -32,12 +102,11 @@ void CustomQuerySettings::init_signals()
 
     connect(ui->buttonBox,&QDialogButtonBox::accepted,[=]{
 
-        write2query_opts_file();
+        QMap<QString,int> __settings_map;
 
-        ////read4rom_query_opts_file();
-        adb_utility::get_settings_4rom_file(query_settings_f_name,__settings_map);
+        settings2Export(__settings_map);
 
-        emit settings_changed(__settings_map);
+        emit settingsExportSig(__settings_map, changes_);
 
         this->accept();
 
@@ -52,14 +121,22 @@ void CustomQuerySettings::init_signals()
         }
     });
 
+    QList<QCheckBox*> comboBoxesInForm = this->findChildren<QCheckBox*>();
+        foreach (auto obj, comboBoxesInForm) {
+            connect(obj, &QCheckBox::stateChanged,[this]{
+                changes_ = true;
+            });
+        }
+
+//    QList<QLineEdit*> lineEditsInForm = this->findChildren<QLineEdit*>();
+//        foreach (auto obj, lineEditsInForm) {
+//            connect(obj, &QLineEdit::textEdited,[this]{
+//                changes_ = true;
+//            });
+//        }
+
 }
 
-void CustomQuerySettings::fileOps()
-{
-    // set default if read file fails
-    if(!read4rom_query_opts_file())
-        write2query_opts_file();
-}
 
 void CustomQuerySettings::formStyle()
 {
@@ -85,46 +162,3 @@ void CustomQuerySettings::formStyle()
 }
 
 
-void CustomQuerySettings::write2query_opts_file()
-{
-    QFile outFile(query_settings_f_name);
-    outFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    QTextStream textStream(&outFile);
-    textStream << "t_content_wnd" << '=' << QString::number(ui->select_checkbox->isChecked()) << Qt::endl;
-    textStream << "t_describe_wnd" << '=' << QString::number(ui->describeCheckBox->isChecked()) << Qt::endl;
-    textStream << "t_query_wnd" << '=' << QString::number(ui->custom_checkbox->isChecked()) << Qt::endl;
-    textStream << "BLANK_RESULT" << '=' << QString::number(ui->emptySetCheckBox->isChecked()) << Qt::endl;
-    textStream << "MSG_SHOW_IF_BLANK_RESULT" << '=' << QString::number(ui->emptySetNotifyCheckBox->isChecked()) << Qt::endl;
-}
-
-bool CustomQuerySettings::read4rom_query_opts_file()
-{
-    ////QMap<QString,int> __settings_map;
-
-    __settings_map.clear();
-
-    if(adb_utility::get_settings_4rom_file(query_settings_f_name,__settings_map)){
-        int temp;
-
-        if((temp = __settings_map.value("t_content_wnd"))!=-1)
-            ui->select_checkbox->setChecked(temp);
-
-        if((temp = __settings_map.value("t_describe_wnd"))!=-1)
-            ui->describeCheckBox->setChecked(temp);
-
-        if((temp = __settings_map.value("t_query_wnd"))!=-1)
-            ui->custom_checkbox->setChecked(temp);
-
-        if((temp = __settings_map.value("BLANK_RESULT"))!=-1)
-            ui->emptySetCheckBox->setChecked(temp);
-
-        if((temp = __settings_map.value("MSG_SHOW_IF_BLANK_RESULT"))!=-1)
-            ui->emptySetNotifyCheckBox->setChecked(temp);
-
-        return true;
-    }
-
-    qWarning() << "Error while read from"<<query_settings_f_name;
-
-    return false;
-}

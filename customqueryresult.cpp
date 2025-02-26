@@ -8,7 +8,7 @@ bool CustomQueryResult::settingsFileReady_ = true;
 
 QString CustomQueryResult::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
-bool CustomQueryResult::askBeforeClose_ = true;
+/*bool*/dynamicbool CustomQueryResult::askBeforeClose_ = true;
 
 CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent,bool closeMessage__) :
     QDialog(parent),
@@ -29,9 +29,9 @@ CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent,bool closeMess
 {
     ui->setupUi(this);
 
-    setCheckCloseMessageFlag(closeMessage__);
-
     fileOps();
+
+    setCheckCloseMessageFlag(closeMessage__);
 
     init_form();
 
@@ -96,15 +96,16 @@ void CustomQueryResult::init_form()
 
 
     QFrame* exportButtonsFrame = new QFrame{/*this*/};
-    exportButtonsFrame->setFrameShape(QFrame::StyledPanel);
+    exportButtonsFrame->setFrameShape(QFrame::NoFrame);//(QFrame::StyledPanel);
     exportButtonsFrame->setFrameShadow(QFrame::Raised);
 
-    QVBoxLayout* exportButtonsFrameSubLay = new QVBoxLayout{exportButtonsFrame};
-    exportButtonsFrameSubLay->addWidget(reload_button_);
+//    QVBoxLayout* exportButtonsFrameSubLay = new QVBoxLayout{exportButtonsFrame};
+//    exportButtonsFrameSubLay->addWidget(reload_button_);
 
 
-    QHBoxLayout* exportButtonsSubLay = new QHBoxLayout{/*exportButtonsFrame*/};
-
+    QHBoxLayout* exportButtonsSubLay = new QHBoxLayout{exportButtonsFrame};
+    exportButtonsSubLay->setContentsMargins(0,0,0,0);
+    exportButtonsSubLay->setSpacing(3);
 
     exportButtonsSubLay->addWidget(export_button_);
     QLabel* exportButtonsSeparateLbl = new QLabel{"::"};
@@ -115,8 +116,8 @@ void CustomQueryResult::init_form()
 
     exportButtonsSubLay->addWidget(copy_button_);
 
-    tableCopyLay->addLayout(exportButtonsSubLay);
-
+//    tableCopyLay->addLayout(exportButtonsSubLay);
+    tableCopyLay->addWidget(exportButtonsFrame);
 
 
     QFrame* reloadButtonFrame = new QFrame;
@@ -346,6 +347,16 @@ void CustomQueryResult::init_signals()
         checkCloseMessageFlag_=false;
         reject();
     });
+
+//    auto dynamicCheck = connect(&CustomQueryResult::askBeforeClose_, &dynamicbool::boolChanged,[this]{
+//        ui->closeMessageCheckBox->setChecked(CustomQueryResult::askBeforeClose_);
+//    });
+
+////    connect(this,&CustomQueryResult::destroyed,[dynamicCheck]{
+//    connect(ui->closeMessageCheckBox,&QCheckBox::destroyed,[dynamicCheck]{
+//        disconnect(dynamicCheck);
+//    });
+    CustomQueryResult::askBeforeClose_.synchronizeCheckBox(ui->closeMessageCheckBox);
 }
 
 
@@ -378,6 +389,14 @@ void CustomQueryResult::reject()
             ui->closeMessageCheckBox->setChecked(newState__);
         });
 
+        CustomQueryResult::askBeforeClose_.synchronizeCheckBox(notAskAgainCheckBox);
+//        auto dynamicCheck = connect(&CustomQueryResult::askBeforeClose_, &dynamicbool::boolChanged,[notAskAgainCheckBox]{
+//            notAskAgainCheckBox->setChecked(CustomQueryResult::askBeforeClose_);
+//        });
+
+//        connect(notAskAgainCheckBox,&QCheckBox::destroyed,[dynamicCheck]{
+//            disconnect(dynamicCheck);
+//        });
 
         questionBox->setAttribute(Qt::WA_DeleteOnClose,true);
         questionBox->setWindowModality(Qt::WindowModal);
@@ -441,22 +460,36 @@ void CustomQueryResult::custom_query_slot(QString const & query__, QString const
 
 void CustomQueryResult::loadQuery()
 {
+
     if(db_connection::try_to_reopen(auth_,last_con_name_))
-        db_connection::set_query(last_query_,&model_,tableView,last_con_name_);
+    {
+        QPointer<adbMessageBox> __warningWindowPtr = nullptr;
+
+        db_connection::set_query(last_query_,&model_,tableView,__warningWindowPtr,last_con_name_);
+
+        if(__warningWindowPtr){
+
+            connect(this,&CustomQueryResult::closeNowSig,[__warningWindowPtr]{
+                if(__warningWindowPtr){
+                    __warningWindowPtr->close();
+                }
+            });
+        }
+    }
 }
 
 
 
 CustomQueryResult::~CustomQueryResult()
 {
-    //qDebug()<<"~CustomQueryResult activated";
+
     delete ui;
 
     delete tableView;
 
     delete export_button_;
     delete copy_button_;
-    //delete copyButtonCB_;
+
 
     delete rescaleBoxWidget;
     delete rescaleDefaultCheckBox;

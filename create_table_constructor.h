@@ -76,7 +76,7 @@ private slots:
     // reload current connection
     void reloadDatabaseComboBox();
 
-    void /*QDialog **/ get_help_window(QPointer<QDialog>&,QString const&,QString const&,QWidget* = nullptr);
+    void /*QDialog **/ get_help_window(QPointer<QDialog>&,QString const&window_pointer,QString const&header_title,QWidget* parent = nullptr);
 
 signals:
 

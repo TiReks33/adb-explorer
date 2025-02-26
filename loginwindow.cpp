@@ -3,9 +3,13 @@
 
 #include "reloadbutton.h"
 
+#include "custom_query.h"
+
 //int timeout_reconnect = 15000; //60000
 
 //bool CONNECTION_LOST_MESSAGE = true;
+
+//int const loginWindow::conHostsFileEntryCapacity_ = 25;
 
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -160,16 +164,62 @@ void loginWindow::fileOps()
 
 void loginWindow::cryptoModuleInit()
 {
+    QString PLUGIN_NAME = "adb-crypt";
 
-    cryptoModule_ = AdbCrypt::data(ui->Login_Form,ui->Password_Form,adb_utility::filepath_);
+    QLibrary lib(PLUGIN_NAME);
+    if(!lib.load()){
+       std::cout << "[WARNING]CRYPTO PLUGIN LOAD FAILED!" << std::endl;
+       qDebug() << lib.errorString();
+       return;
+    } else{
+        std::cout << "[SUCCESS]CRYPTO PLUGIN LOADED SUCCESSFULLY!" << std::endl;
+    }
+
+    // get plugin init method pointer
+    typedef ICryptoPlugin*
+    ( *InitFunc)
+    (
+        QLineEdit * const &,
+        QLineEdit * const &,
+        QLineEdit * const &,
+        const QString &,
+        int const,
+        int const
+    );
+    InitFunc initFunc = (InitFunc) lib.resolve("CCreateCryptoModuleObj");
+
+    if(initFunc){
+
+        plugins::cryptoModule = initFunc(ui->Login_Form,ui->Password_Form,ui->Host_Form,adb_utility::filepath_,15,5);
+
+        if(plugins::cryptoModule){
+            plugins::cryptoModule->getSavedHosts();
+            //qDebug() << plugins::cryptoModule->pluginName();
+        }
+
+    } else{
+        auto __ERR_STR = "[WARNING] PLUGIN INIT METHOD LOAD FAILED!";
+        std::cout << __ERR_STR << std::endl;
+        qDebug() << __ERR_STR;
+    }
+
     ui->Login_Form->installEventFilter(this);
 
+    ui->Host_Form->installEventFilter(this);
+
 }
+
+//const QString &loginWindow::getQueriesHistoryFFilePath()
+//{
+//    return Custom_Query::userQueriesHistoryBinFileName_;
+//}
+
 
 loginWindow::~loginWindow()
 {
     delete ui;
     delete db_window_;
+
 }
 
 void loginWindow::connection_timer_slot()
@@ -294,24 +344,19 @@ void loginWindow::gset_connection_options()
 
     QLineEdit* timeout_line = new QLineEdit;
 
-//    QStatusBar* statusBar = new QStatusBar;
 
     QLabel* statusBarLbl = new QLabel{/*statusbar*/};
     statusBarLbl->setWordWrap(true);
     statusBarLbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     statusBarLbl->setAlignment(Qt::AlignCenter);
 
-//    statusBar->addWidget(statusBarLbl);
 
     connect(options_dialog,&QDialog::destroyed,[statusBarLbl]{ delete statusBarLbl; });
 
     connect(timeout_line,&QLineEdit::textChanged,[statusBarLbl](){ statusBarLbl->hide(); });
 
-//    connect(statusbar,&QStatusBar::messageChanged,[options_dialog]{ options_dialog->adjustSize();});
 
     rec_timeout_layout->addWidget(timeout_line);
-
-    timeout_line->setText(QString::number(timeout_reconnect));
 
     // only digits validation
     QIntValidator* int_validator = new QIntValidator(1000, 2073600000);
@@ -336,29 +381,67 @@ void loginWindow::gset_connection_options()
 
     //
     QHBoxLayout* clearDataSubLay = new QHBoxLayout{};
+
     QPushButton* clearDataButton = new QPushButton{"Clear users data cache"};
-    clearDataButton->setStyleSheet("font-weight:bold;");
+    clearDataButton->setStyleSheet("font-weight:bold;color:white;background:red;");
     clearDataButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
+    QPushButton* reSetButton = new QPushButton{"Reset user settings"};
+    reSetButton->setStyleSheet("font-weight:bold;");
+    reSetButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
     clearDataSubLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
     clearDataSubLay->addWidget(clearDataButton);
+    clearDataSubLay->addWidget(reSetButton);
     clearDataSubLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
     options_layout->addLayout(clearDataSubLay);
 
-    connect(clearDataButton,&QPushButton::clicked,[this, options_dialog]{
-        if(cryptoModule_){
-            auto answer = QMessageBox::warning(options_dialog,"Clear users data", "Are you sure want to remove all saved passwords? This action is irreversible.",QMessageBox::Ok | QMessageBox::Cancel);
+    connect(clearDataButton,&QPushButton::clicked,[options_dialog]{
+        if(plugins::cryptoModule){
+            auto answer = QMessageBox::warning(options_dialog,"Clear users data", "Are you sure want to remove all saved credentials? This action is irreversible.",QMessageBox::Ok | QMessageBox::Cancel);
 
             if(answer==QMessageBox::Ok){
-                cryptoModule_->reCreate();
+                //remove saved credentials
+                plugins::cryptoModule->reGenKey();//reCreate();
+
+                // remove queries history encrypted file
+                Custom_Query::removeUserQueriesHistory();
+
             }
         }
     });
-    //
 
-    if(CONNECTION_LOST_MESSAGE)
-        warning_message_checkbox->setChecked(true);
-    else
-        warning_message_checkbox->setChecked(false);
+    connect(reSetButton,&QPushButton::clicked,[options_dialog,this]{
+
+        auto answer = QMessageBox::warning(options_dialog,"Reset user settings", "Are you sure want to revert all user custom settings to defaults? This action is irreversible.",QMessageBox::Ok | QMessageBox::Cancel);
+
+        if(answer==QMessageBox::Ok){
+            QDir dir(adb_utility::filepath_);
+            dir.setNameFilters(QStringList() << "*.cfg");
+            dir.setFilter(QDir::Files);
+            foreach(QString dirFile, dir.entryList())
+            {
+                dir.remove(dirFile);
+            }
+        }
+
+        timeout_reconnect = _TIMEOUT_RECON_DFLT_;
+        CONNECTION_LOST_MESSAGE = _CON_LOST_MSG_DFLT_;
+        write2recon_opts_file();
+        setCustomSettings();
+
+    });
+
+    auto sign = connect(this,&loginWindow::setCustomSettings,[this,warning_message_checkbox,timeout_line]{
+        warning_message_checkbox->setChecked(CONNECTION_LOST_MESSAGE);
+        timeout_line->setText(QString::number(timeout_reconnect));
+    });
+
+    connect(options_dialog,&QDialog::destroyed,[sign]{
+        disconnect(sign);
+    });
+
+    emit setCustomSettings();
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                      | QDialogButtonBox::Cancel);
@@ -466,6 +549,12 @@ void loginWindow::gset_connection_options()
 }
 
 
+//bool loginWindow::removeQueriesHistoryFile()
+//{
+//    return Custom_Query::removeUserQueriesHistory();
+//}
+
+
 
 void loginWindow::on_pushButton_clicked()
 {
@@ -496,8 +585,11 @@ void loginWindow::on_pushButton_clicked()
         ui->statusbar->showMessage("(✓)Successful authorization");
 
         // saveLoginEncrypted
-        if(cryptoModule_)
-            cryptoModule_->encryptCredentials2File();
+        if(plugins::cryptoModule){
+            plugins::cryptoModule->encryptCredentials2File();
+            plugins::cryptoModule->encryptCurHost();
+        }
+
 
         if(db_window_->show_databases()){
             db_window_->setModal(/*true*/false);
@@ -510,7 +602,6 @@ void loginWindow::on_pushButton_clicked()
 
 
             ////QTimer::singleShot(0,this,SLOT(connection_timer_slot()));
-
 
 
             this->hide();
@@ -546,34 +637,13 @@ void loginWindow::write2recon_opts_file()
     textStream << "timeout_reconnect" << '=' << QString::number(timeout_reconnect) << Qt::endl;
     textStream << "CONNECTION_LOST_MESSAGE" << '=' << QString::number(CONNECTION_LOST_MESSAGE) << Qt::endl;
     textStream << "DB_TYPE"<<'='<< QString::number(ui->dbtypeComboBox->currentIndex()) << Qt::endl;
-    QString const __host = (ui->Host_Form->text().isEmpty())? "localhost" : ui->Host_Form->text();
-    textStream << "HOSTNAME"<<'='<< '\"'+__host+'\"' << Qt::endl;
+//    QString const __host = (ui->Host_Form->text().isEmpty())? "localhost" : ui->Host_Form->text();
+//    textStream << "HOSTNAME"<<'='<< '\"'+__host+'\"' << Qt::endl;
 }
 
 bool loginWindow::read4rom_recon_opts_file()
 {
-//    QMap<QString,int> __settings_map;
 
-//    // fill the QMap container with key-values pairs
-//    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map)){
-//        int temp;
-
-//        // find necessary settings
-//        if((temp = __settings_map.value("timeout_reconnect"))!=-1)
-//            timeout_reconnect = temp;
-
-//        if((temp = __settings_map.value("CONNECTION_LOST_MESSAGE"))!=-1)
-//            CONNECTION_LOST_MESSAGE = temp;
-
-//        if((temp = __settings_map.value("DB_TYPE"))!=-1)
-//            this->ui->dbtypeComboBox->setCurrentIndex(temp);
-
-//        return true;
-//    }
-
-//    qWarning() << "Error while read from"<<config_f_name;
-
-//    return false;
     QMap<QString,int> __settings_map;
 
     // fill the QMap container with key-values pairs
@@ -590,50 +660,95 @@ bool loginWindow::read4rom_recon_opts_file()
         if((temp = __settings_map.value("DB_TYPE"))!=-1)
             this->ui->dbtypeComboBox->setCurrentIndex(temp);
 
-        //return true;
-    } else{
-
-        qWarning() << "Error while read from"<<config_f_name;
-        return false;
-    }
-    //------------------------------------------------------------------
-    QMap<QString,QString> __settings_map_str;
-
-    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map_str)){
-        QString temp_s;
-
-        if((temp_s = __settings_map_str.value("HOSTNAME"))!="")
-            this->ui->Host_Form->setText(temp_s);
-
         return true;
-    } else{
 
-        qWarning() << "Error while read from"<<config_f_name<<"(Strings)";
-    }
+    } /*else{*/
+
+    qWarning() << "Error while read from"<<config_f_name;
+//        return false;
+//    }
+    //------------------------------------------------------------------
+//    QMap<QString,QString> __settings_map_str;
+
+//    if(adb_utility::get_settings_4rom_file(config_f_name,__settings_map_str)){
+//        QString temp_s;
+
+//        if((temp_s = __settings_map_str.value("HOSTNAME"))!="")
+//            this->ui->Host_Form->setText(temp_s);
+
+//        return true;
+//    } else{
+
+//        qWarning() << "Error while read from"<<config_f_name<<"(Strings)";
+//    }
     return false;
 }
 
 
 
-void loginWindow::keyPressEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
+//void loginWindow::keyPressEvent(QKeyEvent *event)
+//{
+//    if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter){
 
-        if(cryptoModule_)
-            cryptoModule_->getSavedLogins();
-     }
-        QMainWindow::keyPressEvent(event);
-}
+////        if(plugins::cryptoModule)
+////            plugins::cryptoModule->getSavedLogins();
+////        on_pushButton_clicked();
+//    }
+
+//    QMainWindow::keyPressEvent(event);
+//}
 
 bool loginWindow::eventFilter(QObject *object, QEvent *event)
 {
-        if(object == ui->Login_Form && event->type() == QEvent::MouseButtonPress) {
 
-            if(cryptoModule_)
-                cryptoModule_->getSavedLogins();
+    if(plugins::cryptoModule){
+
+        if(event->type() == QEvent::MouseButtonPress){
+
+            if(object == ui->Login_Form){
+
+                plugins::cryptoModule->getSavedLogins();
+
+                return true;
+
+            } else if(object == ui->Host_Form){
+
+                plugins::cryptoModule->getSavedHosts();
+
+                return true;
+
+            }
+
+        } else if(event->type() == QEvent::KeyPress){
+
+            auto *keyEvent = static_cast<QKeyEvent *>(event);
+
+            int key = keyEvent->key();
+
+            if (key == Qt::Key_Return || key == Qt::Key_Enter){
+
+                if(object == ui->Login_Form){
+
+                    plugins::cryptoModule->getSavedLogins();
+
+                    return true;
+
+                } else if(object == ui->Host_Form){
+
+                    plugins::cryptoModule->getSavedHosts();
+
+                    return true;
+
+                }
+
+            }
+
         }
 
-        return QMainWindow::eventFilter(object,event);
+    }
+
+
+    return QMainWindow::eventFilter(object,event);
 }
 
 

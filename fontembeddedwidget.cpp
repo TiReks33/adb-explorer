@@ -14,7 +14,7 @@ fontEmbeddedWidget::fontEmbeddedWidget(QWidget *parent__)
 
 fontEmbeddedWidget::~fontEmbeddedWidget()
 {
-
+    //qDebug() << "~fontEmbeddedWidget";
 }
 
 
@@ -66,36 +66,26 @@ void fontEmbeddedWidget::initForm()
     mainLay->setContentsMargins(0,0,0,0);
     mainLay->setSpacing(1);
 
-    //    QHBoxLayout* buttonLay = new QHBoxLayout{};
-    //buttonLay->setContentsMargins(6,6,6,3);
-    //buttonLay->setSpacing(1);
-    //    buttonLay->setSizeConstraint(QLayout::SetDefaultConstraint);//SetMinimumSize);
 
-    //    setFontButton_->setLayout(buttonLay);
     setFontButton_->setObjectName("fontButton");
 
 
-            auto __buttonFont = setFontButton_->font();
+    auto __buttonFont = setFontButton_->font();
 //            __buttonFont.setBold(true);
-            __buttonFont.setUnderline(true);
+    __buttonFont.setUnderline(true);
 
-        QPixmap pixmap(16,16);
-        pixmap.fill(Qt::transparent);
-        QPainter painter(&pixmap);
-        QString string;
-        string = QString::fromUtf8("\U0001F589");
-        painter.setFont(__buttonFont);
-        painter.drawText(0,0,16,16,Qt::AlignHCenter | Qt::AlignVCenter, string);
+    QPixmap pixmap(16,16);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    QString string;
+    string = QString::fromUtf8("\U0001F589");
+    painter.setFont(__buttonFont);
+    painter.drawText(0,0,16,16,Qt::AlignHCenter | Qt::AlignVCenter, string);
 
 
-        setFontButton_->setText("Set Font");
-        setFontButton_->setIcon(pixmap/*QIcon(":/pic/penf.png")*/);
+    setFontButton_->setText("Set Font");
+    setFontButton_->setIcon(pixmap/*QIcon(":/pic/penf.png")*/);
 
-    //        __buttonFont.setUnderline(false);
-    //        __buttonFont.setBold(true);
-    //        setFontButton_->setFont(__buttonFont);
-
-    ////qDebug() << "BUTTON FONT::" << setFontButton_->font() ;
 
     mainLay->addWidget(setFontButton_);
 
@@ -106,28 +96,14 @@ void fontEmbeddedWidget::initForm()
     mainLay->setContentsMargins(0,0,0,0);
 
 
-
     defaultFontCheckBox_->setText("set default");
-//    QHBoxLayout* checkboxSubLay = new QHBoxLayout;
-//    checkboxSubLay->setContentsMargins(0,0,0,0);
-//    checkboxSubLay->setSpacing(0);
 
-//    QLabel* checkBoxSubLbl = new QLabel{"set default"};
-//    checkBoxSubLbl->setContentsMargins(0,0,0,0);
-//    checkBoxSubLbl->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-
-////    checkboxSubLay->addWidget(defaultFontCheckBox_);
-//    checkboxSubLay->addWidget(checkBoxSubLbl);
 
     defaultFontCheckBox_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     defaultFontCheckBox_->setContentsMargins(0,0,0,0);
 
-
-
-//    mainLay->addLayout(checkboxSubLay);
     mainLay->addWidget(defaultFontCheckBox_);
-
 
 }
 

@@ -22,7 +22,7 @@
 #include "auth.h"
 #include "db_connection.h"
 #include "select_cells.hpp"
-#include "custom_query.h"
+//#include "custom_query.h"
 #include "customqueryresult.h"
 #include "customquerysettings.h"
 #include "ui_customquerysettings.h"
@@ -37,6 +37,7 @@
 #include "fontembeddedwidget.h"
 #include "hidemenu.h"
 
+class Custom_Query;
 
 namespace Ui {
 class Tables;
@@ -62,11 +63,6 @@ public slots:
     // send result of query from Custom_Query form in 1) separate or 2) main form of 'tables' window
     void send_custom_query_slot(/*QString,*/Custom_Query *);
 
-    //
-
-//    // [utility func]
-//    void get_information_window(QString const&,QString const&,QWidget* = nullptr);
-
 
 signals:
 
@@ -84,8 +80,6 @@ signals:
 
 
     void current_tables_list_signal(QList<QString>);
-
-    ////void close_custom_query_form();
 
 //    void constructor_query_success();
     void constructor_query_success(QString const&);
@@ -124,27 +118,36 @@ private slots:
 
 public:
 
-    bool t_content_wnd = true;
+    bool separate_content_window = true;
 
-    bool t_describe_wnd = true;
+    bool separate_describe_window = true;
 
-    bool t_query_wnd = true;
+    bool separate_query_window = true;
+    bool showNoteIfNotSeparateWindowResult = true;
 
     bool BLANK_RESULT = false;
 
     bool MSG_SHOW_IF_BLANK_RESULT = false;
 
+    bool MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = false;
+    bool queryFailNote = true;
+
+private:
+
+    // imply data changes from 'CustomQuerySettings' form
+    void importSettings(QMap<QString,int>, QMap<QString,QString> = QMap<QString,QString>{/*EMPTY QMAP BY DEFAULT*/});
+
 private:
     Ui::Tables *ui;
 
-    signalTableView* tableView;
+    signalTableView* tableView = nullptr;
 
-    scrolledStatusBar* statusBar;
+    scrolledStatusBar* statusBar = nullptr;
 
     QString const settings_f_name_ = adb_utility ::filepath_+"/tablesQuery.cfg";
 
 
-    /*BlinkinButton*/reloadButton* showTable_button = nullptr;
+    reloadButton* showTable_button = nullptr;
 
     void init_connections();
 
@@ -159,15 +162,11 @@ private:
     QSqlQueryModel model_;
 
 
-    //CustomQueryResult* custom_query_result_window_;
-
     QPointer<CustomQuerySettings> settings_;
 
-    delete_table* delete_table_window_;
+    delete_table* delete_table_window_ = nullptr;
 
-    CreateTableConstructor* constructor_;
-
-    ////int tuples_windows_counter_=0;
+    CreateTableConstructor* constructor_ = nullptr;
 
 
     // preventing application to exit by escape (QDialog close by esc)
@@ -181,8 +180,7 @@ private:
     void mousePressEvent(QMouseEvent* event);
 
     // rescale stuff
-    QWidget* rescaleBoxWidget;
-    ////bool tableScaleChanged = false;
+    QWidget* rescaleBoxWidget = nullptr;
     QPointer<QCheckBox>rescaleDefaultCheckBox;
     static int defaultScaleIndex_;
 
@@ -195,6 +193,7 @@ private:
     hideMenu* menuFile_ = nullptr;
     QAction* exitEntrie_ = nullptr;
     QAction* prevEntrie_ = nullptr;
+
 };
 
 #endif // TABLES_H

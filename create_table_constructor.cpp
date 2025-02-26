@@ -2,14 +2,7 @@
 #include "ui_create_table_constructor.h"
 #include "tables.h"
 
-QDebug operator<<(QDebug stream__, auth const &auth__){
-    stream__ << "db_server::" << auth__.db_driver_
-             << "host::" << auth__.host_
-             << "db_name::" << auth__.db_name_
-//             << "table_name::" << auth__.table_name_
-                ;
-    return stream__;
-}
+
 
 CreateTableConstructor::CreateTableConstructor(auth& auth__,/*QWidget*/Tables *parent) :
     QStackedWidget(parent),
@@ -200,21 +193,24 @@ void CreateTableConstructor::signals_init()
 
         if(!check_ref){
 
-        QString reference_info=":/txt/references_help_2.txt";
+            QString reference_info=":/txt/references_help_2.txt";
 
-        QString info;
-        QFile file(reference_info);
+            QString info;
+            QFile file(reference_info);
 
-            if(file.open(QIODevice::ReadOnly))
-                {
+            if(file.open(QIODevice::ReadOnly)){
                 QTextStream in(&file);
-            info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
-            file.close();
+
+                info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
+
+                file.close();
             }
 
-        //QMessageBox::about(this,"Referential Actions",info);
+            //QMessageBox::about(this,"Referential Actions",info);
             get_help_window(check_ref,"Referential Actions",info);
+
         } else {
+
             if(check_ref)check_ref->raise();
         }
     });
@@ -293,25 +289,25 @@ void CreateTableConstructor::signals_init()
         //static bool win_open = false;
         static QPointer <QDialog> check_ref;
         if(!/*win_open*/check_ref){
-        QString reference_info=":/txt/references_help_1.txt";
-//static int i=3;
-//qDebug() << &i;
-        QString info;
-        QFile file(reference_info);
+            QString reference_info=":/txt/references_help_1.txt";
+            //static int i=3;
+            //qDebug() << &i;
+            QString info;
+            QFile file(reference_info);
 
-            if(file.open(QIODevice::ReadOnly))
-                {
+            if(file.open(QIODevice::ReadOnly)){
                 QTextStream in(&file);
-            info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
-            file.close();
+                info="<pre style=\"white-space: pre-wrap;\">"+in.readAll()+"</pre>";
+                file.close();
             }
 
-        //QMessageBox::about(this,"Data types",info);
+            //QMessageBox::about(this,"Data types",info);
 
+            get_help_window(check_ref,"Data types",info);
+            //win_open = true;
 
-        get_help_window(check_ref,"Data types",info);
-        //win_open = true;
         } else {
+
             if(check_ref)check_ref->raise();
         }
 
@@ -995,10 +991,10 @@ void CreateTableConstructor::reloadDatabaseComboBox()
 
 
 
-void CreateTableConstructor::get_help_window(QPointer<QDialog>&window_pointer,QString const & header_title__,const QString & info__,QWidget*parent__)
+void CreateTableConstructor::get_help_window(QPointer<QDialog>&window_pointer__,QString const & header_title__,const QString & info__,QWidget*parent__)
 {
-    window_pointer = new QDialog{parent__};
-    window_pointer->setWindowTitle(header_title__);
+    window_pointer__ = new QDialog{parent__};
+    window_pointer__->setWindowTitle(header_title__);
 
     auto layout = new QVBoxLayout;
 
@@ -1015,20 +1011,20 @@ void CreateTableConstructor::get_help_window(QPointer<QDialog>&window_pointer,QS
 
 
     auto buttonBox = new QDialogButtonBox{QDialogButtonBox::Ok};
-    connect(buttonBox, &QDialogButtonBox::accepted, window_pointer, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::accepted, window_pointer__, &QDialog::accept);
     buttonBox->setCenterButtons(true);
-    window_pointer->setLayout(layout);
+    window_pointer__->setLayout(layout);
 
 
     layout->addWidget(scroller);
 
     layout->addWidget(buttonBox);
 
-    connect(window_pointer,&QDialog::destroyed,[&](){
+    connect(window_pointer__,&QDialog::destroyed,[&](){
 
     });
-    window_pointer->setAttribute( Qt::WA_DeleteOnClose, true );
-    window_pointer->show();
+    window_pointer__->setAttribute( Qt::WA_DeleteOnClose, true );
+    window_pointer__->show();
 
 
 

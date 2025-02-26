@@ -82,7 +82,9 @@ signals:
 
     void close_all_custom_windows_();
 
-    void window_rise_signal();
+    //void window_rise_signal();
+
+    void emptySet();
 
 private slots:
 
@@ -98,11 +100,11 @@ private slots:
 private:
     Ui::Databases *ui;
 
-    signalTableView* tableView;
+    QPointer<signalTableView> tableView_ = nullptr;
 
     reloadButton* showDB_button = nullptr;
 
-    scrolledStatusBar* statusBar;
+    scrolledStatusBar* statusBar = nullptr;
 
     void init_signals();
 
@@ -122,10 +124,10 @@ private:
     QSqlQueryModel model_;
 
     // additional window
-    create_db_name* new_db_window_;
+    create_db_name* new_db_window_ = nullptr;
 
     // additional window(2)
-    delete_db* delete_db_window_;
+    delete_db* delete_db_window_ = nullptr;
 
     // keyboard keys logic overload
     void keyPressEvent(QKeyEvent *);
@@ -149,21 +151,22 @@ private:
     void write2_settings_file();
 
     bool query2server_note=true;
+//    bool test_note=true;
 
     void mousePressEvent(QMouseEvent * event);
 
     // rescale stuff
-    QWidget* rescaleBoxWidget;
+    QWidget* rescaleBoxWidget = nullptr;
     ////bool tableScaleChanged = false;
     QPointer<QCheckBox>rescaleDefaultCheckBox;
     static int defaultScaleIndex_;
 
 
-    QPushButton* createUserButton_;
-    QPushButton* getUsersListButton_;
+    QPushButton* createUserButton_ = nullptr;
+    QPushButton* getUsersListButton_ = nullptr;
 
-    QPushButton* grantPermissionsButton_;
-    QPushButton* changePassButton_;
+    QPushButton* grantPermissionsButton_ = nullptr;
+    QPushButton* changePassButton_ = nullptr;
 
     // utility funcs for grant permissions form
     QWidget* getGrantPermissionsWidget(QWidget* parent__ = nullptr);
@@ -180,6 +183,16 @@ private:
     QAction* exitEntrie_ = nullptr;
 
     //QSpinBox* fontPointSizeSpin_ = nullptr;
+
+    bool BLANK_RESULT = false;
+
+    bool MSG_SHOW_IF_BLANK_RESULT = false;
+
+    bool MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = false;
+
+    bool queryFailNote = true;
 };
 
 #endif // DATABASES_H
+
+

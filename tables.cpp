@@ -3,6 +3,8 @@
 
 #include "createtupleconstructor.h"
 
+#include "custom_query.h"
+
 int Tables::defaultScaleIndex_ = 0;
 
 QString Tables::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
@@ -290,11 +292,6 @@ void Tables::init_connections()
     connect(this,SIGNAL(delete_form_request()),delete_table_window_,SLOT(delete_form_request_slot()));
 
     connect(delete_table_window_,&delete_table::delete_form_send,[this](QComboBox* comboBox__){
-//        db_connection::open(auth_);
-
-//        db_connection::set_query("SHOW TABLES;",&model_,comboBox__);
-
-//        comboBox__->setCurrentIndex(-1); //for blank cell default
 
         QString const __queryText = "SHOW TABLES";
 
@@ -438,27 +435,29 @@ void Tables::init_connections()
     connect(ui->query_settings_button,&QPushButton::clicked,[this]{
         if(!settings_){
             if((settings_ = new CustomQuerySettings)){
+
+                settings_->setWindowTitle("Tables::Settings");
+
                 settings_->setAttribute(Qt::WA_DeleteOnClose,true);
 
-                connect(settings_,static_cast<void (CustomQuerySettings::*)(QMap<QString,int>)>(&CustomQuerySettings::settings_changed),[this](QMap<QString,int>settings_map__){
-                    int temp;
 
-                    if((temp = settings_map__.value("t_content_wnd"))!=-1)
-                        t_content_wnd = temp;//settings_map__.value("t_content_wnd");
+                QMap<QString,int> __settings_map;
 
-                    if((temp = settings_map__.value("t_describe_wnd"))!=-1)
-                       t_describe_wnd = temp;//settings_map__.value("t_query_wnd");
+                adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map);
 
-                    if((temp = settings_map__.value("t_query_wnd"))!=-1)
-                       t_query_wnd = temp;//settings_map__.value("t_query_wnd");
+                settings_->setForeignSettingsOnForm(__settings_map);
 
-                    if((temp = settings_map__.value("BLANK_RESULT"))!=-1)
-                        BLANK_RESULT = temp;
+                connect(settings_,static_cast<void (CustomQuerySettings::*)(QMap<QString,int>,bool)>(&CustomQuerySettings::settingsExportSig),
+                        [this](QMap<QString,int>settings_map__,bool changes__)
+                {
 
-                    if((temp = settings_map__.value("MSG_SHOW_IF_BLANK_RESULT"))!=-1)
-                        MSG_SHOW_IF_BLANK_RESULT = temp;//settings_map__.value("MSG_SHOW_IF_BLANK_RESULT");
+                    if(changes__){
 
-                    write2_settings_file();
+                        importSettings(settings_map__);
+
+                        write2_settings_file();
+                    }
+
                 });
 
                 connect(this,&Tables::custom_query_windows_close,[this]{ if(settings_)settings_->close();});
@@ -589,69 +588,185 @@ void Tables::show_tables()
 void Tables::send_custom_query_slot(/*QString query__,*/Custom_Query *custom_query_window__)
 {
 
-    if(!t_query_wnd){
+    auto QueryRawText = custom_query_window__->get_text();
+
+    auto QueriesList = adb_utility::unpack_(QueryRawText,";",true);
+
+    auto queryFailFlag = false;
+
+    auto skipAfterFail = false;
+
+    // check flag of separate window for user's query result
+    if(!separate_query_window){
 
         if(db_connection::open(auth_)){
 
-            if(db_connection::set_query(/*query__*/custom_query_window__->get_text(),&model_,tableView/*,QHeaderView::Stretch*/)){
-                custom_query_window__->close_window();
+            for(auto i=0;i!=QueriesList.size();++i){
 
-                //qDebug() << "tableViewModelColumnCOUNT::" << tableView->model()->columnCount();
-                //qDebug() << "tableViewModelRowsCOUNT::" << tableView->model()->rowCount();
+                if(skipAfterFail){
+                    custom_query_window__->save_query(QUERYSTATUS::NOTSENDED,QueriesList.at(i));
+                    continue;
+                }
 
-                if(!tableView->model()->rowCount()&&!BLANK_RESULT) {
-                    show_tables();
-                    //qDebug() << "rowCount() in model_==0::display result ignored.";
+//                std::cout << QueriesList.at(i).toStdString() << " ";// << std::endl;
+//                //qDebug() << QueriesList.at(i);
+//                std::cout << QueriesList.at(i).toStdString().size() << std::endl;
 
-                    statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
-                                            " contain of displayable result. Current DB tables list reloaded.");
+                if(db_connection::set_query(QueriesList.at(i),&model_,tableView/*,QHeaderView::Stretch*/)){
 
-                    emit empty_set();
+                    //custom_query_window__->close();
+                    custom_query_window__->save_query(QUERYSTATUS::SUCCESS,QueriesList.at(i));
+
+
+                    if(!tableView->model()->rowCount()&&!BLANK_RESULT) {
+
+                        show_tables();
+
+                        statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                                " contain of displayable result. Current DB tables list reloaded.");
+
+                        emit empty_set();
+
+                    } else{
+                        emit disable_select_until_reload();
+                        statusBar->get_line()->clear();
+                    }
 
                 } else{
-                    emit disable_select_until_reload();
-                    statusBar->get_line()->clear();
+
+                    custom_query_window__->save_query(QUERYSTATUS::FAILED,QueriesList.at(i));
+
+                    if(showNoteIfNotSeparateWindowResult){
+
+                        auto notSeparateWindowNoteName = "notSeparateWindowNote";
+
+                        auto previousNotSeparateWindowNote = custom_query_window__->findChild<noteFrame*>(notSeparateWindowNoteName);
+
+                        // remove previous note
+                        if(previousNotSeparateWindowNote)
+                            previousNotSeparateWindowNote->close();
+
+                        noteFrame* notSeparateWindowNotePtr = custom_query_window__->add_note(
+                                    QStringLiteral("*Note: Your successfully proceeded query results places in '%1' window. "
+                                                                "You can switch this behaviour in settings.").arg(this->metaObject()->className()));
+
+                        notSeparateWindowNotePtr->setObjectName(notSeparateWindowNoteName);
+
+                        connect(notSeparateWindowNotePtr,&noteFrame::dontShowNoteAgainSig,[this]{
+                            showNoteIfNotSeparateWindowResult = false;
+                            write2_settings_file();
+                        });
+                    }
+
+                    queryFailFlag = true;
+
+                    if(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL){
+
+                        skipAfterFail = true;
+                        continue;
+                    }
                 }
             }
         }
 
     } else{
 
-        CustomQueryResult new_result_window{auth_,nullptr,true};
+        for(auto i=0;i!=QueriesList.size();++i){
 
-        // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
-        connect(this,&Tables::custom_query_windows_close, &new_result_window, &CustomQueryResult::closeNowSig, Qt::QueuedConnection);//, &CustomQueryResult::close);
+            if(skipAfterFail){
+                custom_query_window__->save_query(QUERYSTATUS::NOTSENDED,QueriesList.at(i));
+                continue;
+            }
 
-        new_result_window.custom_query_slot(/*auth_,*//*query__*/custom_query_window__->get_text()/*,*/ /*new_result_window->model_,*/ /*new_result_window.tableView*/);
+//            std::cout << QueriesList.at(i).toStdString() << " ";// << std::endl;
+//            //qDebug() << QueriesList.at(i);
+//            std::cout << QueriesList.at(i).toStdString().size() << std::endl;
 
-        if((new_result_window.tableView->model())!=nullptr) {
 
-            //qDebug() << "Number of columns in tableView->model()::"<<new_result_window.tableView->model()->columnCount();
-           // qDebug() << "Number of rows in tableView->model()::"<<new_result_window.tableView->model()->rowCount();
+            QPointer<CustomQueryResult> new_result_window{new CustomQueryResult{auth_,nullptr,true}};
 
-            custom_query_window__->close_window();
+            auto newTitle = this->metaObject()->className() + QStringLiteral("::") +new_result_window->windowTitle()+QStringLiteral(" № %1").arg(i);
 
-            if(!new_result_window.tableView->model()->rowCount()&&!BLANK_RESULT){
+            new_result_window->setWindowTitle(newTitle);
 
-                //qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
+            new_result_window->setAttribute(Qt::WA_DeleteOnClose, true);
 
-                statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
-                                        " contain of displayable result.");
+            // correct closing when 'Table' window closed; preventing crashing while switching between DBs in QSqlDatabase connection
+            connect(this,&Tables::custom_query_windows_close, new_result_window, &CustomQueryResult::closeNowSig, Qt::QueuedConnection);
 
-                emit empty_set();
+            new_result_window->custom_query_slot(QueriesList.at(i));
 
-            } else{
+            if((new_result_window->tableView->model())!=nullptr) {
 
-                statusBar->get_line()->clear();
 
-                new_result_window.show();
-                new_result_window.exec();
+                custom_query_window__->save_query(QUERYSTATUS::SUCCESS,QueriesList.at(i));
+
+
+                if(!new_result_window->tableView->model()->rowCount()&&!BLANK_RESULT){
+
+
+                    statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
+                                            " contain of displayable result.");
+
+                    emit empty_set();
+
+                    new_result_window->deleteLater();
+
+                } else{
+
+                    statusBar->get_line()->clear();
+
+                    new_result_window->show();
+                }
+
+            }else {
+
+                custom_query_window__->save_query(QUERYSTATUS::FAILED,QueriesList.at(i));
+
+                queryFailFlag = true;
+
+                if(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL){
+                    //break;
+                    skipAfterFail = true;
+                    continue;
+                }
             }
 
         }
 
     }
 
+
+    if(QueriesList.size()){
+
+        if(!queryFailFlag){
+            custom_query_window__->close();
+
+        } else{
+
+            if(queryFailNote){
+
+                auto failNoteName = "failNote";
+
+                auto previousFailNote = custom_query_window__->findChild<noteFrame*>(failNoteName);
+
+                // remove previous (duplicate) fail note to prevent window's notes-spamming
+                if(previousFailNote)
+                    previousFailNote->close();
+
+                noteFrame* failNotePtr = custom_query_window__->add_note("*Note: Error/s occurred while proceed your SQL transaction/s.");
+
+                failNotePtr->setObjectName(failNoteName);
+
+                connect(failNotePtr,&noteFrame::dontShowNoteAgainSig,[this]{
+                    queryFailNote = false;
+                    write2_settings_file();
+                });
+
+            }
+
+        }
+    }
 }
 
 
@@ -665,7 +780,7 @@ void Tables::get_custom_query_window_(QString const& __pre_query, bool closeMess
                 custom_query_window.setCheckCloseMessageFlag(false);
                 send_custom_query_slot(customQueryWndw__);
                 custom_query_window.setCheckCloseMessageFlag(true);
-            });//static_cast<void(Tables::*)(/*QString,*/Custom_Query*)>(&Tables::send_custom_query_slot));
+            });
 
         connect(this,&Tables::custom_query_windows_close, &custom_query_window , &Custom_Query::closeNowSig);
 
@@ -684,20 +799,16 @@ void Tables::show_table_content()
 
     QString const curIndStr = adb_utility::escape_sql_backticks(tableView->currentIndex().data().toString());
 
-    if(!t_content_wnd){
+    if(!separate_content_window){
 
         db_connection::open(auth_);
 
-        //qDebug() << "CurrentIndexString(Table)::" << curIndStr;
 
         db_connection::set_query(QString("SELECT * FROM ")+/*auth_.table_name_*/curIndStr+(";"),&model_,tableView/*,QHeaderView::Stretch*/);
 
-        //qDebug() << "tableViewModelColumnCOUNT::" << tableView->model()->columnCount();
-        //qDebug() << "tableViewModelRowsCOUNT::" << tableView->model()->rowCount();
 
         if(!tableView->model()->rowCount()&&!BLANK_RESULT) {
             show_tables();
-            //qDebug() << "rowCount() in model_==0::display result ignored.";
 
             statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                     " contain of displayable result. Current DB tables list reloaded.");
@@ -725,13 +836,8 @@ void Tables::show_table_content()
 
         if((new_select_window.tableView->model())!=nullptr) {
 
-            //qDebug() << "Number of columns in tableView->model()::"<<new_select_window.tableView->model()->columnCount();
-            //qDebug() << "Number of rows in tableView->model()::"<<new_select_window.tableView->model()->rowCount();
-
 
             if(!new_select_window.tableView->model()->rowCount()&&!BLANK_RESULT){
-
-               // qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
 
                 statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                         " contain of displayable result.");
@@ -766,12 +872,10 @@ void Tables::get_table_constructor()
 
         size_t size_of_list_=tableView->model()->rowCount();
 
-        //qDebug() << "NUMBER OF TABLES::" << size_of_list_;
 
         for(size_t i=0;i!=size_of_list_;++i)
             list_to_send.append(tableView->model()->index(i,0).data().toString());
 
-        //qDebug()<< "CURRENT LIST OF STRINGs::"<<list_to_send;
 
         emit current_tables_list_signal(list_to_send);
 
@@ -823,23 +927,20 @@ void Tables::get_tuple_constructor_instance()
 
 
 
-void Tables::/*get_describe_table_instance*/show_table_description()
+void Tables::show_table_description()
 {
     QString const curIndStr = adb_utility::escape_sql_backticks(tableView->currentIndex().data().toString());
     QString query_text = "DESC "+curIndStr+';';
 
-    if(!t_describe_wnd){
+    if(!separate_describe_window){
 
         db_connection::open(auth_);
 
-        db_connection::set_query(query_text,&model_,tableView/*,QHeaderView::Stretch*/);
+        db_connection::set_query(query_text,&model_,tableView);
 
-        //qDebug() << "tableViewModelColumnCOUNT::" << tableView->model()->columnCount();
-        //qDebug() << "tableViewModelRowsCOUNT::" << tableView->model()->rowCount();
 
         if(!tableView->model()->rowCount() && !BLANK_RESULT) {
             show_tables();
-            //qDebug() << "rowCount() in model_==0::display result ignored.";
 
             statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                     " contain of displayable result. Current DB tables list reloaded.");
@@ -867,13 +968,9 @@ void Tables::/*get_describe_table_instance*/show_table_description()
 
         if((new_select_window.tableView->model())!=nullptr) {
 
-            //qDebug() << "Number of columns in tableView->model()::"<<new_select_window.tableView->model()->columnCount();
-            //qDebug() << "Number of rows in tableView->model()::"<<new_select_window.tableView->model()->rowCount();
-
 
             if(!new_select_window.tableView->model()->rowCount()&&!BLANK_RESULT){
 
-                //qDebug() << "(✓) rowCount() in model_==0::display result ignored.";
 
                 statusBar->get_line()->setText("(✓) [Note] :: Query result not contain/doesn't imply"
                                         " contain of displayable result.");
@@ -895,6 +992,51 @@ void Tables::/*get_describe_table_instance*/show_table_description()
 
 
 
+void Tables::importSettings(QMap<QString, int> settings_map__, QMap<QString, QString> settings_map_str__)
+{
+    int temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_content_window]))!=-1)
+        separate_content_window = temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_describe_window]))!=-1)
+        separate_describe_window = temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_query_window]))!=-1)
+        separate_query_window = temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::BLANK_RESULT]))!=-1)
+        BLANK_RESULT = temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT]))!=-1)
+        MSG_SHOW_IF_BLANK_RESULT = temp;
+
+    if((temp = settings_map__.value(CustomQuerySettings::paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL]))!=-1)
+        MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = temp;
+
+    if((temp = settings_map__.value("defaultScaleMode"))!=-1){
+        Tables::defaultScaleIndex_=temp;
+        rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(temp);
+    }
+
+    if((temp = settings_map__.value("showNoteIfNotSeparateWindowResult")!=-1))
+        showNoteIfNotSeparateWindowResult = temp;
+
+    if((temp = settings_map__.value("queryFailNote")!=-1))
+        queryFailNote = temp;
+
+    //------------------------------------------------------------------
+
+    if(!settings_map_str__.isEmpty()){
+        QString temp_s;
+
+        if((temp_s = settings_map_str__.value("defaultTableFont"))!="")
+            Tables::defaultFont_ = temp_s;
+    }
+
+}
+
+
 void Tables::mousePressEvent(QMouseEvent *event)
 {
     auto key = event->button();
@@ -908,64 +1050,50 @@ void Tables::mousePressEvent(QMouseEvent *event)
 
 bool Tables::read4rom_settings_file()
 {
+    int __res = 0;
+
     QMap<QString,int> __settings_map;
 
-    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map)){
-        int temp;
-
-        if((temp = __settings_map.value("t_content_wnd"))!=-1)
-            t_content_wnd = temp;
-
-        if((temp = __settings_map.value("t_describe_wnd"))!=-1)
-            t_describe_wnd = temp;
-
-        if((temp = __settings_map.value("t_query_wnd"))!=-1)
-            t_query_wnd = temp;
-
-        if((temp = __settings_map.value("BLANK_RESULT"))!=-1)
-            BLANK_RESULT = temp;
-
-        if((temp = __settings_map.value("MSG_SHOW_IF_BLANK_RESULT"))!=-1)
-            MSG_SHOW_IF_BLANK_RESULT = temp;
-
-        if((temp = __settings_map.value("defaultScaleMode"))!=-1){
-            Tables::defaultScaleIndex_=temp;
-            rescaleBoxWidget->findChild<notifyComboBox*>()->setCurrentIndex(temp);
-        }
-
-//        return true;
-    } else{
+    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map))
+        __res++;
+    else{
 
         qWarning() << "Error while read from"<<settings_f_name_;
     }
     //------------------------------------------------------------------
+
     QMap<QString,QString> __settings_map_str;
 
-    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map_str)){
-        QString temp_s;
-
-        if((temp_s = __settings_map_str.value("defaultTableFont"))!="")
-            Tables::defaultFont_ = temp_s;
-
-        return true;
-    } else{
+    if(adb_utility::get_settings_4rom_file(settings_f_name_,__settings_map_str))
+        __res++;
+    else{
 
         qWarning() << "Error while read from"<<settings_f_name_<<"(Strings)";
     }
 
-    return false;
+    if(__res)
+        importSettings(__settings_map,__settings_map_str);
+
+    return __res;
 }
+
+
 
 void Tables::write2_settings_file()
 {
     QFile outFile(settings_f_name_);
     outFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream textStream(&outFile);
-    textStream << "t_content_wnd" << '=' << QString::number(t_content_wnd) << Qt::endl;
-    textStream << "t_describe_wnd" << '=' << QString::number(t_describe_wnd) << Qt::endl;
-    textStream << "t_query_wnd" << '=' << QString::number(t_query_wnd) << Qt::endl;
-    textStream << "BLANK_RESULT" << '=' << QString::number(BLANK_RESULT) << Qt::endl;
-    textStream << "MSG_SHOW_IF_BLANK_RESULT" << '=' << QString::number(MSG_SHOW_IF_BLANK_RESULT) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_content_window] << '=' << QString::number(separate_content_window) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_describe_window] << '=' << QString::number(separate_describe_window) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::separate_query_window] << '=' << QString::number(separate_query_window) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::BLANK_RESULT] << '=' << QString::number(BLANK_RESULT) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT] << '=' << QString::number(MSG_SHOW_IF_BLANK_RESULT) << Qt::endl;
+    textStream << CustomQuerySettings::paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL] << '=' << QString::number(MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL) << Qt::endl;
     textStream << "defaultScaleMode" << '=' << QString::number(Tables::defaultScaleIndex_) << Qt::endl;
     textStream << "defaultTableFont" << '=' << '\"'+Tables::defaultFont_+'\"' << Qt::endl;
+    textStream << "showNoteIfNotSeparateWindowResult" << '=' << QString::number(showNoteIfNotSeparateWindowResult) << Qt::endl;
+    textStream << "queryFailNote" << '=' << QString::number(queryFailNote) << Qt::endl;
 }
+
+

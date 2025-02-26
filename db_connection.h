@@ -58,6 +58,9 @@ static bool set_query(QString const&, QSqlQueryModel*model__,QAbstractItemView*,
 // QTableView
 static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,/*QHeaderView::ResizeMode scalemode=QHeaderView::Stretch,*/QString const & = auth::con_name_);
 
+// QTableView (return Warning message window version)
+static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,QPointer<adbMessageBox>& warningWindow,QString const & = auth::con_name_);
+
 // QComboBox
 static bool set_query(QString const&, QSqlQueryModel*model__,QComboBox*, QString const & = auth::con_name_);
 

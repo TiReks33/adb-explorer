@@ -17,6 +17,7 @@
 #include "fontembeddedwidget.h"
 #include "reloadbutton.h"
 
+#include "dynamicbool.h"
 
 namespace Ui {
 class CustomQueryResult;
@@ -115,7 +116,7 @@ private:
 
     void reject() override;
 
-    static bool askBeforeClose_;
+    static /*bool*/dynamicbool askBeforeClose_;
     bool checkCloseMessageFlag_ = false;
 
     bool eventFilter(QObject *obj, QEvent *event) override;
