@@ -11,5 +11,5 @@ That sort of tasks can be easily solved with various instruments, that provides 
 Detailed info can be found in [<ins>User Guide</ins>](UserGuide.pdf). 
 ## Download
 [<ins>latest packages</ins>](https://github.com/TiReks33/adb-explorer/releases/latest)
-### Dependencies
-[adb-crypt](https://github.com/TiReks33/adb-crypt/releases/latest)
+## Plugins
+[ADB-Crypt](https://github.com/TiReks33/adb-crypt/releases/latest)
