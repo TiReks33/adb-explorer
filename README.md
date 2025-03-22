@@ -10,6 +10,6 @@ DB-administrators routines, such as:
 That sort of tasks can be easily solved with various instruments, that provides ADB-Explorer.  
 Detailed info can be found in [<ins>User Guide</ins>](UserGuide.pdf). 
 ## Download
-[<ins>v.1.1c download packages</ins>](https://github.com/TiReks33/adb-explorer/releases/latest)
+[<ins>latest packages</ins>](https://github.com/TiReks33/adb-explorer/releases/latest)
 ### Dependencies
 [adb-crypt](https://github.com/TiReks33/adb-crypt/releases/latest)
