@@ -13,3 +13,6 @@ Detailed info can be found in [<ins>User Guide</ins>](UserGuide.pdf).
 [<ins>latest packages</ins>](https://github.com/TiReks33/adb-explorer/releases/latest)
 ## Plugins
 [ADB-Crypt](https://github.com/TiReks33/adb-crypt/releases/latest)
+## CLI-keys(since v.1.3c)
+___'--nocrypto'___ or ___'-nc'___ for disabling encryption functionality (saving user credentials,  
+encrypted SQL-queries history).
