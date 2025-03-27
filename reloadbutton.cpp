@@ -41,14 +41,12 @@ reloadButton::reloadButton(QWidget* parent__, QColor bgColor__, QColor fontColor
     button_rich_text_lbl_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
 
 
-
     button_sublayout->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
     button_sublayout->addWidget(button_icon_lbl_);
     button_sublayout->addWidget(button_rich_text_lbl_);
     button_sublayout->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Fixed));
 
     this->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
-
 
 
     if(fontColor__.isValid()){
@@ -66,10 +64,7 @@ reloadButton::reloadButton(QWidget* parent__, QColor bgColor__, QColor fontColor
     hoverFontColour_ = defaultFontColour();
     focusFontColour_ = defaultFontColour();
 
-
-
     installEventFilter(this);
-
 
 }
 
@@ -118,20 +113,16 @@ void reloadButton::setFontPointSize(int newPointSize__)
 void reloadButton::setKhakiHighlight()
 {
 
-    //qDebug() << "setKhaki call";
-
     hoverFontColour_ = adb_style::buttonKhakiHighlightTextHoverColor_;
     focusFontColour_ = adb_style::buttonKhakiHighlightTextFocusColor_;
 
 
     setStyleSheet(adb_style::getbuttonKhakiHiglightSS(hoverFontColour_.name(),focusFontColour_.name()));
 
-
 }
 
 void reloadButton::removeKhakiHighlight()
 {
-    //qDebug() << "Khaki reject";
 
     hoverFontColour_ = defaultFontColour();
     focusFontColour_ = defaultFontColour();
@@ -142,9 +133,7 @@ void reloadButton::removeKhakiHighlight()
 //    auto curIsItalic = isItalic();
 //    auto curFontPointS = fontPointSize();
 
-
     setStyleSheet("");
-
 
     setBackgroundColour(defaultBackgroundColour());
     setFontColour(defaultFontColour());
@@ -223,10 +212,8 @@ void reloadButton::reloadIconChange(QIcon::Mode mode__, QColor colour__/*, Reloa
         __newColor = colour__;
 
 
-
     // Convert the pixmap to QImage
     QImage tmp = pixm.toImage();
-
 
 
     // Loop all the pixels
@@ -262,11 +249,10 @@ void reloadButton::changeEvent(QEvent *event__)
             repaintFont(/*this->palette().buttonText().color()*/defaultFontColour(), QIcon::Normal);
         }
     }
-//    } else{
-        QPushButton::changeEvent(event__);
-//    }
-}
 
+    QPushButton::changeEvent(event__);
+
+}
 
 
 bool reloadButton::eventFilter(QObject *obj, QEvent *event)

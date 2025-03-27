@@ -25,8 +25,6 @@ class statusLineEdit : public QLineEdit
 public:
     explicit statusLineEdit(QWidget *parent = 0);
 
-    ////inline void set_default(){ setPlaceholderText(default_str_); };
-
     void setText(QString const&);
 
 private slots:
@@ -37,8 +35,6 @@ private slots:
 signals:
     void rightClicked();
 
-//private:
-//    QString const default_str_ = "Status information";
 };
 
 
@@ -58,14 +54,9 @@ public slots:
     inline statusLineEdit* get_line(){ return statusLine;}
     inline QScrollBar* get_scroll(){ return hor_scrollbar;}
 
-    //inline statusLineEdit* operator->(){ return statusLine;}
-
 private:
     statusLineEdit* statusLine;
     QScrollBar* hor_scrollbar;
-
-
-//    void keyPressEvent(QKeyEvent *e);
 
     int maximum=0;
     int width=0;

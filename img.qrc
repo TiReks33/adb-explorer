@@ -18,5 +18,9 @@
         <file>pic/check-mark-true_darkgoldenrod.png</file>
         <file>pic/penf.png</file>
         <file>pic/adb-explorer_logo.png</file>
+        <file>pic/eyeOff.png</file>
+        <file>pic/eyeOn.png</file>
+        <file>pic/eyeOff0.png</file>
+        <file>pic/eyeOn1.png</file>
     </qresource>
 </RCC>

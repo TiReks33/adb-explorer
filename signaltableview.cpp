@@ -11,6 +11,7 @@ signalTableView::signalTableView(QWidget* parent__)
         for(auto i=0; i!=model()->columnCount();++i){
             this->model()->setHeaderData(i,Qt::Horizontal,(model()->headerData(i,Qt::Horizontal,Qt::DisplayRole).toString()),Qt::ToolTipRole);
         }
+
     });
 
 }
@@ -21,11 +22,10 @@ signalTableView::~signalTableView()
 }
 
 
-
 void signalTableView::setModel(QAbstractItemModel *newModel)
 {
     QTableView::setModel(newModel);
-    //qDebug() << "model changed";
+
     emit model_changed();
 }
 

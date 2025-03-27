@@ -184,7 +184,7 @@ void adb_utility::get_information_window(enum QMessageBox::Icon messageBoxType__
     messageBox->show();
 }
 
-QPointer<adbMessageBox>/*void*/ adb_utility::get_separate_information_window(enum QMessageBox::Icon messageBoxType__, const QString & header_text__, const QString & main_text__,  QWidget *parent__, bool stayOnTop__,bool timer__)
+QPointer<adbMessageBox>/*void*/ adb_utility::get_separate_information_window(enum QMessageBox::Icon messageBoxType__, const QString & header_text__, const QString & main_text__,  QWidget *parent__, bool timer__, bool stayOnTop__, Qt::WindowModality modalType__)
 {
 
     QPointer <adbMessageBox> messageBox;
@@ -208,8 +208,9 @@ QPointer<adbMessageBox>/*void*/ adb_utility::get_separate_information_window(enu
     if(!stayOnTop__){
         flags = QFlag(Qt::Window & ~Qt::WindowStaysOnTopHint);
     }else{
-        flags = QFlag(Qt::Dialog);
+        flags = QFlag(Qt::Dialog & Qt::WindowStaysOnTopHint); //!!
         IsModal = true;
+        messageBox->setWindowModality(modalType__);
     }
     messageBox->setWindowFlags(flags);
     messageBox->setModal(IsModal);

@@ -31,6 +31,8 @@ Databases::Databases(auth& auth__, QWidget *parent) :
 
   , menuBar_{new QMenuBar{this}}
   , menuFile_{new /*QMenu*/hideMenu{Qt::Key_F10,menuBar_}}
+  , serverInfoEntrie_{new QAction{"Server connection info"}}
+  , getSqlCurUsEntrie_{new QAction{"Current SQL-Server user entry"}}
   , exitEntrie_{new QAction{"Exit",menuFile_}}
   //, fontPointSizeSpin_{new QSpinBox{}}
 {
@@ -87,7 +89,6 @@ void Databases::keyPressEvent(QKeyEvent *e) {
 
 void Databases::closeEvent(QCloseEvent *event)
 {
-
 
     if(!adb_utility::showExitAppDialog(this)){
 
@@ -247,19 +248,23 @@ void Databases::init_form()
         fontPushButton->setStyleSheet(QStringLiteral("QPushButton{color: darkslategray; background: #fffffa;} %1").arg(adb_style::getbuttonKhakiHiglightSS()));
 
 
-        auto rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
-        if(rescaleComboBox)
-            rescaleComboBox->setStyleSheet(adb_style::getComboBoxKhakiHighlightSS("#fffffa","darkslategray"));//("background:#fffffa;");
-
-
+    auto rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
+    if(rescaleComboBox)
+        rescaleComboBox->setStyleSheet(adb_style::getComboBoxKhakiHighlightSS("#fffffa","darkslategray"));//("background:#fffffa;");
 
 
     ui->mainLayout->insertWidget(0,menuBar_);
 
     menuFile_->setTitle("File");
+
+    menuFile_->addAction(serverInfoEntrie_);
+    menuFile_->addAction(getSqlCurUsEntrie_);
     menuFile_->addAction(exitEntrie_);
 
+
     exitEntrie_->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCloseButton));
+    serverInfoEntrie_->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
+    getSqlCurUsEntrie_->setIcon(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation));
 
     menuBar_->addMenu(menuFile_);
 
@@ -288,21 +293,20 @@ void Databases::init_form()
 
         }
 
-        ui->showTables_button->setFocus();
 
-        tableView_->setAlternatingRowColors(true);
+    ui->showTables_button->setFocus();
 
-        tableView_->setPalette(QPalette(adb_style::whiteUndGrayColor));
+    tableView_->setAlternatingRowColors(true);
+
+    tableView_->setPalette(QPalette(adb_style::whiteUndGrayColor));
 
 
 
+    QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
+        foreach (auto obj, checkBoxInFormlist) {
 
-        QList<QCheckBox*> checkBoxInFormlist = this->findChildren<QCheckBox*>();
-            foreach (auto obj, checkBoxInFormlist) {
-
-                    obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
-            }
-
+                obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
+        }
 
 }
 
@@ -556,6 +560,18 @@ void Databases::init_signals()
         close();
     });
 
+    connect(serverInfoEntrie_,&QAction::triggered,[this]{
+
+        adb_utility::get_separate_information_window(QMessageBox::Information,"Server connection information",auth_.getConnectionInfo(), this,false);
+    });
+
+    connect(getSqlCurUsEntrie_,&QAction::triggered,[this]{
+
+        adb_utility::get_separate_information_window(QMessageBox::Information,"Current SQL-Server login entry",
+                                                     QStringLiteral("Current connected SQL-Server user: %1.")
+                                                     .arg(db_connection::getCurrentSQLuserEntry(auth_,auth::con_name_)), this,false);
+    });
+
     connect(this,&Databases::emptySet,[=]{
         if(MSG_SHOW_IF_BLANK_RESULT)
         {
@@ -647,7 +663,24 @@ void Databases::deleteUser()
 
         db_connection::open(auth_);
 
-        db_connection::set_query(deleteUserForm->comboBoxLoadQueryText(),__model,deleteFormComboBox,auth::con_name_);
+        QPointer<adbMessageBox> __warningWindowPtr = nullptr;
+
+        db_connection::set_query(deleteUserForm->comboBoxLoadQueryText(),__model,deleteFormComboBox,__warningWindowPtr,true,Qt::ApplicationModal,auth::con_name_);
+
+        if(__warningWindowPtr){
+
+            auto sig = connect(this,&Databases::close_all_custom_windows_,[__warningWindowPtr]{
+                if(__warningWindowPtr){
+                    __warningWindowPtr->close();
+                }
+
+            });
+
+            connect(__warningWindowPtr,&adbMessageBox::destroyed,[sig]{
+                disconnect(sig);
+            });
+
+        }
 
         deleteFormComboBox->setCurrentIndex(-1); //for blank cell default
     });
@@ -671,8 +704,6 @@ void Databases::deleteUser()
             deleteUserForm->reload();
         }
     });
-
-    deleteFormUserRButton->setChecked(true);
 
     QRadioButton* deleteFormRoleRButton = deleteUserForm->findChild<QRadioButton*>("deleteRole");
 
@@ -724,6 +755,7 @@ void Databases::deleteUser()
     deleteUserForm->setAttribute(Qt::WA_DeleteOnClose,true);
     deleteUserForm->setModal(true);
     deleteUserForm->show();
+    deleteFormUserRButton->setChecked(true);
 }
 
 
@@ -740,7 +772,7 @@ void Databases::getUsersList()
         recordsForm->setModal(false);
         recordsForm->show();
 
-        connect(this,&Databases::close_all_custom_windows_, recordsForm , &getCredentialRecordsForm::close, Qt::QueuedConnection);
+        connect(this,&Databases::close_all_custom_windows_, recordsForm , &getCredentialRecordsForm::closeNowSig, Qt::QueuedConnection);
 
     } else{
         recordsForm->raise();
@@ -782,8 +814,6 @@ void Databases::createUser()
 
 
 
-
-
 void Databases::grantUserPermissionsButtonHandler()
 {
 
@@ -793,15 +823,17 @@ void Databases::grantUserPermissionsButtonHandler()
         statusBar->get_line()->setText(message__);
     });
 
+
     grantUserPermissionsWndw->setAttribute(Qt::WA_DeleteOnClose,true);
+//    grantUserPermissionsWndw->setWindowModality(Qt::WindowModal);
+
     grantUserPermissionsWndw->setModal(true);
+
     grantUserPermissionsWndw->show();
 
-
+    grantUserPermissionsWndw->load();
 
 }
-
-
 
 
 
@@ -842,14 +874,6 @@ void Databases::get_query_wndw()
         });
     }
 
-
-//    if(test_note){
-//        noteFrame* test_ptr = custom_query_window->add_note("*testNote: blah-blah-blah mr. Freeman");
-
-//        connect(test_ptr,&noteFrame::dontShowNoteAgainSig,[this]{
-//            test_note = false;
-//        });
-//    }
 
     // call overload signal on overload slot
     connect(custom_query_window,static_cast<void(Custom_Query::*)(/*QString,*/Custom_Query *)>(&Custom_Query::send_custom_query),

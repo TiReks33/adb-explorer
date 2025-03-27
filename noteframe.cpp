@@ -20,7 +20,6 @@ void noteFrame::initForm()
     this->setFrameShadow(QFrame::Raised);
 
 
-    //dyn_note_lbl_->setObjectName("NOTELABEL");
     dyn_note_lbl_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
     dyn_note_lbl_->setWordWrap(true);
     dyn_note_hide_button_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);

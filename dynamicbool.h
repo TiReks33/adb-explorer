@@ -16,10 +16,6 @@ public:
 
     dynamicbool & operator=(bool const &);
 
-    //bool operator ==(dynamicbool const&);
-
-    //bool operator !=(dynamicbool const&);
-
     inline bool operator ==(const dynamicbool &__dynbool)
     {
         return (booly_ = __dynbool.booly_);

@@ -58,8 +58,16 @@ delete_sqldb_user::delete_sqldb_user(QWidget*parent__) :
 
 }
 
+void delete_sqldb_user::show()
+{
+    delete_form::show();
+
+}
+
 void delete_sqldb_user::on_buttonBox_accepted()
 {
     delete_form::on_buttonBox_accepted();
 
 }
+
+

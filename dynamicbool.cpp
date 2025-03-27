@@ -11,7 +11,7 @@ dynamicbool::dynamicbool(const dynamicbool & dynbool__, QObject *parent__)
     : QObject{parent__},
       booly_{dynbool__.booly_}
 {
-    //emit boolChanged();
+
 }
 
 dynamicbool& dynamicbool::operator=(const dynamicbool & dynbool__)
@@ -46,15 +46,5 @@ dynamicbool& dynamicbool::operator=(const bool & booly__)
     }
     return *this;
 }
-
-//bool dynamicbool::operator ==(const dynamicbool &__dynbool)
-//{
-//    return (booly_ = __dynbool.booly_);
-//}
-
-//bool dynamicbool::operator !=(const dynamicbool &__dynbool)
-//{
-//    return !(*this==__dynbool);
-//}
 
 

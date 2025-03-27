@@ -7,22 +7,16 @@
 #include <QScrollArea>
 #include <QDialogButtonBox>
 #include <QScrollBar>
-
 #include <QMenuBar>
 
 #include "adb-exp-utility.h"
 #include "clickablelabel.h"
 #include "auth.h"
 #include "fontembeddedwidget.h"
-
-//#include "adbcrypt.h"
 #include "iqtplugins.h"
-
 #include "hidemenu.h"
 #include "noteframe.h"
-
 #include "dynamicbool.h"
-
 #include "loginwindow.h"
 
 namespace Ui {
@@ -66,22 +60,17 @@ signals:
 
 public slots:
 
-    // special method to close user query window when query is successful;
-    //
-    // saveSuccessfulQuery = true -- query text (not result) will be saved in 'query history' form;
-    //
+    // query text (not result) will be saved in 'query history' form;
     // customTextToAdd -- if not specified (or NULL), full queries text will be saved; if specified,
     // this text (from text variable) will be saved (usefull 4ex. when more than 1 query in form
     // presented at once, and queries list of separated strings is parsed in 'for' cycle)
-//    void close_window(bool saveSuccessfulQuery = false, QString const & customTextToAdd = NULL, QUERYSTATUS = QUERYSTATUS::NOTSENDED);
-
     void save_query(QUERYSTATUS /*= QUERYSTATUS::NOTSENDED*/, QString const & customTextToAdd = NULL);
 
     // set text to form
     void set_text(QString const&) const;
 
     // add notification on window
-    /*void*/noteFrame* add_note(QString const&);
+    noteFrame* add_note(QString const&);
 
 private slots:
 
@@ -110,15 +99,13 @@ private:
 
     void reject();
 
-    static /*bool*/dynamicbool askBeforeClose_;
+    static dynamicbool askBeforeClose_;
     bool checkCloseMessageFlag_ = false;
 
     QPointer<QPushButton> userQueriesHistoryBut_;
     static int userQueriesHistoryLengthLines_;
 
     static QString const userQueriesHistoryBinFileName_;
-//    friend QString const & loginWindow::getQueriesHistoryFFilePath();
-//    friend bool loginWindow::removeQueriesHistoryFile();
 
     QMenuBar* menuBar_ = nullptr;
     hideMenu* menuFile_ = nullptr;
@@ -127,6 +114,9 @@ private:
 
     // keyboard keys logic overload
     void keyPressEvent(QKeyEvent *);
+
+    QCheckBox* saveQueriesCB_ = nullptr;
+    static dynamicbool saveQueriesFlag_;
 };
 
 #endif // CUSTOM_QUERY_H

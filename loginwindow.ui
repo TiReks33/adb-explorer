@@ -94,7 +94,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>v.1.2c</string>
+           <string>v.1.3c</string>
           </property>
          </widget>
         </item>
@@ -184,22 +184,6 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item>
-             <widget class="QCheckBox" name="checkBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Unhide</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
            </layout>
           </widget>
          </item>
@@ -404,25 +388,6 @@ Hostname/IP-address</string>
            </property>
            <property name="text">
             <string>Options</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2">
-          <widget class="QLineEdit" name="Password_Form">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="echoMode">
-            <enum>QLineEdit::Password</enum>
-           </property>
-           <property name="placeholderText">
-            <string/>
            </property>
           </widget>
          </item>

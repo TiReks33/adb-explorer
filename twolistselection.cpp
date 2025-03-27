@@ -12,14 +12,14 @@ TwoListSelection::TwoListSelection(auth& auth__,QWidget *parent) :
 
 TwoListSelection::~TwoListSelection()
 {
-    //qDebug() << "~TwoListSelection";
+
 }
 
 void TwoListSelection::addAvailableItems(const QStringList &items) {
     for( QString s : items)
         list_before_changes_.append(s);
     mInput->addItems(items);
-    //qDebug() << "list::"<<list_before_changes_;
+
 }
 
 QStringList TwoListSelection::selectedItems() {
@@ -35,7 +35,7 @@ void TwoListSelection::update_doublelist(QString const& query__,QString const& c
         qDebug() << QString("(x)There is error while update tables (connection is not established).");
         return;
     }
-//    db_connection::set_query(QString("SHOW COLUMNS FROM `%1`").arg(QString(escape_sql_backticks(auth_.table_name_))), this);
+
     if(db_connection::set_query(query__, this, connection_name__))
         select_cells(0,0,mInput);
 
@@ -211,3 +211,5 @@ void TwoListSelection::setStatusButton() {
     mBtnMoveToAvailable->setDisabled(mInput->selectedItems().isEmpty());
     mBtnMoveToSelected->setDisabled(mOutput->selectedItems().isEmpty());
 }
+
+

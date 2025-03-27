@@ -1,5 +1,6 @@
 #ifndef AUTH_H
 #define AUTH_H
+
 #include <QString>
 #include <QDebug>
 #include <iostream>
@@ -10,7 +11,7 @@ enum SQLDBtype{
     PSQL
 };
 
-// credential structure (cross-window transer solution)
+// credential structure (cross-window transfer solution)
 struct auth{
 
     auth();
@@ -40,19 +41,16 @@ struct auth{
 
     static QMap<QString,QString> SQLDBtype2SQLdriver;
 
+    static QMap<QString,QString> SQLdriver2SQLDBServerName;
+
     static QMap<QString,int> SQLdriver2SQLDBtype;
 
     static bool SQLdriverMatch(QString const&, SQLDBtype);
+
+    QString const getConnectionInfo() const;
+
 };
 
-//QDebug operator<<(QDebug stream__, auth const &auth__){
-//    stream__ << "db_server::" << auth__.db_driver_
-//             << "host::" << auth__.host_
-//             << "db_name::" << auth__.db_name_
-////             << "table_name::" << auth__.table_name_
-//                ;
-//    return stream__;
-//}
 
 
 #endif // AUTH_H

@@ -78,7 +78,7 @@ namespace adb_utility
     // get custom QMessageBox{1}
     void get_information_window(enum QMessageBox::Icon messageBoxType__, QString const&,QString const&, QWidget* = nullptr, bool stayOnTop__ = false);
     // {1}non-static version
-    QPointer<adbMessageBox>/*void*/ get_separate_information_window(enum QMessageBox::Icon messageBoxType__, QString const&,QString const&, QWidget* = nullptr, bool stayOnTop__ = false, bool timer = false);
+    QPointer<adbMessageBox>/*void*/ get_separate_information_window(enum QMessageBox::Icon messageBoxType__, QString const&,QString const&, QWidget* = nullptr, bool timer = false, bool stayOnTop__ = false,  Qt::WindowModality = Qt::WindowModal);
 
     QWidget* getRescaleBox(/*QTableView*/QPointer<signalTableView>);
 
@@ -189,6 +189,8 @@ extern QString const adbCheckBoxStyleSheet;
 namespace plugins {
 
 extern ICryptoPlugin* cryptoModule;
+
+extern bool enableCryptoPluginFlag;
 
 }
 

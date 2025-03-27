@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QSqlQueryModel>
 #include <QStatusBar>
+#include <QButtonGroup>
 
 #include "twolistselection.h"
 #include "auth.h"
@@ -76,6 +77,8 @@ public:
     explicit grantUserPermissionsForm(auth&,QWidget* = nullptr);
 
     virtual ~grantUserPermissionsForm();
+
+    void load();
 
 signals:
 
@@ -227,3 +230,5 @@ private:
 };
 
 #endif // SQLUSERMANAGEMENT_H
+
+

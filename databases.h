@@ -59,8 +59,6 @@ public slots:
     // load-reload databases list on form
     bool show_databases();
 
-//    // [utility func]
-//    void get_information_window(QString const&,QString const&, QWidget* = nullptr, enum QMessageBox::Icon messageBoxType__ = QMessageBox::Information);
 
     void createUser();
 
@@ -81,8 +79,6 @@ signals:
     void delete_form_request();
 
     void close_all_custom_windows_();
-
-    //void window_rise_signal();
 
     void emptySet();
 
@@ -180,6 +176,8 @@ private:
 
     QMenuBar* menuBar_ = nullptr;
     /*QMenu*/hideMenu* menuFile_ = nullptr;
+    QAction* serverInfoEntrie_ = nullptr;
+    QAction* getSqlCurUsEntrie_ = nullptr;
     QAction* exitEntrie_ = nullptr;
 
     //QSpinBox* fontPointSizeSpin_ = nullptr;
@@ -191,6 +189,7 @@ private:
     bool MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL = false;
 
     bool queryFailNote = true;
+
 };
 
 #endif // DATABASES_H

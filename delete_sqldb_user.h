@@ -8,6 +8,8 @@ class delete_sqldb_user : public delete_form
 public:
     explicit delete_sqldb_user(QWidget *parent = nullptr);
 
+    virtual void show();
+
 protected slots:
     void on_buttonBox_accepted();
 };

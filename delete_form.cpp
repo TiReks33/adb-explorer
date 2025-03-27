@@ -70,7 +70,7 @@ void delete_form::reload()
 
 void delete_form::delete_form_request_slot(){
     emit delete_form_send(ui->comboBox);
-    //qDebug() << "Delete form signal was send.";
+
 }
 
 void delete_form::on_buttonBox_accepted()
@@ -80,9 +80,7 @@ void delete_form::on_buttonBox_accepted()
                                                              QMessageBox::Yes|QMessageBox::No);
       if (reply == QMessageBox::Yes) {
           emit delete_entity(ui->comboBox);
-        //qDebug() << QString("Yes was clicked in delete %0 form").arg(entity_name_);
-      } else {
-        //qDebug() << "cancel deletion";
+
       }
 
 }

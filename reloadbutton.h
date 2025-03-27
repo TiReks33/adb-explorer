@@ -18,7 +18,7 @@ enum ReloadButtonState {
     Blinkin
 };
 
-class reloadButton : public BlinkinButton/*QPushButton*/
+class reloadButton : public BlinkinButton
 {
     Q_OBJECT
 public:
@@ -107,10 +107,7 @@ public:
 
     inline QColor blinkinFontColour() const{ return blinkinFontColour_;}
 
-
-    //
     inline QFont const& font() const{ return button_rich_text_lbl_->font(); }
-    //
 
     inline bool isBold() const{ return this->font().bold();}
 
@@ -172,17 +169,11 @@ private:
     QColor hoverFontColour_;
     QColor focusFontColour_;
 
-
-
     bool alternateBlinkinColour_=false;
 
     QString styleSheetBackup_ = "";
 
-
-
     bool eventFilter(QObject *obj, QEvent *event) override;
-
-//    using BlinkinButton::changeBlinkSS;
 
 };
 

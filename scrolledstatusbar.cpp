@@ -70,15 +70,13 @@ scrolledStatusBar::scrolledStatusBar(QWidget *parent)
         QFontMetrics fm(statusLine->font());
         width = fm.horizontalAdvance(text__);
 
-        if(width>=/*hor_scrollbar->width()-20*/statusLine->size().width()-20)
+        if(width>=statusLine->size().width()-20)
             hor_scrollbar->show();
         else{
             hor_scrollbar->hide();
             ////this->adjustSize();
         }
 
-//        if(text__.isEmpty())
-//            get_line()->set_default();
 
     });
 
@@ -120,7 +118,7 @@ scrolledStatusBar::~scrolledStatusBar()
 void scrolledStatusBar::resizeEvent(QResizeEvent *event)
 {
     //refresh();
-//    qDebug() << hor_scrollbar->width() << hor_scrollbar->size().width() << hor_scrollbar->size().height();
+
     QWidget::resizeEvent(event);
 
     if(width>=/*hor_scrollbar->width()-20*/statusLine->size().width()-20)

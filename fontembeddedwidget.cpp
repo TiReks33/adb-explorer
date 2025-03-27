@@ -14,7 +14,7 @@ fontEmbeddedWidget::fontEmbeddedWidget(QWidget *parent__)
 
 fontEmbeddedWidget::~fontEmbeddedWidget()
 {
-    //qDebug() << "~fontEmbeddedWidget";
+
 }
 
 

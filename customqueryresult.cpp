@@ -8,7 +8,7 @@ bool CustomQueryResult::settingsFileReady_ = true;
 
 QString CustomQueryResult::defaultFont_ = "Noto Sans,10,-1,0,50,0,0,0,0,0,Regular";
 
-/*bool*/dynamicbool CustomQueryResult::askBeforeClose_ = true;
+dynamicbool CustomQueryResult::askBeforeClose_ = true;
 
 CustomQueryResult::CustomQueryResult(auth& auth__,QWidget *parent,bool closeMessage__) :
     QDialog(parent),
@@ -99,9 +99,6 @@ void CustomQueryResult::init_form()
     exportButtonsFrame->setFrameShape(QFrame::NoFrame);//(QFrame::StyledPanel);
     exportButtonsFrame->setFrameShadow(QFrame::Raised);
 
-//    QVBoxLayout* exportButtonsFrameSubLay = new QVBoxLayout{exportButtonsFrame};
-//    exportButtonsFrameSubLay->addWidget(reload_button_);
-
 
     QHBoxLayout* exportButtonsSubLay = new QHBoxLayout{exportButtonsFrame};
     exportButtonsSubLay->setContentsMargins(0,0,0,0);
@@ -116,7 +113,7 @@ void CustomQueryResult::init_form()
 
     exportButtonsSubLay->addWidget(copy_button_);
 
-//    tableCopyLay->addLayout(exportButtonsSubLay);
+
     tableCopyLay->addWidget(exportButtonsFrame);
 
 
@@ -200,8 +197,6 @@ void CustomQueryResult::init_form()
     copyButtonModeSubLay->addWidget(copyButtonCheckBox_);
 
 
-
-
     copy_button_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
     auto copyLblFont = copyButtonSubLbl->font();
@@ -239,7 +234,6 @@ void CustomQueryResult::init_form()
     tableView->setPalette(QPalette(adb_style::whiteUndGrayColor));
 
 
-
     QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
         foreach (auto obj, ButtonsInFormlist) {
             // if button is inherited class object -> cast pointer to inherit type
@@ -254,7 +248,6 @@ void CustomQueryResult::init_form()
             }
 
         }
-
 
 
         copy_button_->installEventFilter(this);
@@ -299,7 +292,7 @@ void CustomQueryResult::init_signals()
     //QObject::connect(rescaleDefaultCheckBox,&QCheckBox::destroyed,[=]{ qDebug() << "~Databases::ui->rescaleLayout::rescaleDefaultCheckBox"; });
 
 
-    QPointer</*QComboBox*/notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
+    QPointer<notifyComboBox> rescaleComboBox = rescaleBoxWidget->findChild<notifyComboBox*>();
 
 
     connect(rescaleComboBox,&notifyComboBox::sameIndexRepeated,[=](){
@@ -348,14 +341,7 @@ void CustomQueryResult::init_signals()
         reject();
     });
 
-//    auto dynamicCheck = connect(&CustomQueryResult::askBeforeClose_, &dynamicbool::boolChanged,[this]{
-//        ui->closeMessageCheckBox->setChecked(CustomQueryResult::askBeforeClose_);
-//    });
 
-////    connect(this,&CustomQueryResult::destroyed,[dynamicCheck]{
-//    connect(ui->closeMessageCheckBox,&QCheckBox::destroyed,[dynamicCheck]{
-//        disconnect(dynamicCheck);
-//    });
     CustomQueryResult::askBeforeClose_.synchronizeCheckBox(ui->closeMessageCheckBox);
 }
 
@@ -390,13 +376,7 @@ void CustomQueryResult::reject()
         });
 
         CustomQueryResult::askBeforeClose_.synchronizeCheckBox(notAskAgainCheckBox);
-//        auto dynamicCheck = connect(&CustomQueryResult::askBeforeClose_, &dynamicbool::boolChanged,[notAskAgainCheckBox]{
-//            notAskAgainCheckBox->setChecked(CustomQueryResult::askBeforeClose_);
-//        });
 
-//        connect(notAskAgainCheckBox,&QCheckBox::destroyed,[dynamicCheck]{
-//            disconnect(dynamicCheck);
-//        });
 
         questionBox->setAttribute(Qt::WA_DeleteOnClose,true);
         questionBox->setWindowModality(Qt::WindowModal);
@@ -465,17 +445,25 @@ void CustomQueryResult::loadQuery()
     {
         QPointer<adbMessageBox> __warningWindowPtr = nullptr;
 
-        db_connection::set_query(last_query_,&model_,tableView,__warningWindowPtr,last_con_name_);
+        db_connection::set_query(last_query_,&model_,tableView,__warningWindowPtr,true,Qt::WindowModal,last_con_name_);
 
         if(__warningWindowPtr){
 
-            connect(this,&CustomQueryResult::closeNowSig,[__warningWindowPtr]{
+            auto sig = connect(this,&CustomQueryResult::closeNowSig,[__warningWindowPtr]{
                 if(__warningWindowPtr){
                     __warningWindowPtr->close();
                 }
+
             });
+
+            connect(__warningWindowPtr,&adbMessageBox::destroyed,[sig]{
+                disconnect(sig);
+            });
+
         }
+
     }
+
 }
 
 
@@ -498,7 +486,7 @@ CustomQueryResult::~CustomQueryResult()
 
 void CustomQueryResult::close_window()
 {
-    //qDebug()<<"Close custom query form signal handled";
+
     this->close();
 }
 
@@ -692,13 +680,11 @@ bool CustomQueryResult::eventFilter(QObject *obj, QEvent *event)
         }
 
 
+    }
 
+    // pass the event on to the parent class
+    return QDialog::eventFilter(obj, event);
 
-    }/*else {*/
-
-        // pass the event on to the parent class
-        return QDialog::eventFilter(obj, event);
-        //    }
 }
 
 void CustomQueryResult::repaintCopyButtonText(QColor newColour__)

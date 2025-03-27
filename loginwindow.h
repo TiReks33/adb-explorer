@@ -17,9 +17,8 @@
 #include "auth.h"
 #include "db_connection.h"
 #include "blinkinbutton.h"
-
-//#include "adbcrypt.h"
 #include "iqtplugins.h"
+#include "passwordlineedit.h"
 
 #include <iostream>
 
@@ -49,15 +48,9 @@ public slots:
     // initialization of settings dialog
     void gset_connection_options();
 
-    // remove SQL queries history encrypted file
-//    QString const & getQueriesHistoryFFilePath();
-//    bool removeQueriesHistoryFile();
-
 signals:
 
     void message_to_database_window(QString const&);
-
-//    void current_driver_check_();
 
     void start_connection_timer_stuff();
 
@@ -65,13 +58,15 @@ signals:
 
     void setCustomSettings();
 
+    void rememberMeSig();
+
 private slots:
 
     // connect to SQL and explore DBs
     void on_pushButton_clicked();
 
     // password hide
-    void on_checkBox_stateChanged(int arg1);
+//    void on_checkBox_stateChanged(int arg1);
 
     // .cfg file synchronize
     void write2recon_opts_file();
@@ -79,14 +74,15 @@ private slots:
     // .cfg file synchronize(2)
     bool read4rom_recon_opts_file();
 
-//    // get login list from cryptoModule by keyboard
-//    void keyPressEvent(QKeyEvent *event);
-
     // get login list from cryptoModule by mouse
     bool eventFilter(QObject *object, QEvent *event);
 
 private:
     Ui::loginWindow *ui;
+
+    QCheckBox* rememberCB_ = nullptr;
+
+    PasswordLineEdit* passwLine_ = nullptr;
 
     // user info struct declare
     auth auth_;

@@ -38,10 +38,11 @@ public slots:
     }
 
 
-
 private:
     QHeaderView::ResizeMode horScale_ = QHeaderView::Stretch;
     QHeaderView::ResizeMode verScale_ = QHeaderView::ResizeToContents;
 };
 
 #endif // SIGNALTABLEVIEW_H
+
+

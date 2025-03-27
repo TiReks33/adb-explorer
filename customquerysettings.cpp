@@ -36,18 +36,6 @@ CustomQuerySettings::~CustomQuerySettings()
     delete ui;
 }
 
-//void CustomQuerySettings::enumFill()
-//{
-////    paramEnumToStr[tblQuerSet::separate_content_window] = "separate_content_window";
-////    paramEnumToStr[tblQuerSet::separate_describe_window] = "separate_describe_window";
-////    paramEnumToStr[tblQuerSet::separate_query_window] = "separate_query_window";
-////    paramEnumToStr[tblQuerSet::BLANK_RESULT] = "BLANK_RESULT";
-////    paramEnumToStr[tblQuerSet::MSG_SHOW_IF_BLANK_RESULT] = "MSG_SHOW_IF_BLANK_RESULT";
-////    paramEnumToStr[tblQuerSet::MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL] = "MULTIPLY_USER_QUERIES_TERMINATE_AFTER_FAIL";
-
-//    qDebug() << "paramEnumToStr.value(tblQuerSet::separate_content_window)::" << paramEnumToStr.value(tblQuerSet::separate_content_window);
-
-//}
 
 
 void CustomQuerySettings::setForeignSettingsOnForm(QMap<QString, int> settings_map__)
@@ -128,12 +116,6 @@ void CustomQuerySettings::init_signals()
             });
         }
 
-//    QList<QLineEdit*> lineEditsInForm = this->findChildren<QLineEdit*>();
-//        foreach (auto obj, lineEditsInForm) {
-//            connect(obj, &QLineEdit::textEdited,[this]{
-//                changes_ = true;
-//            });
-//        }
 
 }
 

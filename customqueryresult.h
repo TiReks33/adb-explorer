@@ -16,7 +16,6 @@
 #include "signaltableview.h"
 #include "fontembeddedwidget.h"
 #include "reloadbutton.h"
-
 #include "dynamicbool.h"
 
 namespace Ui {
@@ -79,24 +78,24 @@ private:
 
     void write2_settings_file();
 
-    /*signalTableView**/QPointer<signalTableView> tableView/* = nullptr*/;
+    QPointer<signalTableView> tableView;
 
-    /*QPushButton*/reloadButton* reload_button_=nullptr;
+    reloadButton* reload_button_=nullptr;
 
     QPushButton* export_button_ = nullptr;
     QPushButton* copy_button_ = nullptr;
-    /*QCheckBox**/QPointer<QCheckBox> copyButtonCheckBox_ /*= nullptr*/;
+    QPointer<QCheckBox> copyButtonCheckBox_;
     static bool headerCopy_;
 
 
     // rescale stuff
-    /*QWidget**/QPointer <QWidget>rescaleBoxWidget /*= nullptr*/;
+    QPointer <QWidget>rescaleBoxWidget;
 
     QPointer<QCheckBox>rescaleDefaultCheckBox;
     static int defaultScaleIndex_;
     static bool settingsFileReady_;
 
-//public:
+
     auth& auth_;
 
     QSqlQueryModel model_;

@@ -1,22 +1,17 @@
 #include "loginwindow.h"
 #include "ui_loginwindow.h"
-
 #include "reloadbutton.h"
-
 #include "custom_query.h"
 
-//int timeout_reconnect = 15000; //60000
-
-//bool CONNECTION_LOST_MESSAGE = true;
-
-//int const loginWindow::conHostsFileEntryCapacity_ = 25;
 
 loginWindow::loginWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::loginWindow)
+    , rememberCB_{new QCheckBox{this}}
+    , passwLine_{new PasswordLineEdit{this}}
     , db_window_(new Databases(auth_))
     , timer{new QTimer{this}}
-//    , cryptoModule_{AdbCrypt::data(ui->Login_Form,ui->Password_Form,adb_utility::filepath_)}
+
 {
 
     form_init();
@@ -32,10 +27,16 @@ loginWindow::loginWindow(QWidget *parent)
 void loginWindow::form_init()
 {
     ui->setupUi(this);
+
+    ui->gridLayout->addWidget(rememberCB_,5,3);
+
+    ui->gridLayout->addWidget(passwLine_,6,2);
+
     //this->setFixedSize(QSize(615, 362));
     move(screen()->geometry().center() - frameGeometry().center());
-    ui->checkBox->setText("Hide");
-    ui->checkBox->setChecked(true);
+
+    rememberCB_->setText("Remember");
+
 
     ui->cc_label->setToolTip("<pre style=\"white-space: pre-wrap;\"><img src=':/pic/9rnvobslce_cc.png' height='16' width='16'><b>"
                         "[Non-Commercial License<br>   Requires Attribution]</b><br>This logo's "
@@ -49,9 +50,6 @@ void loginWindow::form_init()
     ui->loginLbl->setStyleSheet("QToolTip {font-family:'Noto Sans','Black';color: yellow;font-weight:bold;background: brown;border:0px;}");
 //    "<span style=\" font-family:'Noto Sans','Black';\"><font style=\"color: yellow;font-weight:bold;background: brown;\">[A]DB_Explorer</font></span>"
 
-//    QStringList drivers_list = QSqlDatabase::drivers();
-
-//    std::sort(drivers_list.begin(), drivers_list.end());
 
     QStringList drivers_list;
 
@@ -64,12 +62,13 @@ void loginWindow::form_init()
     ui->dbtypeComboBox->addItems(drivers_list);
 
 
-
     ui->Login_Form->setFocus();
 
-    setTabOrder(ui->Login_Form, ui->Password_Form);
-    setTabOrder(ui->Password_Form, ui->checkBox);
-    setTabOrder(ui->checkBox, ui->Host_Form);
+
+    setTabOrder(ui->Login_Form, rememberCB_);
+    setTabOrder(rememberCB_, passwLine_);
+    setTabOrder(passwLine_,ui->Host_Form);
+
     setTabOrder(ui->Host_Form, ui->conOptsButton);
     setTabOrder(ui->conOptsButton, ui->port_checkBox);
     setTabOrder(ui->port_checkBox, ui->portForm);
@@ -94,6 +93,7 @@ void loginWindow::form_init()
                 obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
         }
 
+
 }
 
 
@@ -111,20 +111,6 @@ void loginWindow::signals_init()
             ui->portForm->setFocus();
         }
     });
-
-//    // toDo
-//    connect(this,&loginWindow::current_driver_check_,[=]{
-
-//        QPointer <QMessageBox> messageBox{new QMessageBox(QMessageBox::Information,"Current SQL driver issue",
-//                                                          39+auth_.db_driver_+39+" driver currently not tested.",
-//                                                          QMessageBox::Ok,this/*0*/)};
-
-//        ////connect(messageBox,&QMessageBox::destroyed,[&](){ qDebug() << "~messageBox activated (destroyed).";});
-//        messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
-//        //messageBox->setModal(false);
-//        messageBox->show();
-
-//    });
 
     // start SQL-server alive-check
     connect(this,&loginWindow::start_connection_timer_stuff,[=]{
@@ -153,6 +139,12 @@ void loginWindow::signals_init()
         }
     });
 
+    connect(this,&loginWindow::rememberMeSig,[this]{
+        if(plugins::enableCryptoPluginFlag && plugins::cryptoModule)
+            rememberCB_->setChecked(true);
+        else
+            rememberCB_->setEnabled(false);
+    });
 }
 
 void loginWindow::fileOps()
@@ -164,55 +156,59 @@ void loginWindow::fileOps()
 
 void loginWindow::cryptoModuleInit()
 {
-    QString PLUGIN_NAME = "adb-crypt";
+    do{
 
-    QLibrary lib(PLUGIN_NAME);
-    if(!lib.load()){
-       std::cout << "[WARNING]CRYPTO PLUGIN LOAD FAILED!" << std::endl;
-       qDebug() << lib.errorString();
-       return;
-    } else{
-        std::cout << "[SUCCESS]CRYPTO PLUGIN LOADED SUCCESSFULLY!" << std::endl;
-    }
+        if(plugins::enableCryptoPluginFlag){
 
-    // get plugin init method pointer
-    typedef ICryptoPlugin*
-    ( *InitFunc)
-    (
-        QLineEdit * const &,
-        QLineEdit * const &,
-        QLineEdit * const &,
-        const QString &,
-        int const,
-        int const
-    );
-    InitFunc initFunc = (InitFunc) lib.resolve("CCreateCryptoModuleObj");
+            QString PLUGIN_NAME = "adb-crypt";
 
-    if(initFunc){
+            QLibrary lib(PLUGIN_NAME);
+            if(!lib.load()){
+               std::cout << "[WARNING]CRYPTO PLUGIN LOAD FAILED!" << std::endl;
+               qDebug() << lib.errorString();
+               break;
+            } else{
+                std::cout << "[SUCCESS]CRYPTO PLUGIN LOADED SUCCESSFULLY!" << std::endl;
+            }
 
-        plugins::cryptoModule = initFunc(ui->Login_Form,ui->Password_Form,ui->Host_Form,adb_utility::filepath_,15,5);
+            // get plugin init method pointer
+            typedef ICryptoPlugin*
+            ( *InitFunc)
+            (
+                QLineEdit * const &,
+                QLineEdit * const &,
+                QLineEdit * const &,
+                const QString &,
+                int const,
+                int const
+            );
+            InitFunc initFunc = (InitFunc) lib.resolve("CCreateCryptoModuleObj");
 
-        if(plugins::cryptoModule){
-            plugins::cryptoModule->getSavedHosts();
-            //qDebug() << plugins::cryptoModule->pluginName();
+            if(initFunc){
+
+                plugins::cryptoModule = initFunc(ui->Login_Form,/*ui->Password_Form*/passwLine_,ui->Host_Form,adb_utility::filepath_,15,5);
+
+                if(plugins::cryptoModule){
+                    plugins::cryptoModule->getSavedHosts();
+                    //qDebug() << plugins::cryptoModule->pluginName();
+                }
+
+            } else{
+                auto __ERR_STR = "[WARNING] PLUGIN INIT METHOD LOAD FAILED!";
+                std::cout << __ERR_STR << std::endl;
+                qDebug() << __ERR_STR;
+            }
+
+            ui->Login_Form->installEventFilter(this);
+
+            ui->Host_Form->installEventFilter(this);
+
         }
 
-    } else{
-        auto __ERR_STR = "[WARNING] PLUGIN INIT METHOD LOAD FAILED!";
-        std::cout << __ERR_STR << std::endl;
-        qDebug() << __ERR_STR;
-    }
+    }while(false);
 
-    ui->Login_Form->installEventFilter(this);
-
-    ui->Host_Form->installEventFilter(this);
-
+    emit rememberMeSig();
 }
-
-//const QString &loginWindow::getQueriesHistoryFFilePath()
-//{
-//    return Custom_Query::userQueriesHistoryBinFileName_;
-//}
 
 
 loginWindow::~loginWindow()
@@ -240,9 +236,9 @@ void loginWindow::connection_timer_slot()
         disconnect_once_msg=false;
 
         if(!reconnect_once_msg){
-        std::cout << "Connection is alive!" << std::endl;
-        qDebug() << "Connection is alive!";
-        reconnect_once_msg=true;
+            std::cout << "Connection is alive!" << std::endl;
+            qDebug() << "Connection is alive!";
+            reconnect_once_msg=true;
         }
 
         if(messageBox){
@@ -296,9 +292,6 @@ void loginWindow::connection_timer_slot()
                                                                                     QMessageBox::NoButton,this})){
                      messageBox->setAttribute( Qt::WA_DeleteOnClose, true );
 
-//                     connect(messageBox,&QMessageBox::destroyed,[=]{
-//                         qDebug() << "~MessageBox::Critical";
-//                     });
 
                      // reconnect by clicking reload button
                      QPushButton* recon_but = messageBox->addButton("Force reconnect",QMessageBox::ActionRole);
@@ -324,10 +317,6 @@ void loginWindow::gset_connection_options()
 
     // flag to dealloc memory after closing
     options_dialog->setAttribute(Qt::WA_DeleteOnClose,true);
-
-//    connect(options_dialog,&QDialog::destroyed,[=]{
-//        qDebug() << "~Options_dialog";
-//    });
 
 
     QVBoxLayout* options_layout = new QVBoxLayout;
@@ -472,7 +461,6 @@ void loginWindow::gset_connection_options()
 
     statusbar_layout->setSizeConstraint(QLayout::SetDefaultConstraint);
 
-    //statusbar->showMessage("aBc");
 
     statusbar_layout->addWidget(statusBarLbl);
 
@@ -487,8 +475,6 @@ void loginWindow::gset_connection_options()
     options_layout->setContentsMargins(3,3,3,3);
     options_layout->setSizeConstraint(QLayout::SetFixedSize);
 
-
-//    qDebug() << statusbar->font();
 
     connect(buttonBox, &QDialogButtonBox::accepted, [=]{
             QString str = timeout_line->text();
@@ -549,12 +535,6 @@ void loginWindow::gset_connection_options()
 }
 
 
-//bool loginWindow::removeQueriesHistoryFile()
-//{
-//    return Custom_Query::removeUserQueriesHistory();
-//}
-
-
 
 void loginWindow::on_pushButton_clicked()
 {
@@ -566,7 +546,7 @@ void loginWindow::on_pushButton_clicked()
 
     // auth_ structure with credentials to transfer across multiply childs via reference
     auth_.login_=this->ui->Login_Form->text();
-    auth_.passw_=this->ui->Password_Form->text();
+    auth_.passw_=/*this->ui->Password_Form*/passwLine_->text();
 
     QString const hostInf = ui->Host_Form->text();
     (hostInf.isEmpty()) ? auth_.host_="localhost" : auth_.host_ = hostInf;
@@ -585,7 +565,7 @@ void loginWindow::on_pushButton_clicked()
         ui->statusbar->showMessage("(✓)Successful authorization");
 
         // saveLoginEncrypted
-        if(plugins::cryptoModule){
+        if(plugins::cryptoModule && rememberCB_->isChecked()){
             plugins::cryptoModule->encryptCredentials2File();
             plugins::cryptoModule->encryptCurHost();
         }
@@ -620,14 +600,6 @@ void loginWindow::on_pushButton_clicked()
 }
 
 
-void loginWindow::on_checkBox_stateChanged(int arg1)
-{
-    if (arg1 == Qt::Checked)
-        ui->Password_Form->setEchoMode(QLineEdit::Password);
-    else
-        ui->Password_Form->setEchoMode(QLineEdit::Normal);
-
-}
 
 void loginWindow::write2recon_opts_file()
 {

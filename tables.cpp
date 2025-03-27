@@ -48,8 +48,6 @@ Tables::~Tables()
 {
     delete ui;
 
-    ////delete custom_query_result_window_;
-//    delete settings_;
     delete delete_table_window_;
     delete constructor_;
     delete rescaleBoxWidget;
@@ -282,7 +280,7 @@ void Tables::keyPressEvent(QKeyEvent *e__)
         }
 
     } else {/* minimize */
-        //qDebug()<<"escape pressed (tables)";
+
         QDialog::keyPressEvent(e__);
     }
 }

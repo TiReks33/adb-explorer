@@ -11,6 +11,8 @@ int Custom_Query::userQueriesHistoryLengthLines_ = 1000;
 
 QString const Custom_Query::userQueriesHistoryBinFileName_ = adb_utility::filepath_+"/.usqrhist.bin";
 
+dynamicbool Custom_Query::saveQueriesFlag_ = true;
+
 Custom_Query::Custom_Query(QWidget *parent, bool closeMessage/*, QFont font*/)
     : QDialog(parent)
     , ui(new Ui::Custom_Query)
@@ -21,6 +23,7 @@ Custom_Query::Custom_Query(QWidget *parent, bool closeMessage/*, QFont font*/)
     , menuFile_{new hideMenu{Qt::Key_F10,menuBar_}}
     , saveQueryEntrie_{new QAction{"Save Query",menuFile_}}
     , exitEntrie_{new QAction{"Exit",menuFile_}}
+    , saveQueriesCB_{new QCheckBox("Save queries")}
 {
     ui->setupUi(this);
     defaultFontWidget_ = new fontEmbeddedWidget{ui->plainTextEdit};
@@ -37,13 +40,12 @@ Custom_Query::Custom_Query(QWidget *parent, bool closeMessage/*, QFont font*/)
 
 Custom_Query::~Custom_Query()
 {
-    //qDebug()<<"~CustomQuery activated";
     delete ui;
 }
 
 void Custom_Query::fileOps()
 {
-    // get/set file data only once (for multiply windows speed)
+    // get/set file data only once (for multiply windows speed, and.. hdd relax.:) )
     if(Custom_Query::settingsFileReady_){
         // if read file unsuccessful -- write default settings to file
         if(!read4rom_settings_file()){
@@ -66,10 +68,8 @@ void Custom_Query::connections_init()
 
     // send result of query exec. to form
     connect(ui->Ok_button,&QPushButton::clicked,[=]{
-        emit send_custom_query(/*ui->plainTextEdit->toPlainText(),*/this);
+        emit send_custom_query(this);
     });
-
-    //{before}
 
     connect(ui->closeCheckBox,&QCheckBox::stateChanged,[this](int newState__){
         Custom_Query::askBeforeClose_ = newState__;
@@ -102,6 +102,20 @@ void Custom_Query::connections_init()
     });
 
     Custom_Query::askBeforeClose_.synchronizeCheckBox(ui->closeCheckBox);
+
+
+    saveQueriesCB_->setChecked(Custom_Query::saveQueriesFlag_);
+
+    saveQueryEntrie_->setEnabled(Custom_Query::saveQueriesFlag_);
+
+    connect(saveQueriesCB_,&QCheckBox::stateChanged,[this](int newState__){
+        Custom_Query::saveQueriesFlag_ = newState__;
+        saveQueryEntrie_->setEnabled(newState__);
+        write2_settings_file();
+    });
+
+    Custom_Query::saveQueriesFlag_.synchronizeCheckBox(saveQueriesCB_);
+
 }
 
 
@@ -124,7 +138,7 @@ void Custom_Query::form_init()
     QFrame* fontWidgetFrame = new QFrame;
     fontWidgetFrame->setContentsMargins(0,0,0,0);
 
-    fontWidgetFrame->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+    fontWidgetFrame->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     fontWidgetFrame->setFrameShape(QFrame::StyledPanel);
     fontWidgetFrame->setFrameShadow(QFrame::Sunken);
@@ -145,14 +159,15 @@ void Custom_Query::form_init()
     userQueriesHistorySubFrame->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
 
 
-    QHBoxLayout* userQueriesHistoryLay{new QHBoxLayout{userQueriesHistorySubFrame}};
+    QVBoxLayout* userQueriesHistoryLay{new QVBoxLayout{userQueriesHistorySubFrame}};
 
     if(plugins::cryptoModule){
+        userQueriesHistorySubFrame->setEnabled(true);
         userQueriesHistoryBut_->setStyleSheet("color:white;background:orange;");
     } else{
-        userQueriesHistoryBut_->setStyleSheet("background-color:gray;");
-        userQueriesHistoryBut_->setEnabled(false);
-        userQueriesHistoryBut_->setToolTip("Crypto plugin is not available");
+        userQueriesHistorySubFrame->setEnabled(false);
+
+        userQueriesHistorySubFrame->setToolTip("Crypto plugin is not available");
     }
 
     auto buttonFont = userQueriesHistoryBut_->font();
@@ -161,6 +176,8 @@ void Custom_Query::form_init()
     userQueriesHistoryBut_->setFont(buttonFont);
 
     userQueriesHistoryLay->addWidget(userQueriesHistoryBut_);
+    userQueriesHistoryLay->addWidget(saveQueriesCB_);
+
     userQueriesHistoryLay->setSpacing(1);
     userQueriesHistoryLay->setContentsMargins(1,1,1,1);
 
@@ -232,6 +249,11 @@ void Custom_Query::form_init()
         menuBar_->addMenu(menuFile_);
 
         menuBar_->hide();
+
+        auto sendButtonFont = ui->Ok_button->font();
+        sendButtonFont.setPointSize(14);
+        sendButtonFont.setBold(true);
+        ui->Ok_button->setFont(sendButtonFont);
 }
 
 
@@ -318,7 +340,7 @@ void Custom_Query::setCheckCloseMessageFlag(bool state__)
 
 void Custom_Query::save_query(QUERYSTATUS queryStatus__, const QString &customTextToAdd__)
 {
-    if(plugins::cryptoModule){
+    if(plugins::cryptoModule && Custom_Query::saveQueriesFlag_){
 
         QString __text2Encrypt;
 
@@ -367,29 +389,9 @@ void Custom_Query::set_text(QString const& text__) const
     this->ui->plainTextEdit->setPlainText(text__);
 }
 
-/*void*/noteFrame* Custom_Query::add_note(const QString & message__)
+noteFrame* Custom_Query::add_note(const QString & message__)
 {
     noteFrame* notePtr = new noteFrame(message__,this);
-//    QFrame* style_frame = new QFrame{this};
-
-//    QHBoxLayout* dynamic_note_lay = new QHBoxLayout;
-
-//    style_frame->setLayout(dynamic_note_lay);
-
-//    style_frame->setFrameShape(QFrame::StyledPanel);
-//    style_frame->setFrameShadow(QFrame::Raised);
-
-
-//    ClickableLabel* dyn_note_lbl = new ClickableLabel(message__);
-//    dyn_note_lbl->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-//    dyn_note_lbl->setWordWrap(true);
-//    QPushButton* dyn_note_hide_button = new QPushButton("hide");
-//    dyn_note_hide_button->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-//    QPushButton* dyn_note_disable_button = new QPushButton("Don't show again");
-//    dyn_note_disable_button->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-//    dynamic_note_lay->addWidget(dyn_note_lbl);
-//    dynamic_note_lay->addWidget(dyn_note_hide_button);
-//    dynamic_note_lay->addWidget(dyn_note_disable_button);
 
     ui->verticalLayout->insertWidget(0,notePtr);
 
@@ -402,18 +404,8 @@ void Custom_Query::set_text(QString const& text__) const
 
         }
 
-////    connect(notePtr,&noteFrame::dontShowNoteAgainSig,this,&Custom_Query::dont_show_note);
 
     notePtr->setAttribute(Qt::WA_DeleteOnClose, true);
-
-//    connect(dyn_note_hide_button,&QPushButton::clicked,[=]{
-//        delete style_frame;
-//    });
-
-//    connect(dyn_note_disable_button,&QPushButton::clicked,[=]{
-//        delete style_frame;
-//        emit dont_show_note();
-//    });
 
     return notePtr;
 }
@@ -556,14 +548,14 @@ void Custom_Query::showQueriesHistory()
 
         exitButton->setStyleSheet("background-color:darkred;color:white;font-size:14pt;padding-left:6px;padding-right:6px;");
 
-        buttonLay->addWidget(/*exitButton*//*exitFrame*/setQObjInFrame(exitButton),1,Qt::AlignRight);
+        buttonLay->addWidget(setQObjInFrame(exitButton),1,Qt::AlignRight);
 
         QPushButton* clearHistButton = new QPushButton{"Clear"};
         clearHistButton->setStyleSheet("font-weight:bold;color:white;background:orange;");
         clearHistButton->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
         buttonLay->insertWidget(0,setQObjInFrame(clearHistButton),1,Qt::AlignLeft);
 
-        connect(clearHistButton,&QPushButton::clicked,[this,plainTextForm]{
+        connect(clearHistButton,&QPushButton::clicked,[plainTextForm]{
             auto answer = QMessageBox::warning(historyWindowPtr,"Clear queries history", "Are you sure want to remove queries history? This action is irreversible.",QMessageBox::Ok | QMessageBox::Cancel);
 
             if(answer==QMessageBox::Ok){
@@ -633,6 +625,9 @@ bool Custom_Query::read4rom_settings_file()
         if((temp = __settings_map_int.value("userQueriesHistoryLengthLines_"))!=-1)
             Custom_Query::userQueriesHistoryLengthLines_ = temp;
 
+        if((temp = __settings_map_int.value("saveQueriesFlag_"))!=-1)
+            Custom_Query::saveQueriesFlag_ = temp;
+
         return true;
     } else{
 
@@ -651,6 +646,7 @@ void Custom_Query::write2_settings_file()
     textStream << "font_" << '=' << '\"'+Custom_Query::font_+'\"' << Qt::endl;
     textStream << "closeQuestion" << '=' << QString::number(Custom_Query::askBeforeClose_) << Qt::endl;
     textStream << "userQueriesHistoryLengthLines_" << '=' << QString::number(Custom_Query::userQueriesHistoryLengthLines_) << Qt::endl;
+    textStream << "saveQueriesFlag_" << '=' << QString::number(Custom_Query::saveQueriesFlag_) << Qt::endl;
 }
 
 

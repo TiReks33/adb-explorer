@@ -32,7 +32,7 @@ static bool open(auth&,QString const & con_name__ = auth::con_name_/*,QString co
 static bool try_to_reopen(auth &,QString const & con_name__ = auth::con_name_);
 
 // close the qsql connection
-static void close/*_con*/(QString const & = auth::con_name_);
+static void close/*_con*/(QString const & = auth::con_name_, bool silent = false);
 
 // remove connection from list (must be execute if connection is closed )
 static void remove(QString const & = auth::con_name_);
@@ -59,12 +59,17 @@ static bool set_query(QString const&, QSqlQueryModel*model__,QAbstractItemView*,
 static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,/*QHeaderView::ResizeMode scalemode=QHeaderView::Stretch,*/QString const & = auth::con_name_);
 
 // QTableView (return Warning message window version)
-static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*,QPointer<adbMessageBox>& warningWindow,QString const & = auth::con_name_);
+static bool set_query(QString const&, QSqlQueryModel*model__,QTableView*, QPointer<adbMessageBox>& warningWindow, bool stayOnTop = false, Qt::WindowModality = Qt::WindowModal, QString const & = auth::con_name_);
 
 // QComboBox
 static bool set_query(QString const&, QSqlQueryModel*model__,QComboBox*, QString const & = auth::con_name_);
 
+// QComboBox (return Warning message window version)
+static bool set_query(QString const&, QSqlQueryModel*model__,QComboBox*, QPointer<adbMessageBox>& warningWindow, bool stayOnTop = false, Qt::WindowModality = Qt::WindowModal, QString const & = auth::con_name_);
+
 // ]
+
+static QString const getCurrentSQLuserEntry(auth & authStruct, QString const & conName);
 
 private:
 

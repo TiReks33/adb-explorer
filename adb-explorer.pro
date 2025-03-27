@@ -36,6 +36,7 @@ SOURCES += \
     loginwindow.cpp \
     noteframe.cpp \
     notifycombobox.cpp \
+    passwordlineedit.cpp \
     reloadbutton.cpp \
     scrolledstatusbar.cpp \
     select_cells.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
     loginwindow.h \
     noteframe.h \
     notifycombobox.h \
+    passwordlineedit.h \
     reloadbutton.h \
     scrolledstatusbar.h \
     select_cells.hpp \

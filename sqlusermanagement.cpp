@@ -1,7 +1,6 @@
 #include "sqlusermanagement.h"
 
 
-
 createUserForm::createUserForm(auth& auth__,QWidget *parent__)
     :QDialog(parent__)
     , auth_{auth__}
@@ -52,14 +51,10 @@ void createUserForm::initForm()
     QRegExp regex ("["+adb_utility::en_lit+adb_utility::digits_lit+adb_utility::spec_chars_lit+"]*");
     QRegExpValidator * v = new QRegExpValidator (regex, this);
     nameLine_->setValidator (v);
-//    connect(nameLine_, &QLineEdit::destroyed,[=]{ delete v; /*qDebug() << "~createUser::validator";*/ });
 
     userRButton_->setText("create User");
 
-
-
     roleRButton_->setText("create Role");
-
 
 
     QHBoxLayout* entityChooseSubLay = new QHBoxLayout;
@@ -68,7 +63,6 @@ void createUserForm::initForm()
     entityChooseSubLay->addWidget(roleRButton_);
 
     mainLay->addLayout(entityChooseSubLay);
-
 
 
     QLabel* setNameLbl = new QLabel{"set Name"};
@@ -82,9 +76,7 @@ void createUserForm::initForm()
     credentialSubLay->addWidget(nameLine_,0,1);
 
 
-
     hostLbl_->setText("set Host");
-
 
 
     hostLine_->setPlaceholderText("'%' by default");
@@ -117,13 +109,11 @@ void createUserForm::initForm()
     passwordLineLay->setContentsMargins(0,0,0,0);
 
 
-
     buttonBox_ -> addButton(QDialogButtonBox::Ok);
     buttonBox_->addButton(QDialogButtonBox::Cancel);
 
 
     mainLay->addWidget(buttonBox_);
-
 
 
     QList<QPushButton*> ButtonsInFormlist = this->findChildren<QPushButton*>();
@@ -161,9 +151,7 @@ void createUserForm::initForm()
                 obj->setStyleSheet(adb_style::adbCheckBoxStyleSheet);
         }
 
-
 }
-
 
 
 void createUserForm::initSignals()
@@ -195,7 +183,7 @@ void createUserForm::initSignals()
             passwordFrame_->show();
             setPasswordCheckBox_->show();
             if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
-//                hostLine_->setEnabled(true);
+
                 hostLine_->show();
                 hostLbl_->show();
             }
@@ -210,7 +198,7 @@ void createUserForm::initSignals()
             passwordFrame_->hide();
             setPasswordCheckBox_->hide();
             if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB)){
-//                hostLine_->setEnabled(false);
+
                 hostLine_->hide();
                 hostLbl_->hide();
                 adjustSize();
@@ -414,6 +402,32 @@ grantUserPermissionsForm::~grantUserPermissionsForm()
     db_connection::remove(subConName_);
 }
 
+void grantUserPermissionsForm::load()
+{
+    if(db_connection::try_to_reopen(auth_,auth::con_name_)){
+
+        QString __qry="";
+
+        if(UserRButton_->isChecked()){
+            if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB))
+                __qry = "select concat(quote(user),\'@\',quote(host)) from mysql.user where is_role=\'n\';";
+            else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL))
+                __qry = "select concat(quote(user),\'@\',quote(host)) from mysql.user "
+                                        "where password_expired=\'n\' or account_locked=\'n\';";
+        } else if(RoleRButton_->isChecked()){
+            if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB))
+                __qry = "select user from mysql.user where is_role=\'y\';";
+            else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL))
+                __qry = "select concat(quote(user),\'@\',quote(host)) from mysql.user "
+                                                    "where password_expired=\'y\' and account_locked=\'y\';";
+        }
+
+
+        db_connection::set_query(__qry,model_,sqlUsersComboBox_,auth::con_name_);
+
+    }
+}
+
 
 
 void grantUserPermissionsForm::initForm()
@@ -426,7 +440,6 @@ void grantUserPermissionsForm::initForm()
     mainLay->setSizeConstraint(QLayout::SetFixedSize);
 
     this->setLayout(mainLay);
-
 
 
     QLabel* topLbl = new QLabel{"Select what you want to give permissions to:"};
@@ -447,7 +460,15 @@ void grantUserPermissionsForm::initForm()
     UserRButton_->setText("User");
     RoleRButton_->setText("Role");
 
+
     QHBoxLayout* userOrRoleSwitchSubLay = new QHBoxLayout;
+
+    QButtonGroup* buttonGroup = new QButtonGroup{this};
+
+    buttonGroup->addButton(UserRButton_);
+    buttonGroup->addButton(RoleRButton_);
+
+    buttonGroup->setExclusive(true);
 
     mainLay->addLayout(userOrRoleSwitchSubLay);
 
@@ -468,7 +489,6 @@ void grantUserPermissionsForm::initForm()
     sqlUsersListLay->addWidget(sqlUsersComboBox_);
 
 
-//    sqlUsersListReloadButton_->QPushButton::setText("reload");//setText("reload");
     sqlUsersListReloadButton_->setBackgroundColour("darkslategray");
     sqlUsersListReloadButton_->setFontColour("snow");
     sqlUsersListReloadButton_->setBold(true);
@@ -520,7 +540,6 @@ void grantUserPermissionsForm::initForm()
     permissionsLvlComboBox_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
 
     permissionsLvlComboBox_->addItems(adb_utility::unpack_("Global, Database, Table"));
-
 
 
     GlobalPermissionsWarningLbl_->setText("[<b><font color=\"Red\">Warning</font></b>]");
@@ -830,24 +849,9 @@ void grantUserPermissionsForm::initSignals()
     });
 
     connect(sqlUsersListReloadButton_,&QPushButton::clicked,[=]{
-        if(db_connection::try_to_reopen(auth_,auth::con_name_)){
-            if(UserRButton_->isChecked()){
-                if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB))
-                    db_connection::set_query("select concat(quote(user),\'@\',quote(host)) from mysql.user where is_role=\'n\';",model_,sqlUsersComboBox_,auth::con_name_);
-                else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL))
-                    db_connection::set_query("select concat(quote(user),\'@\',quote(host)) from mysql.user "
-                                            "where password_expired=\'n\' or account_locked=\'n\';",model_,sqlUsersComboBox_,auth::con_name_);
-            } else if(RoleRButton_->isChecked()){
-                if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MARIADB))
-                    db_connection::set_query("select user from mysql.user where is_role=\'y\';",model_,sqlUsersComboBox_,auth::con_name_);
-                else if(auth::SQLdriverMatch(auth_.db_driver_,SQLDBtype::MYSQL))
-                    db_connection::set_query("select concat(quote(user),\'@\',quote(host)) from mysql.user "
-                                            "where password_expired=\'y\' and account_locked=\'y\';",model_,sqlUsersComboBox_,auth::con_name_);
-            }
-        }
+        load();
     });
 
-        sqlUsersListReloadButton_->click();
 
     connect(allPermissionsRButton_,&QRadioButton::toggled,[this](bool state__){
        if(!state__){
@@ -863,10 +867,10 @@ void grantUserPermissionsForm::initSignals()
 
     connect(specificPermissionsRButton_,&QRadioButton::toggled,[this](bool state__){
         if(!state__){
-//            choosePermissionsButton_->setEnabled(false);
+
             specificPermissionsSubFrame_->hide();
         } else{
-//            choosePermissionsButton_->setEnabled(true);
+
             specificPermissionsSubFrame_->show();
             chosenPrivilegesList_.clear();
         }
@@ -878,7 +882,7 @@ void grantUserPermissionsForm::initSignals()
     (int curInd__)
     {
         if(curInd__==permissionsLvl::Global){
-//            db_connection::try_to_reopen()
+
             specificPermissionsTableFrame_->hide();
             specificPermissionsDatabaseFrame_->hide();
 
@@ -891,17 +895,17 @@ void grantUserPermissionsForm::initSignals()
             GlobalPermissionsWarningLbl_->hide();
 
             if(curInd__==permissionsLvl::Database){
-            specificPermissionsDatabaseFrame_->show();
-            specificPermissionsTableFrame_->hide();
+                specificPermissionsDatabaseFrame_->show();
+                specificPermissionsTableFrame_->hide();
 
-            if(db_connection::try_to_reopen(auth_,auth::con_name_))
-                db_connection::set_query("show databases;",&databaseBoxModel_,permissionsDatabaseSubBox_,auth::con_name_);
-            if(!permissionsDatabaseSubBox_->count()){
-                choosePermissionsButton_->setEnabled(false);
-                //return;
-            }
+                if(db_connection::try_to_reopen(auth_,auth::con_name_))
+                    db_connection::set_query("show databases;",&databaseBoxModel_,permissionsDatabaseSubBox_,auth::con_name_);
+                if(!permissionsDatabaseSubBox_->count()){
+                    choosePermissionsButton_->setEnabled(false);
 
-    //            return;
+                }
+
+
 
             } else if(curInd__==permissionsLvl::Table){
                 specificPermissionsDatabaseFrame_->show();
@@ -910,7 +914,7 @@ void grantUserPermissionsForm::initSignals()
                 if(db_connection::try_to_reopen(auth_,auth::con_name_))
                     db_connection::set_query("show databases;",&databaseBoxModel_,permissionsDatabaseSubBox_,auth::con_name_);
 
-    //            return;
+
             }
 
         }
@@ -936,12 +940,10 @@ void grantUserPermissionsForm::initSignals()
         db_connection::try_to_reopen(auth_copy,subConName_);
 
 
-
         if(db_connection::set_query("SHOW TABLES;", &tableBoxModel_,permissionsTableSubBox_,subConName_)){
             // if no tables in DB -->> clear previous keys comboBox model (preventing model's nullptr calling)
             if(permissionsLvlComboBox_->currentIndex()==permissionsLvl::Table){
                 if(!permissionsTableSubBox_->count()){
-                    //submodel_2_.clear();
 
                     permissionsTableSubBox_->setToolTip("*no tables*");
                     //ui->ref_key_comboBox_2->setToolTip("*no corteges (empty table)*");
@@ -958,7 +960,6 @@ void grantUserPermissionsForm::initSignals()
     },Qt::QueuedConnection);
 
 
-
     connect(permissionsTableSubBox_,&QComboBox::currentTextChanged,this,[this]
             (QString const& currentTableName__){
 
@@ -967,9 +968,7 @@ void grantUserPermissionsForm::initSignals()
     });
 
 
-
     permissionsLvlComboBox_->setCurrentIndex(permissionsLvl::Database);
-
 
 
     connect(doubleList_,&TwoListSelection::export_list,[this](QStringList chosenPrivilegesList__){
@@ -996,14 +995,9 @@ void grantUserPermissionsForm::initSignals()
             SQLPermissions = "ALTER,CREATE,CREATE VIEW,DELETE,DROP,INDEX,INSERT,REFERENCES,SELECT,SHOW VIEW,TRIGGER,UPDATE";
         }
 
-//        = "ALTER,ALTER ROUTINE,CREATE,CREATE ROLE,CREATE ROUTINE,CREATE TABLESPACE,"
-//                                     "CREATE TEMPORARY TABLES,CREATE USER,CREATE VIEW,DELETE,DROP,DROP ROLE,EVENT,"
-//                                     "EXECUTE,FILE,INDEX,INSERT,LOCK TABLES,PROCESS,PROXY,REFERENCES,RELOAD,REPLICATION CLIENT,"
-//                                     "REPLICATION SLAVE,SELECT,SHOW DATABASES,SHOW VIEW,SHUTDOWN,SUPER,TRIGGER,UPDATE";
 
         doubleList_->addAvailableItems(adb_utility::unpack_(SQLPermissions,","));
 
-//        doubleList_->setAttribute(Qt::WA_DeleteOnClose,true);
         doubleList_->setModal(true);
         doubleList_->show();
 
@@ -1031,7 +1025,6 @@ void grantUserPermissionsForm::initSignals()
 
 void grantUserPermissionsForm::formAccepted()
 {
-
 
     QString __recordType="";
     (UserRButton_->isChecked()) ? __recordType = "User" : __recordType = "Role";
@@ -1072,6 +1065,7 @@ void grantUserPermissionsForm::formAccepted()
                 return;
 
             } else{
+
                   if(permissionsLvlComboBox_->currentIndex()!=permissionsLvl::Global){
                       QPointer <adbMessageBox> messageBox = new adbMessageBox(QMessageBox::Information,"No additional permissions select",
                                                     "You doesn't provide any additional privileges for grant to "+__recordType+" besides <b>GRANT</b> privilege."
@@ -1081,9 +1075,6 @@ void grantUserPermissionsForm::formAccepted()
 
                       messageBox->setAttribute( Qt::WA_DeleteOnClose, true);
 
-    //                      QFlag flags = QFlag(Qt::Window & ~Qt::WindowStaysOnTopHint);
-
-    //                      messageBox->setWindowFlags(flags);
                       messageBox->setModal(true);
                       messageBox->show();
                       int dialogAnswer = messageBox->exec();
@@ -1103,9 +1094,6 @@ void grantUserPermissionsForm::formAccepted()
 
                       messageBox->setAttribute( Qt::WA_DeleteOnClose, true);
 
-    //                      QFlag flags = QFlag(Qt::Window & ~Qt::WindowStaysOnTopHint);
-
-    //                      messageBox->setWindowFlags(flags);
                       messageBox->setModal(true);
                       messageBox->show();
                       int dialogAnswer = messageBox->exec();
@@ -1145,9 +1133,6 @@ void grantUserPermissionsForm::formAccepted()
 
                     messageBox->setAttribute( Qt::WA_DeleteOnClose, true);
 
-            //                      QFlag flags = QFlag(Qt::Window & ~Qt::WindowStaysOnTopHint);
-
-            //                      messageBox->setWindowFlags(flags);
                     messageBox->setModal(true);
                     messageBox->show();
                     int dialogAnswer = messageBox->exec();
@@ -1210,7 +1195,6 @@ bool grantUserPermissionsForm::grantPermissions2user(QString const& recordType__
             }
         }
 
-        qDebug() << "FINAL GRANT QUERY::" << __qryStr;
 
         if(qry.prepare(__qryStr)){
             if(qry.exec()){
@@ -1305,18 +1289,6 @@ void getCredentialRecordsForm::initForm()
     recordChooseLay->addWidget(userRB_,0,Qt::AlignCenter);
 
 
-
-    ////recordChooseLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Preferred));
-
-//    QFrame* recordTypeLineFrame = new QFrame{};
-//    recordTypeLineFrame->setFrameShape(QFrame::VLine);
-//    recordTypeLineFrame->setFrameShadow(QFrame::Raised);
-//    recordChooseLay->addWidget(recordTypeLineFrame);
-
-    ////recordChooseLay->addItem(new QSpacerItem(10, 20, QSizePolicy::Expanding, QSizePolicy::Preferred));
-
-
-
     recordChooseLay->addWidget(roleRB_,0,Qt::AlignCenter);
 
     recordTypeMainLay->addWidget(recordChooseFrame);
@@ -1333,7 +1305,6 @@ void getCredentialRecordsForm::initForm()
         }
 
 }
-
 
 
 void getCredentialRecordsForm::getRecords()
@@ -1409,6 +1380,7 @@ void passwordMgmtForm::initSignals()
         }
     });
 
+
     connect(hidePasswCheckBox_,&QCheckBox::stateChanged,[=](int state_arg__){
         if (state_arg__ == Qt::Checked){
             passwLine_->setEchoMode(QLineEdit::Password);
@@ -1472,14 +1444,10 @@ void passwordMgmtForm::initForm()
     QHBoxLayout* chooseUserLay = new QHBoxLayout{chooseUserFrame_};
 
 
-
-    //chooseUserLay->addWidget(chooseUserLbl);
-
     chooseUserLay->addWidget(chooseUserComboBox_);
 
     chooseUserComboBox_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
 
-//    reloadUsersListButton_->setText("reload");
     reloadUsersListButton_->setBackgroundColour("darkslategray");
     reloadUsersListButton_->setFontColour("snow");
     reloadUsersListButton_->setBold(true);
@@ -1490,8 +1458,6 @@ void passwordMgmtForm::initForm()
     userLay->addWidget(chooseUserFrame_);
 
 
-
-
     QFrame* passwordFrame = new QFrame;
 
     passwordFrame->setFrameShape(QFrame::StyledPanel);
@@ -1500,9 +1466,6 @@ void passwordMgmtForm::initForm()
 
     QGridLayout* passwordLay = new QGridLayout{passwordFrame};
     widgetLay->addWidget(passwordFrame);
-
-
-//    emit reloadUsersListButton_ ->clicked();
 
 
     QLabel* passwLbl = new QLabel{"Set new password:"};
@@ -1572,7 +1535,6 @@ void passwordMgmtForm::formAccepted()
 {
     if(passwLine_->text()!=validPasswLine_->text()){
 
-//        adb_utility::get_information_window(QMessageBox::Warning,"Passwords confirmation wrong","Passwords must be identical. Please, try again.",this);
         QPointer <adbMessageBox> messageBox = new adbMessageBox(QMessageBox::Warning,"Passwords confirmation wrong",
                                                                 "Passwords must be identical. Please, try again.",
                                                                 QMessageBox::Ok,this);
@@ -1634,15 +1596,6 @@ void passwordMgmtForm::formAccepted()
 
                 }
 
-
-
-//                std::cout << "CURUSR::"<< __curUsr.toStdString() << std::endl;
-//                std::cout << "CURPASSW::"<< __curPassw.toStdString() << std::endl;
-
-
-//                std::cout << "auth_login_==" << auth_.login_.toStdString() << std::endl;
-//                std::cout << "auth_host_==" << auth_.host_.toStdString() << std::endl;
-//                std::cout << "auth_passw_==" << auth_.passw_.toStdString() << std::endl;
 
                 this->close();
                 return;
