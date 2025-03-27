@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    qInstallMessageHandler(adb_utility::customMessageHandler);
+    qInstallMessageHandler(adb_utility::customMessageHandler);
 
     QDir dir(adb_utility::filepath_);
     if(!dir.exists())
